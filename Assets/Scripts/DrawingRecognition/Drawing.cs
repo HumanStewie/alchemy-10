@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Data;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -6,18 +7,34 @@ using UnityEngine.EventSystems;
 [RequireComponent(typeof(LineRenderer))]
 public class Drawing : MonoBehaviour, IPointerUpHandler, IPointerDownHandler, IDragHandler
 {
+    public static Drawing Instance;
+
     public LineRenderer lr;
     public List<Vector2> currentStroke = new List<Vector2>();
+
+
 
     [Header("Settings")]
     [SerializeField] private float minDistanceBetweenPoints = 10f; 
     [SerializeField] private float lineZPlane = 5f;
+
+
+
+    private void Awake()
+    {
+        Instance = this;
+    }
     public void OnDrag(PointerEventData eventData)
     {
-        Vector2 lastPos = currentStroke[currentStroke.Count - 1];
-        if (Vector2.Distance(lastPos, eventData.position) >= minDistanceBetweenPoints)
+        RectTransform rect = GetComponent<RectTransform>();
+
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(rect, eventData.position, eventData.pressEventCamera, out Vector2 localPoint))
         {
-            AddPoint(eventData.position, eventData.pressEventCamera);
+            Vector2 lastPos = currentStroke[currentStroke.Count - 1];
+            if (Vector2.Distance(lastPos, localPoint) >= minDistanceBetweenPoints)
+            {
+                AddPoint(eventData.position, eventData.pressEventCamera);
+            }
         }
     }
 
@@ -35,25 +52,35 @@ public class Drawing : MonoBehaviour, IPointerUpHandler, IPointerDownHandler, ID
             ClearVisuals();
             return;
         }
+        GestureRecognizer.Instance.DoEverything(currentStroke);
     }
 
     void Start()
     {
         lr = GetComponent<LineRenderer>();
+        lr.startWidth = 0.01f;
+        lr.endWidth = 0.01f;
+
+        lr.useWorldSpace = false;
         lr.positionCount = 0;
     }
 
     void AddPoint(Vector2 screenPoint, Camera cam)
     {
-        if (!IsInsideBox(screenPoint, cam)) return;
+        RectTransform rect = GetComponent<RectTransform>();
 
-        currentStroke.Add(screenPoint);
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(rect, screenPoint, cam, out Vector2 localPoint))
+        {
+            if (!rect.rect.Contains(localPoint)) return;
 
-        int index = currentStroke.Count - 1;
-        lr.positionCount = currentStroke.Count;
+            currentStroke.Add(localPoint);
 
-        Vector3 worldPos = Camera.main.ScreenToWorldPoint(new Vector3(screenPoint.x, screenPoint.y, lineZPlane));
-        lr.SetPosition(index, worldPos);
+            lr.positionCount = currentStroke.Count;
+            int index = currentStroke.Count - 1;
+
+            Vector3 localPos = new Vector3(localPoint.x, localPoint.y, -0.002f);
+            lr.SetPosition(index, localPos);
+        }
     }
 
     public void ClearVisuals()
@@ -62,8 +89,14 @@ public class Drawing : MonoBehaviour, IPointerUpHandler, IPointerDownHandler, ID
         lr.positionCount = 0;
     }
 
-    private bool IsInsideBox(Vector2 screenPoint, Camera eventCamera)
+
+    public void SaveAsTemplate(SpellTemplate targetAsset, List<Vector2> normalizedPoints)
     {
-        return RectTransformUtility.RectangleContainsScreenPoint(GetComponent<RectTransform>(), screenPoint, eventCamera);
+        targetAsset.points = new List<Vector2>(normalizedPoints);
+#if UNITY_EDITOR
+        UnityEditor.EditorUtility.SetDirty(targetAsset);
+        UnityEditor.AssetDatabase.SaveAssets();
+#endif
+        Debug.Log($"Saved {normalizedPoints.Count} points to {targetAsset.spellName}");
     }
 }

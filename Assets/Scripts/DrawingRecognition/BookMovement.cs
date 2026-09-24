@@ -6,9 +6,9 @@ using UnityEngine;
 public class BookMovement : MonoBehaviour
 {
     Vector3 startLoc = new Vector3(0.5f, 0.2f, -0.36f);
-    Vector3 endLoc = new Vector3(-30f, -18f, -10f);
+    Vector3 startRot = new Vector3(-30f, -18f, -10f);
 
-    Vector3 startRot = new Vector3(0.5f, 0.2f, -0.36f);
+    Vector3 endLoc = new Vector3(0f, 0.9f, -1f);
     Vector3 endRot = new Vector3(90f, 0f, 0f);
     bool isIdle = true;
 
@@ -16,7 +16,10 @@ public class BookMovement : MonoBehaviour
 
     void Start()
     {
-        
+        transform.rotation = Quaternion.Euler(startRot);
+        Invoke("Testing", 1f);
+        Invoke("Testing2", 2f);
+
     }
 
     void Update()
@@ -33,6 +36,18 @@ public class BookMovement : MonoBehaviour
                 transform.DORotate(startRot, timeChange).SetEase(Ease.OutBack);
             }
         }    
+    }
+
+    void Testing()
+    {
+        transform.DOMove(startLoc, timeChange).SetEase(Ease.OutBack);
+        transform.DORotate(startRot, timeChange).SetEase(Ease.OutBack);
+
+    }
+    void Testing2()
+    {
+        transform.DOMove(endLoc, timeChange).SetEase(Ease.OutBack);
+        transform.DORotate(endRot, timeChange).SetEase(Ease.OutBack);
     }
 
 }
