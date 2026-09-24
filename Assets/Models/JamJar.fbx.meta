@@ -3,7 +3,27 @@ guid: 29bf69e366dd1bf42aeb91b676bcb79c
 ModelImporter:
   serializedVersion: 24300
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cap
+    second: {fileID: 2100000, guid: 21091bd4fb27c2dc68a58bf185582345, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Jam
+    second: {fileID: 2100000, guid: 0033504d96a4ee160b964839ca163248, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Jar
+    second: {fileID: 2100000, guid: 13cc869cb8b3ea5828719905dddf6fc0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: JarLabel
+    second: {fileID: 2100000, guid: 084992ac222a29b7f877d2a99464fc18, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
