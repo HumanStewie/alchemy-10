@@ -66,6 +66,9 @@ public class BookMovement : MonoBehaviour
     {
         if (isInanimation) return;
 
+
+        Cursor.lockState = CursorLockMode.None;
+
         if (isIdle)
         {
             transform.DOKill();
@@ -77,13 +80,14 @@ public class BookMovement : MonoBehaviour
         else
         {
             ReturnToIdle();
+
         }
     }
 
     public void ReturnToIdle()
     {
-        if (isInanimation) return;
 
+        Cursor.lockState = CursorLockMode.Locked;
         transform.DOKill();
         transform.DOLocalMove(startLoc, timeChange).SetEase(Ease.OutQuad);
         transform.DOLocalRotate(startRot, timeChange).SetEase(Ease.OutQuad)
@@ -97,7 +101,6 @@ public class BookMovement : MonoBehaviour
     public void WallSpellAnimation()
     {
         isInanimation = true;
-        isIdle = false;
         transform.DOKill();
 
         transform.DOLocalMove(WallSpellLoc, WallSpellTime).SetEase(Ease.OutBack);

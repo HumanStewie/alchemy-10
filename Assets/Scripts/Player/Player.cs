@@ -25,8 +25,11 @@ public class Player : MonoBehaviour
         var deltaTime = Time.deltaTime;
         // Same idea as below, this is how we read look data
         var cameraInput = new CameraInput { Look = input.Look.ReadValue<Vector2>() };
-        playerCamera.UpdateRotation(cameraInput);
-        
+        if (BookMovement.Instance.isIdle)
+        {
+            playerCamera.UpdateRotation(cameraInput);
+        }
+
         // Get character input and update it. This is mainly how we will take InputAction and use them
         // Essentially, we "queue" the input, preparing to throw into UpdateInput.
         var characterInput = new CharacterInput

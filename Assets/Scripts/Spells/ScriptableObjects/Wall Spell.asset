@@ -80,4 +80,5 @@ MonoBehaviour:
   - {x: 177.17822, y: 244.7472}
   - {x: 207.96997, y: 245.98352}
   - {x: 238.76147, y: 247.2196}
-  wall: {fileID: 2923354050623583249, guid: ce9befd6b696d6548b1ab5348ea9e7e9, type: 3}
+  wall: {fileID: 5072859581774275027, guid: c43766395a4dc32478e33b5ec4ba3e8a, type: 3}
+  yFinal: 2.75
