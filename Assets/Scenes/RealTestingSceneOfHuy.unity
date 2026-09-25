@@ -119,11 +119,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!4 &37855272 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 1460212217490399550, guid: dfdf77287aa78b6d3a952d90110c51f1, type: 3}
-  m_PrefabInstance: {fileID: 980748941}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &240698199
 GameObject:
   m_ObjectHideFlags: 0
@@ -259,37 +254,6 @@ MonoBehaviour:
   raycastCheckDist: 0.5
   groundSnapDistance: 1.5
   arrowVisual: {fileID: 0}
---- !u!1 &710472451
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 710472452}
-  m_Layer: 0
-  m_Name: WallSpawnLocation
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &710472452
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 710472451}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 37855272}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &980748941
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -342,16 +306,13 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    - target: {fileID: 3788485504342964226, guid: dfdf77287aa78b6d3a952d90110c51f1, type: 3}
-      propertyPath: WallSpawnLoc
-      value: 
-      objectReference: {fileID: 710472452}
+    - target: {fileID: 7481458638589007281, guid: dfdf77287aa78b6d3a952d90110c51f1, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 3
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects:
-    - targetCorrespondingSourceObject: {fileID: 1460212217490399550, guid: dfdf77287aa78b6d3a952d90110c51f1, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 710472452}
+    m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dfdf77287aa78b6d3a952d90110c51f1, type: 3}
 --- !u!1 &996634390
