@@ -119,6 +119,11 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!4 &37855272 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1460212217490399550, guid: dfdf77287aa78b6d3a952d90110c51f1, type: 3}
+  m_PrefabInstance: {fileID: 980748941}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &240698199
 GameObject:
   m_ObjectHideFlags: 0
@@ -131,6 +136,7 @@ GameObject:
   - component: {fileID: 240698202}
   - component: {fileID: 240698201}
   - component: {fileID: 240698200}
+  - component: {fileID: 240698204}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -231,6 +237,59 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &240698204
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 240698199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 103aa0525be084a48b85ea5a5a7bc06d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RuneController
+  waitDuration: 5
+  moveDuration: 5
+  moveSpeed: 6
+  obstacleMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  castRadius: 0.4
+  raycastCheckDist: 0.5
+  groundSnapDistance: 1.5
+  arrowVisual: {fileID: 0}
+--- !u!1 &710472451
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 710472452}
+  m_Layer: 0
+  m_Name: WallSpawnLocation
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &710472452
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 710472451}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 37855272}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &980748941
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -283,13 +342,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    - target: {fileID: 2285441648140290133, guid: dfdf77287aa78b6d3a952d90110c51f1, type: 3}
-      propertyPath: m_TagString
-      value: Player
-      objectReference: {fileID: 0}
+    - target: {fileID: 3788485504342964226, guid: dfdf77287aa78b6d3a952d90110c51f1, type: 3}
+      propertyPath: WallSpawnLoc
+      value: 
+      objectReference: {fileID: 710472452}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 1460212217490399550, guid: dfdf77287aa78b6d3a952d90110c51f1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 710472452}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dfdf77287aa78b6d3a952d90110c51f1, type: 3}
 --- !u!1 &996634390

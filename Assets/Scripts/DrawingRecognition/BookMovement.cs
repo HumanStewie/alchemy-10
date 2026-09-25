@@ -25,6 +25,8 @@ public class BookMovement : MonoBehaviour
     public float WallSpellTime = 0.5f;
     private Vector3 WallSpellLoc = new Vector3(0.3f, -0.1f, 0.1f);
     private Vector3 WallSpellRot = new Vector3(0, 0, 180);
+    public Transform WallSpawnLoc; 
+
 
     private float currentY;
 

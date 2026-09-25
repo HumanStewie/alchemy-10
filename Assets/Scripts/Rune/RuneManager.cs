@@ -10,8 +10,8 @@ public class RuneController : MonoBehaviour
 
     [Header("Detection Settings")]
     public LayerMask obstacleMask;
-    public float castRadius = 0.4f;       // Radius of the rune's collision shape
-    public float raycastCheckDist = 0.5f; // Forward check distance
+    public float castRadius = 0.4f;
+    public float raycastCheckDist = 0.5f; 
     public float groundSnapDistance = 1.5f;
 
     [Header("Visuals")]
