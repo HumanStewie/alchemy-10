@@ -1,7 +1,8 @@
 using UnityEngine;
-[CreateAssetMenu(fileName = "ThrowJam", menuName = "Spells/ThrowJam")]
 
-public class ThrowJam : SpellTemplate
+
+[CreateAssetMenu(fileName = "Sword", menuName = "Spells/Sword")]
+public class SwordSpell : SpellTemplate
 {
     public GameObject wall;
     public override void Cast(GameObject caster, Vector3 targetPoint, float scale)

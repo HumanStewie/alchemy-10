@@ -1,7 +1,10 @@
+using System.Collections.Generic;
 using UnityEngine;
-[CreateAssetMenu(fileName = "ThrowJam", menuName = "Spells/ThrowJam")]
 
-public class ThrowJam : SpellTemplate
+
+[CreateAssetMenu(fileName = "WallSpell", menuName = "Spells/WallSpell")]
+
+public class WallSpell : SpellTemplate
 {
     public GameObject wall;
     public override void Cast(GameObject caster, Vector3 targetPoint, float scale)

@@ -1,37 +1,32 @@
-using NUnit.Framework;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class GestureRecognizer : MonoBehaviour
 {
     public static GestureRecognizer Instance;
 
-    float totLength = 0;
+    private float totLength = 0;
     public float spaceInterval = 0;
-    public float boxSize = 500;
+    public float standardSize = 500f;
 
-    public List<Vector2> listForChecking;
+    public List<Vector2> listForChecking = new List<Vector2>();
 
+    private float maxX = 0;
+    private float maxY = 0;
+    private float minX = 0;
+    private float minY = 0;
 
-    public float maxX = 0;
-    public float maxY = 0;
-
-    public float minX = -999;
-    public float minY = -999;
-
-
-    public float standardSize = 500;
-
-    public bool isGettingTemp;
-
+    [Header("Template Recording")]
+    public bool isGettingTemp = false;
+    public SpellTemplate temp;
 
     [Header("Templates & Thresholds")]
     public List<SpellTemplate> templates = new List<SpellTemplate>();
     [SerializeField] private float maxAllowedError = 50f;
 
-    public SpellTemplate temp;
+    [Header("Equipped Spell & Cooldown")]
+    public SpellTemplate preparedSpell;
+    private float nextCastTime = 0f;
 
     private void Awake()
     {
@@ -42,16 +37,40 @@ public class GestureRecognizer : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.P))
         {
-            if (!isGettingTemp)
+            isGettingTemp = !isGettingTemp;
+            Debug.Log($"Record Mode: {isGettingTemp}");
+        }
+
+        if (BookMovement.Instance != null && BookMovement.Instance.isIdle && !BookMovement.Instance.isInanimation)
+        {
+            if (Input.GetMouseButtonDown(0))
             {
-                isGettingTemp = true;
-            }
-            else
-            {
-                isGettingTemp = false;
+                TryCastSpell();
             }
         }
     }
+
+    private void TryCastSpell()
+    {
+        if (preparedSpell == null) return;
+
+        if (Time.time < nextCastTime)
+        {
+            Debug.Log($"Cooldown active! {nextCastTime - Time.time:F1}s remaining.");
+            return;
+        }
+
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Vector3 targetPoint = ray.origin + ray.direction * 30f;
+        if (Physics.Raycast(ray, out RaycastHit hit))
+        {
+            targetPoint = hit.point;
+        }
+
+        preparedSpell.Cast(gameObject, targetPoint, 1f);
+        nextCastTime = Time.time + preparedSpell.cooldown;
+    }
+
     public void DoEverything(List<Vector2> points)
     {
         findTotalLength(points);
@@ -60,14 +79,14 @@ public class GestureRecognizer : MonoBehaviour
     void findTotalLength(List<Vector2> points)
     {
         totLength = 0;
-        spaceInterval = 0;
         for (int i = 1; i < points.Count; i++)
         {
             totLength += Vector2.Distance(points[i - 1], points[i]);
         }
-        spaceInterval = totLength / 63;
+        spaceInterval = totLength / 63f;
         NewList(points);
     }
+
     public void NewList(List<Vector2> points)
     {
         listForChecking.Clear();
@@ -86,7 +105,7 @@ public class GestureRecognizer : MonoBehaviour
                 Vector2 newPoint = Vector2.Lerp(working[i - 1], working[i], t);
 
                 listForChecking.Add(newPoint);
-                working.Insert(i, newPoint); 
+                working.Insert(i, newPoint);
                 accumulatedDist = 0f;
             }
             else
@@ -110,28 +129,12 @@ public class GestureRecognizer : MonoBehaviour
         minY = points[0].y;
         maxY = points[0].y;
 
-        for (int i = 0; i < points.Count; ++i)
+        for (int i = 1; i < points.Count; ++i)
         {
-            if (points[i].x >= maxX)
-            {
-                maxX = points[i].x;
-            }
-            if (points[i].y >= maxY)
-            {
-                maxY = points[i].y;
-            }
-        }
-
-        for (int i = 0; i < points.Count; ++i)
-        {
-            if (points[i].x <= minX)
-            {
-                minX = points[i].x;
-            }
-            if (points[i].y <= minY)
-            {
-                minY = points[i].y;
-            }
+            if (points[i].x > maxX) maxX = points[i].x;
+            if (points[i].x < minX) minX = points[i].x;
+            if (points[i].y > maxY) maxY = points[i].y;
+            if (points[i].y < minY) minY = points[i].y;
         }
 
         Scaler(points);
@@ -139,34 +142,32 @@ public class GestureRecognizer : MonoBehaviour
 
     public void Scaler(List<Vector2> points)
     {
-        float width = maxX - minX;  
-        float height = maxY - minY;
-        
+        float width = Mathf.Max(maxX - minX, 0.001f);
+        float height = Mathf.Max(maxY - minY, 0.001f);
+
         float ratioX = standardSize / width;
         float ratioY = standardSize / height;
-
 
         for (int i = 0; i < points.Count; ++i)
         {
             points[i] = new Vector2(points[i].x * ratioX, points[i].y * ratioY);
         }
+
         Centroidizer(points);
     }
 
-    public void Centroidizer(List<Vector2> points) {
-
+    public void Centroidizer(List<Vector2> points)
+    {
         float totX = 0;
         float totY = 0;
 
-
         for (int i = 0; i < points.Count; ++i)
         {
-            totX += points[i].x;    
+            totX += points[i].x;
             totY += points[i].y;
         }
 
-        Vector2 centroid = new Vector2(totX/points.Count, totY/points.Count);
-
+        Vector2 centroid = new Vector2(totX / points.Count, totY / points.Count);
 
         for (int i = 0; i < points.Count; ++i)
         {
@@ -176,14 +177,15 @@ public class GestureRecognizer : MonoBehaviour
         checkTemplate(points);
     }
 
-
     public void checkTemplate(List<Vector2> points)
     {
         if (isGettingTemp)
-        { 
+        {
             Drawing.Instance.SaveAsTemplate(temp, points);
+            BookMovement.Instance.ReturnToIdle();
+            Drawing.Instance.ClearVisuals();
+            return;
         }
-
 
         SpellTemplate bestTemp = null;
         float lowestDistance = float.MaxValue;
@@ -191,7 +193,7 @@ public class GestureRecognizer : MonoBehaviour
         for (int t = 0; t < templates.Count; t++)
         {
             SpellTemplate current = templates[t];
-            if (current.points == null || current.points.Count != points.Count) continue;
+            if (current == null || current.points == null || current.points.Count != points.Count) continue;
 
             float totalDist = 0f;
             for (int i = 0; i < points.Count; i++)
@@ -207,11 +209,17 @@ public class GestureRecognizer : MonoBehaviour
             }
         }
 
+        BookMovement.Instance.ReturnToIdle();
+        Drawing.Instance.ClearVisuals();
+
         if (lowestDistance <= maxAllowedError && bestTemp != null)
         {
-            SpellExecutor.Instance.ExecuteSpell(bestTemp);
+            preparedSpell = bestTemp;
+            Debug.Log(preparedSpell.spellName);
         }
-
+        else
+        {
+            Debug.Log($"Failed to recognize gesture. Closest was: {bestTemp?.spellName} ({lowestDistance:F1})");
+        }
     }
 }
-
