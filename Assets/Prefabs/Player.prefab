@@ -1027,7 +1027,7 @@ MonoBehaviour:
   startLoc: {x: 0.45, y: -0.07, z: 0.05}
   startRot: {x: 0, y: 0, z: 0}
   endLoc: {x: 0, y: 0.09, z: -0.3}
-  endRot: {x: 0, y: 0, z: 0}
+  endRot: {x: 0, y: 22, z: 0}
   isInanimation: 0
   isIdle: 1
   timeChange: 0.2
@@ -1036,6 +1036,7 @@ MonoBehaviour:
   spinSpeed: 40
   WallSpellTime: 1
   WallSpawnLoc: {fileID: 7481458638589007281}
+  isDisabled: 1
 --- !u!1 &5978117166810417901 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -7767597886930267675, guid: 29bf69e366dd1bf42aeb91b676bcb79c, type: 3}
