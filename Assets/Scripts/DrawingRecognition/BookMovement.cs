@@ -1,4 +1,5 @@
 ﻿using DG.Tweening;
+using System.Collections;
 using UnityEngine;
 
 public class BookMovement : MonoBehaviour
@@ -30,6 +31,8 @@ public class BookMovement : MonoBehaviour
 
     private float currentY;
 
+    public bool isDisabled = true;
+
     private void Awake()
     {
         Instance = this;
@@ -49,7 +52,7 @@ public class BookMovement : MonoBehaviour
             Spinning();
         }
 
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.E) || !isDisabled)
         {
             ToggleBookState();
         }
@@ -153,5 +156,18 @@ public class BookMovement : MonoBehaviour
             isIdle = true;
             currentY = startRot.y;
         });
+    }
+
+    public void Disabler(float time)
+    {
+        StartCoroutine(TemporaryDisable(time));
+    }
+    public IEnumerator TemporaryDisable(float time)
+    {
+        isDisabled = true;
+
+        yield return new WaitForSeconds(time);
+
+        isDisabled = false;
     }
 }

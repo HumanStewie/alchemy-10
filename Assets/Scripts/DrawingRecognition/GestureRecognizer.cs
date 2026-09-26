@@ -41,7 +41,7 @@ public class GestureRecognizer : MonoBehaviour
             Debug.Log($"Record Mode: {isGettingTemp}");
         }
 
-        if (BookMovement.Instance != null && BookMovement.Instance.isIdle && !BookMovement.Instance.isInanimation)
+        if (BookMovement.Instance != null && BookMovement.Instance.isIdle && !BookMovement.Instance.isInanimation && !BookMovement.Instance.isDisabled)
         {
             if (Input.GetMouseButtonDown(0))
             {
