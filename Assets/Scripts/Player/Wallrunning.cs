@@ -36,6 +36,7 @@ public class Wallrunning : MonoBehaviour
     {
         wallRight = Physics.SphereCast(transform.position + motor.CharacterUp * castOffset, wallCheckRadius, motor.CharacterRight, out rightWallHit, wallCheckDistance);
         wallLeft = Physics.SphereCast(transform.position + motor.CharacterUp * castOffset, wallCheckRadius, -motor.CharacterRight, out leftWallHit, wallCheckDistance);
+        
         return wallLeft || wallRight;
     }
     
@@ -90,6 +91,8 @@ public class Wallrunning : MonoBehaviour
 
     public Vector3 WallJump(ref KinematicCharacterMotor motor)
     {
+        Debug.Log("WallJumping");
+
         ExitingWall = true;
         ExitWallTimer = exitWallTime;
         var trueJumpVelocity = wallJumpHorizontalStrength * currentHit.normal +

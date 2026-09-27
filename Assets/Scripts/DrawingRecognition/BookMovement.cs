@@ -47,12 +47,7 @@ public class BookMovement : MonoBehaviour
 
     void Update()
     {
-        if (isIdle)
-        {
-            Spinning();
-        }
-
-        if (Input.GetKeyDown(KeyCode.E) && !isDisabled)
+        if (!isDisabled)
         {
             ToggleBookState();
         }
@@ -91,6 +86,7 @@ public class BookMovement : MonoBehaviour
 
     public void ReturnToIdle()
     {
+        isIdle = true;
 
         Cursor.lockState = CursorLockMode.Locked;
         transform.DOKill();
@@ -99,7 +95,6 @@ public class BookMovement : MonoBehaviour
             .OnComplete(() =>
             {
                 currentY = startRot.y;
-                isIdle = true;
             });
     }
 

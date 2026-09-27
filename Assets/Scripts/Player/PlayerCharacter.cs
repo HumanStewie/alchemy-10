@@ -1,4 +1,5 @@
 using KinematicCharacterController;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public struct CharacterInput
@@ -9,6 +10,7 @@ public struct CharacterInput
     public bool Jump;
     public bool JumpSustain;
     public bool Crouch;
+    public bool Interact;
 }
 public struct Character
 {
@@ -37,6 +39,8 @@ public class PlayerCharacter : MonoBehaviour, ICharacterController
     [SerializeField] private    Wallrunning wallRun;
     [SerializeField] private Transform cameraTarget;
     public Transform GetCameraTarget() => cameraTarget;
+    [SerializeField] private Animator armsAnimator;
+    [SerializeField] private Animator jarAnimator;
 
     [Header("Move")]
     [SerializeField] public float walkSpeed = 10.0f;
@@ -80,6 +84,8 @@ public class PlayerCharacter : MonoBehaviour, ICharacterController
     }
     public void UpdateInput(CharacterInput input)
     {
+        
+        
         requestedRotation = input.Rotation;
         
         // Get requested 2D input from character input, given from InputActions in Player.cs
@@ -100,6 +106,14 @@ public class PlayerCharacter : MonoBehaviour, ICharacterController
         requestedJumpSustain = input.JumpSustain;
 
         requestedCrouch = input.Crouch;
+
+        if (input.Interact)
+        {
+            BookMovement.Instance.ToggleBookState();
+            armsAnimator.SetBool("IsDrawing", !BookMovement.Instance.isIdle);
+            jarAnimator.SetBool("IsDrawing", !BookMovement.Instance.isIdle);
+
+        }
     }
     public void UpdateBody(float deltaTime)
     {
@@ -111,18 +125,28 @@ public class PlayerCharacter : MonoBehaviour, ICharacterController
         Gizmos.DrawLine(transform.position, (transform.position + character.velocity));
         Gizmos.color = Color.red;
         Gizmos.DrawLine(transform.position, transform.position + movementForce);
+        Gizmos.color = Color.green;
+        Gizmos.DrawLine(Vector3.zero, motor.GroundingStatus.GroundNormal);
     }
 
     public void UpdateRotation(ref Quaternion currentRotation, float deltaTime)
     {
-        currentRotation = Quaternion.LookRotation(
+        /*currentRotation = Quaternion.LookRotation(
             Vector3.ProjectOnPlane(requestedRotation * Vector3.forward, motor.CharacterUp),
             motor.CharacterUp
-        );
+        );*/
+        if (motor.GroundingStatus.FoundAnyGround && motor.GroundingStatus.GroundCollider.gameObject.layer == LayerMask.NameToLayer("CurvedFloor"))
+        {
+            motor.ForceUnground();
+            currentRotation = Quaternion.FromToRotation(motor.CharacterUp, motor.GroundingStatus.GroundNormal);
+        }
     }
 
     public void UpdateVelocity(ref Vector3 currentVelocity, float deltaTime)
     {
+        armsAnimator.SetBool("IsGroundedMoving", false);
+        jarAnimator.SetBool("IsGroundedMoving", false);
+
         // State checking
         // Check air or ground
         character.state = motor.GroundingStatus.IsStableOnGround ? CharacterState.Grounded : CharacterState.InAir;
@@ -180,8 +204,12 @@ public class PlayerCharacter : MonoBehaviour, ICharacterController
             direction: requestedMovement,
             surfaceNormal: motor.GroundingStatus.GroundNormal
         ) * requestedMovement.magnitude;
-
-
+        
+        if (groundedMovement.sqrMagnitude > 0)
+        {
+            armsAnimator.SetBool("IsGroundedMoving", true);
+            jarAnimator.SetBool("IsGroundedMoving", true);
+        }
         if (character.stance is Stance.Stand) {
             // Walking & Sprinting
             var speed = requestedSprint ? walkSpeed * 2 : walkSpeed;
@@ -222,7 +250,11 @@ public class PlayerCharacter : MonoBehaviour, ICharacterController
         if (currentVelocity.y < -maxFallSpeed)
             currentVelocity.y = -maxFallSpeed;
 
-        if (requestedJump) Jump(ref currentVelocity, deltaTime);
+        if (requestedJump)
+        {
+            
+            Jump(ref currentVelocity, deltaTime);
+        }
     }
 
     private void WallRunMovement(ref Vector3 currentVelocity, float deltaTime)
@@ -249,6 +281,7 @@ public class PlayerCharacter : MonoBehaviour, ICharacterController
     {
         if (character.state is CharacterState.Grounded || (!wasUngroundedByJump && timeSinceUngrounded < coyoteTime))
         {
+            
             requestedJump = false;
             requestedCrouch = false;
             wasUngroundedByJump = true;

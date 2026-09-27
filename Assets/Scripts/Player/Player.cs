@@ -5,7 +5,6 @@ public class Player : MonoBehaviour
     [Header("Needed Objects")]
     [SerializeField] private PlayerCharacter playerCharacter;
     [SerializeField] private PlayerCamera playerCamera;
-    
 
     private PlayerActionInputs inputActions;
     private void Start()
@@ -27,9 +26,10 @@ public class Player : MonoBehaviour
         var cameraInput = new CameraInput { Look = input.Look.ReadValue<Vector2>() };
         if (BookMovement.Instance.isIdle)
         {
-            playerCamera.UpdateRotation(cameraInput);
+            playerCamera.UpdateRotation(cameraInput, playerCharacter.GetCameraTarget());
         }
 
+        
         // Get character input and update it. This is mainly how we will take InputAction and use them
         // Essentially, we "queue" the input, preparing to throw into UpdateInput.
         var characterInput = new CharacterInput
@@ -40,7 +40,8 @@ public class Player : MonoBehaviour
             Jump = input.Jump.WasPressedThisFrame(),
             JumpSustain = input.Jump.IsPressed(),
             // Crouch = input.Crouch.IsPressed() ? CrouchInput.Hold : CrouchInput.Release
-            Crouch = input.Crouch.WasPressedThisFrame()
+            Crouch = input.Crouch.WasPressedThisFrame(),
+            Interact = input.Interact.WasPressedThisFrame(),
         };
         playerCharacter.UpdateInput(characterInput);
         playerCharacter.UpdateBody(deltaTime);
