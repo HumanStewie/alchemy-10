@@ -84,8 +84,6 @@ public class PlayerCharacter : MonoBehaviour, ICharacterController
     }
     public void UpdateInput(CharacterInput input)
     {
-        
-        
         requestedRotation = input.Rotation;
         
         // Get requested 2D input from character input, given from InputActions in Player.cs
@@ -94,8 +92,14 @@ public class PlayerCharacter : MonoBehaviour, ICharacterController
         requestedMovement = Vector3.ClampMagnitude(requestedMovement, 1.0f);
         // Relative movement to camera, this affects the pitch, causing requestedMovement to point *upward* (flying), fix below    
         // This also cause the angle of movement vector to be closer to flat, which causes buggy diagonals when pitch is up and down
-        var yawOnly = Quaternion.Euler(0, input.Rotation.eulerAngles.y, 0);
-        requestedMovement = yawOnly * requestedMovement;
+        Vector3 planarForward = Vector3.ProjectOnPlane(requestedRotation *  Vector3.forward, motor.CharacterUp).normalized;
+        if (planarForward.sqrMagnitude < 0.001f)
+        {
+            
+        }
+
+        Quaternion surfaceYaw = Quaternion.LookRotation(planarForward, motor.CharacterUp);
+        requestedMovement = surfaceYaw * requestedMovement;
         
         requestedSprint = input.Sprint;
 
@@ -131,19 +135,24 @@ public class PlayerCharacter : MonoBehaviour, ICharacterController
 
     public void UpdateRotation(ref Quaternion currentRotation, float deltaTime)
     {
-        /*currentRotation = Quaternion.LookRotation(
+        currentRotation = Quaternion.LookRotation(
             Vector3.ProjectOnPlane(requestedRotation * Vector3.forward, motor.CharacterUp),
             motor.CharacterUp
-        );*/
-        if (motor.GroundingStatus.FoundAnyGround && motor.GroundingStatus.GroundCollider.gameObject.layer == LayerMask.NameToLayer("CurvedFloor"))
+        );
+        if (motor.GroundingStatus.FoundAnyGround)
         {
-            motor.ForceUnground();
-            currentRotation = Quaternion.FromToRotation(motor.CharacterUp, motor.GroundingStatus.GroundNormal);
+            currentRotation = Quaternion.Lerp(
+                currentRotation,
+                Quaternion.FromToRotation(motor.CharacterUp, motor.GroundingStatus.GroundNormal) * currentRotation, 
+                1.0f - Mathf.Exp(-walkResponse * deltaTime)
+            );
         }
+        
     }
 
     public void UpdateVelocity(ref Vector3 currentVelocity, float deltaTime)
     {
+        Debug.Log(motor.CharacterUp);
         armsAnimator.SetBool("IsGroundedMoving", false);
         jarAnimator.SetBool("IsGroundedMoving", false);
 
