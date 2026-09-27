@@ -4,11 +4,11 @@ using UnityEngine;
 public class Charger : EnemyBase
 {
     [Header("Charge Settings")]
-    public float chargeSpeedMultiplier = 4f; 
-    public float chargeDuration = 1f;       
-    public float windUpTime = 0.5f;         
-    public float hitboxRadius = 1.5f;       
-    public LayerMask playerLayer;           
+    public float chargeSpeedMultiplier = 4f;
+    public float chargeDuration = 1f;
+    public float windUpTime = 0.5f;
+    public float hitboxRadius = 1.5f;
+    public LayerMask playerLayer;
 
     private bool isAttacking;
     private float attackTimer;
@@ -19,16 +19,17 @@ public class Charger : EnemyBase
         base.Start();
         attackTimer = attackCooldown;
 
-        player = FindAnyObjectByType<PlayerCharacter>().transform;
+        var pc = FindAnyObjectByType<PlayerCharacter>();
+        if (pc != null) player = pc.transform;
     }
 
     void Update()
     {
-        if (isAttacking) return;
+        if (player == null || isAttacking) return;
 
         attackTimer -= Time.deltaTime;
 
-        if (attackTimer <= 0)
+        if (attackTimer <= 0f)
         {
             StartCoroutine(AttackSeq());
         }
@@ -43,7 +44,10 @@ public class Charger : EnemyBase
     {
         isAttacking = true;
 
-        transform.LookAt(new Vector3(player.position.x, transform.position.y, player.position.z));
+        if (player != null)
+        {
+            transform.LookAt(new Vector3(player.position.x, transform.position.y, player.position.z));
+        }
         Vector3 chargeDirection = transform.forward;
 
         yield return new WaitForSeconds(windUpTime);
@@ -65,15 +69,20 @@ public class Charger : EnemyBase
                     if (hit.CompareTag("Player"))
                     {
                         hasHitPlayer = true;
+                        var health = hit.GetComponent<PlayerHealthAndStat>();
+                        if (health != null)
+                        {
+                            health.takeDamage(currentdamage > 0 ? currentdamage : 10f);
+                        }
                         break;
                     }
                 }
             }
 
-            yield return null; 
+            yield return null;
         }
 
-        attackTimer = attackCooldown; 
+        attackTimer = attackCooldown;
         isAttacking = false;
     }
 

@@ -1,5 +1,4 @@
 using UnityEngine;
-using static UnityEngine.LowLevelPhysics2D.PhysicsShape;
 
 public class ProjectileGetter : MonoBehaviour
 {
@@ -38,19 +37,19 @@ public class ProjectileGetter : MonoBehaviour
     {
         hasHit = true;
 
-        Quaternion splatRotation = Quaternion.LookRotation(-hit.normal, Vector3.right);
-        Vector3 splatPos = hit.point + (hit.normal * surfaceOffset);
-
-        GameObject splat = Instantiate(trapPrefab, splatPos, splatRotation);
-        splat.transform.SetParent(hit.collider.transform);
-
-        if (splat.TryGetComponent<JamSpread>(out var splatScript))
+        if (trapPrefab != null)
         {
-            splatScript.InitSplat();
+            Quaternion splatRotation = Quaternion.LookRotation(-hit.normal, Vector3.right);
+            Vector3 splatPos = hit.point + (hit.normal * surfaceOffset);
+
+            GameObject splat = Instantiate(trapPrefab, splatPos, splatRotation);
+            splat.transform.SetParent(hit.collider.transform);
+
+            if (splat.TryGetComponent<JamSpread>(out var splatScript))
+            {
+                splatScript.InitSplat();
+            }
         }
         Destroy(gameObject);
-
     }
-
 }
-

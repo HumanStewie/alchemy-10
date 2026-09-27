@@ -10,6 +10,8 @@ public class PlayerHealthAndStat : MonoBehaviour
 
     public float cooldownMultiplier = 1f;
 
+    public float maxSpeed;
+
 
     [SerializeField] private GameObject bloodParticle;
     [SerializeField] private GameObject PoofParticle;
@@ -35,12 +37,12 @@ public class PlayerHealthAndStat : MonoBehaviour
     {
         if (multiplier != 1)
         {
-            currentdamage *= multiplier;
+            GetComponent<PlayerCharacter>().walkSpeed *= multiplier;
         }
     }
     public void SpeedNormal()
     {
-        currentdamage = damage;
+        GetComponent<PlayerCharacter>().walkSpeed = maxSpeed;
     }
 
     public void takeDamage(float damage)

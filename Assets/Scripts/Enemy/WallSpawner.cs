@@ -17,7 +17,8 @@ public class WallSpawner : EnemyBase
         currentdamage = damage;
         currentspeed = speed;
 
-        player = FindAnyObjectByType<PlayerCharacter>().transform;
+        var pc = FindAnyObjectByType<PlayerCharacter>();
+        if (pc != null) player = pc.transform;
 
         bookMovement = FindAnyObjectByType<BookMovement>();
 
@@ -35,13 +36,14 @@ public class WallSpawner : EnemyBase
 
         float dist = Vector3.Distance(player.position, transform.position);
 
-        if (dist > 7)
+        if (dist > 7f)
         {
             transform.position = Vector3.MoveTowards(transform.position, player.position, currentspeed * Time.deltaTime);
+            transform.LookAt(new Vector3(player.position.x, transform.position.y, player.position.z));
         }
         else
         {
-            if (attackTimer <= 0 && !isSummoning)
+            if (attackTimer <= 0f && !isSummoning)
             {
                 StartCoroutine(SummonWall());
             }
@@ -54,9 +56,13 @@ public class WallSpawner : EnemyBase
 
         yield return new WaitForSeconds(2f);
 
-        if (bookMovement != null && player != null)
+        if (wall != null && bookMovement != null && bookMovement.WallSpawnLoc != null && player != null)
         {
-            GameObject spawnedWall = Instantiate(wall, bookMovement.WallSpawnLoc.position, Quaternion.Euler(-90, player.eulerAngles.y - 90f, 0));
+            GameObject spawnedWall = Instantiate(
+                wall,
+                bookMovement.WallSpawnLoc.position,
+                Quaternion.Euler(-90f, player.eulerAngles.y - 90f, 0f)
+            );
             spawnedWall.transform.DOMoveY(2.75f, 0.5f).SetEase(Ease.InOutSine);
         }
         attackTimer = attackCooldown;

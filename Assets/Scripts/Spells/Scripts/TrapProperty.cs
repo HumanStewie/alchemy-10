@@ -1,5 +1,3 @@
-using NUnit.Framework;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,48 +6,64 @@ public class TrapProperty : MonoBehaviour
     [Header("Trap Settings")]
     public float lifetime = 10f;
     public float damage = 4f;
-    public float damageInterval = 1f; // Ticks once every 1 second
+    public float damageInterval = 1f;
     public GameObject explosionVFX;
 
-    private Dictionary<Collider, float> activeEnemies = new();
+    [Header("Explosion Upgrade Settings")]
+    public float deathExplosionRadius = 3f;
+    public float deathExplosionDamage = 10f;
+
+    private Dictionary<Collider, float> activeEnemies = new Dictionary<Collider, float>();
     private List<Collider> toRemove = new List<Collider>();
+
+    private BreadTrap trap;
+    private bool isQuitting = false;
 
     private void Start()
     {
+        if (GestureRecognizer.Instance != null && GestureRecognizer.Instance.templates != null)
+        {
+            trap = GestureRecognizer.Instance.templates.Find(s => s is BreadTrap) as BreadTrap;
+        }
+
+        ApplyUpgrades();
         Destroy(gameObject, lifetime);
+    }
+
+    private void ApplyUpgrades()
+    {
+        if (trap == null) return;
+
+        if (trap.isTier12)
+        {
+            lifetime = 15f;
+            transform.localScale *= 1.5f;
+        }
     }
 
     private void Update()
     {
         toRemove.Clear();
+        List<Collider> keys = new List<Collider>(activeEnemies.Keys);
 
-        foreach (var entry in activeEnemies)
+        foreach (Collider enemy in keys)
         {
-            Collider enemy = entry.Key;
-
             if (enemy == null)
             {
                 toRemove.Add(enemy);
                 continue;
             }
 
-            if (Time.time >= entry.Value + damageInterval)
+            if (Time.time >= activeEnemies[enemy] + damageInterval)
             {
-                ApplyDamage(enemy);
-                toRemove.Add(enemy); 
+                ApplyEffects(enemy);
+                activeEnemies[enemy] = Time.time;
             }
         }
 
         foreach (Collider col in toRemove)
         {
-            if (col != null)
-            {
-                activeEnemies[col] = Time.time;
-            }
-            else
-            {
-                activeEnemies.Remove(col);
-            }
+            activeEnemies.Remove(col);
         }
     }
 
@@ -57,7 +71,7 @@ public class TrapProperty : MonoBehaviour
     {
         if (other.CompareTag("Enemy") && !activeEnemies.ContainsKey(other))
         {
-            ApplyDamage(other);
+            ApplyEffects(other);
             activeEnemies.Add(other, Time.time);
         }
     }
@@ -70,13 +84,59 @@ public class TrapProperty : MonoBehaviour
         }
     }
 
-    private void ApplyDamage(Collider enemy)
+    private void ApplyEffects(Collider enemy)
     {
-        enemy.SendMessageUpwards("TakeDamage", damage, SendMessageOptions.DontRequireReceiver);
+        EnemyBase enemyScript = enemy.GetComponentInParent<EnemyBase>();
+        if (enemyScript == null) return;
+
+        enemyScript.takeDamage(damage);
 
         if (explosionVFX != null)
         {
             Instantiate(explosionVFX, enemy.transform.position, Quaternion.identity);
         }
+
+        if (trap == null) return;
+
+        if (trap.isTier11)
+        {
+            enemyScript.Poisoned(1f, 5f);
+        }
+
+        if (trap.isTier21)
+        {
+            enemyScript.Burnt(0.5f, 6f);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (isQuitting || !gameObject.scene.isLoaded) return;
+
+        if (trap != null && trap.isTier22)
+        {
+            if (explosionVFX != null)
+            {
+                Instantiate(explosionVFX, transform.position, Quaternion.identity);
+            }
+
+            Collider[] hits = Physics.OverlapSphere(transform.position, deathExplosionRadius);
+            foreach (Collider col in hits)
+            {
+                if (col.CompareTag("Enemy"))
+                {
+                    EnemyBase enemy = col.GetComponentInParent<EnemyBase>();
+                    if (enemy != null)
+                    {
+                        enemy.takeDamage(deathExplosionDamage);
+                    }
+                }
+            }
+        }
+    }
+
+    private void OnApplicationQuit()
+    {
+        isQuitting = true;
     }
 }

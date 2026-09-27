@@ -24,6 +24,7 @@ public abstract class EnemyBase : MonoBehaviour
     public bool isPoisoned = false;
     public bool isBurning;
 
+    private Coroutine freezeCoroutine;
 
 
     protected virtual void Start()
@@ -71,8 +72,23 @@ public abstract class EnemyBase : MonoBehaviour
         Instantiate(PoofParticle, transform.position, Quaternion.identity);
         Destroy(gameObject);
     }
-    
 
+    public void Freeze(float duration)
+    {
+        if (freezeCoroutine != null) StopCoroutine(freezeCoroutine);
+        freezeCoroutine = StartCoroutine(Freezing(duration));
+    }
+
+    private IEnumerator Freezing(float duration)
+    {
+        float originalSpeed = currentspeed;
+        currentspeed = 0f; // Halt movement
+
+        yield return new WaitForSeconds(duration);
+
+        currentspeed = originalSpeed; // Restore speed
+        freezeCoroutine = null;
+    }
     public void Poisoned(float damage, float time)
     {
         if (isPoisoned) return;
@@ -81,6 +97,7 @@ public abstract class EnemyBase : MonoBehaviour
 
     IEnumerator poisoning(float damage, float time)
     {
+        isPoisoned = true;
 
         float timer = 0;
 
@@ -90,6 +107,7 @@ public abstract class EnemyBase : MonoBehaviour
             timer += 1f;
             yield return new WaitForSeconds(1f);
         }
+        isPoisoned = false;
     }
     public void Burnt(float damage, float time)
     {
@@ -99,6 +117,7 @@ public abstract class EnemyBase : MonoBehaviour
 
     IEnumerator burning(float damage, float time)
     {
+        isBurning = true;
 
         float timer = 0;
 
@@ -108,5 +127,6 @@ public abstract class EnemyBase : MonoBehaviour
             timer += 0.5f;
             yield return new WaitForSeconds(0.5f);
         }
+        isBurning = false;
     }
 }

@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class ButterShooter : EnemyBase
@@ -14,9 +12,9 @@ public class ButterShooter : EnemyBase
     public float hitRadius = 0.8f;
 
     [Header("Movement Thresholds")]
-    public float distanceBeforeStop = 4f; 
+    public float distanceBeforeStop = 4f;
     public float distanceBeforeShoot = 6f;
-    public float orbitSpeed = 45f;        
+    public float orbitSpeed = 45f;
 
     public bool isAttacking = false;
 
@@ -26,7 +24,8 @@ public class ButterShooter : EnemyBase
     protected override void Start()
     {
         base.Start();
-        player = FindFirstObjectByType<PlayerCharacter>().transform;
+        var pc = FindFirstObjectByType<PlayerCharacter>();
+        if (pc != null) player = pc.transform;
         attackTimer = attackCooldown;
     }
 
@@ -44,7 +43,6 @@ public class ButterShooter : EnemyBase
         {
             isAttacking = false;
         }
-
 
         transform.LookAt(new Vector3(player.position.x, transform.position.y, player.position.z));
 
@@ -76,10 +74,6 @@ public class ButterShooter : EnemyBase
 
     private void PerformShoot()
     {
-        if (animator != null)
-        {
-        }
-
         if (projectile != null)
         {
             Instantiate(projectile, transform.position, transform.rotation);

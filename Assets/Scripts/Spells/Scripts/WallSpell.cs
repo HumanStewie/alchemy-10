@@ -1,17 +1,62 @@
+using DG.Tweening;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using DG.Tweening;
 
 [CreateAssetMenu(fileName = "WallSpell", menuName = "Spells/WallSpell")]
-
 public class WallSpell : SpellTemplate
 {
+    [Header("Prefab & Position")]
     public GameObject wall;
     public float yFinal = 2.75f;
+    public float lifetime = 10f;
+
+    [Header("Base & Upgrade Stats")]
+    public int maxWalls = 1;                 
+    public float contactDamage = 0f;           
+    public float sizeMultiplier = 1f;         
+    public bool allowWallWalk = false;          
+    public bool runeHeals = false;             
+
+    private Queue<WallProp> activeWalls = new();
+
     public override void Cast(GameObject caster, Vector3 targetPoint, float scale)
     {
-        BookMovement.Instance.WallSpellAnimation();
-        GameObject walls =  Instantiate(wall, FindAnyObjectByType<BookMovement>().WallSpawnLoc.position, Quaternion.Euler(-90,FindAnyObjectByType<PlayerCharacter>().transform.eulerAngles.y -90f, 0));
-        walls.transform.DOMoveY(yFinal, 0.5f).SetEase(Ease.InOutSine);
+        BookMovement book = FindAnyObjectByType<BookMovement>();
+        PlayerCharacter player = FindAnyObjectByType<PlayerCharacter>();
+
+        if (book == null || player == null || wall == null) return;
+
+        book.WallSpellAnimation();
+
+        PruneDestroyedWalls();
+        while (activeWalls.Count >= maxWalls)
+        {
+            WallProp oldest = activeWalls.Dequeue();
+            if (oldest != null)
+            {
+                oldest.DespawnWall();
+            }
+        }
+
+        Vector3 spawnLoc = book.WallSpawnLoc.position;
+        Quaternion spawnRot = Quaternion.Euler(-90f, player.transform.eulerAngles.y - 90f, 0f);
+
+        GameObject newWallObj = Instantiate(wall, spawnLoc, spawnRot);
+        newWallObj.transform.DOMoveY(yFinal, 0.5f).SetEase(Ease.InOutSine);
+
+        if (newWallObj.TryGetComponent<WallProp>(out var wallScript))
+        {
+            wallScript.Initialize(lifetime, contactDamage, sizeMultiplier, allowWallWalk, runeHeals);
+            activeWalls.Enqueue(wallScript);
+        }
+    }
+
+    private void PruneDestroyedWalls()
+    {
+        while (activeWalls.Count > 0 && activeWalls.Peek() == null)
+        {
+            activeWalls.Dequeue();
+        }
     }
 }

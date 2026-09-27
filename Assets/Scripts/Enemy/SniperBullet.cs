@@ -3,11 +3,17 @@ using UnityEngine;
 public class SniperBullet : MonoBehaviour
 {
     public float speed = 10f;
+    public float lifetime = 5f;
+    public float damage = 20f;
 
     void Start()
     {
-        transform.LookAt(FindFirstObjectByType<PlayerCharacter>().transform);        
-        
+        var pc = FindFirstObjectByType<PlayerCharacter>();
+        if (pc != null)
+        {
+            transform.LookAt(pc.transform);
+        }
+        Destroy(gameObject, lifetime);
     }
 
     void Update()
@@ -19,7 +25,12 @@ public class SniperBullet : MonoBehaviour
     {
         if (other.TryGetComponent<PlayerHealthAndStat>(out PlayerHealthAndStat player))
         {
-            player.takeDamage(20);
+            player.takeDamage(damage);
+            Destroy(gameObject);
+        }
+        else if (!other.isTrigger)
+        {
+            Destroy(gameObject);
         }
     }
 }

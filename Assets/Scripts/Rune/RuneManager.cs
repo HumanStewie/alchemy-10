@@ -1,12 +1,17 @@
 using System.Collections;
 using UnityEngine;
 
-public class RuneController : MonoBehaviour
+public class RuneManager : MonoBehaviour
 {
     [Header("Timings & Speeds")]
     public float waitDuration = 5f;
     public float moveDuration = 5f;
     public float moveSpeed = 6f;
+
+
+    [Header("Timings & Speeds")]
+    public float currentHealth;
+    public float maxHealth;
 
     [Header("Detection Settings")]
     public LayerMask obstacleMask;

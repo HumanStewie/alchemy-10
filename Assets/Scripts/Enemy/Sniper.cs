@@ -6,19 +6,19 @@ public class SniperEnemy : EnemyBase
     [Header("Sniper Settings")]
     public LineRenderer aimLine;
     public float stoppingDistance = 15f;
-    public LayerMask obstacleMask; 
+    public LayerMask obstacleMask;
 
     private Transform player;
     private float attackTimer;
     private bool isAiming = false;
-
 
     public GameObject bullet;
 
     protected override void Start()
     {
         base.Start();
-        player = FindAnyObjectByType<PlayerCharacter>().transform;
+        var pc = FindAnyObjectByType<PlayerCharacter>();
+        if (pc != null) player = pc.transform;
 
         attackTimer = attackCooldown;
 
@@ -27,7 +27,7 @@ public class SniperEnemy : EnemyBase
 
     void Update()
     {
-        if (isAiming) return;
+        if (player == null || isAiming) return;
 
         float dist = Vector3.Distance(transform.position, player.position);
         bool canSeePlayer = HasLineOfSight();
@@ -54,13 +54,16 @@ public class SniperEnemy : EnemyBase
 
     private bool HasLineOfSight()
     {
+        if (player == null) return false;
+
         Vector3 origin = transform.position + Vector3.up * 1f;
         Vector3 target = player.position + Vector3.up * 1f;
         Vector3 direction = target - origin;
+        float maxDist = Vector3.Distance(origin, target);
 
-        if (Physics.Raycast(origin, direction, out RaycastHit hit, stoppingDistance, obstacleMask))
+        if (Physics.Raycast(origin, direction, out RaycastHit hit, maxDist, obstacleMask))
         {
-            if (hit.distance < Vector3.Distance(origin, target))
+            if (hit.transform != player && !hit.transform.IsChildOf(player))
             {
                 return false;
             }
@@ -80,19 +83,27 @@ public class SniperEnemy : EnemyBase
         {
             elapsed += Time.deltaTime;
 
-            aimLine.SetPosition(0, transform.position + Vector3.up * 1f);
-            aimLine.SetPosition(1, player.position + Vector3.up * 1f);
-
-            aimLine.enabled = (Mathf.FloorToInt(elapsed * 10f) % 2 == 0);
+            if (aimLine != null && player != null)
+            {
+                aimLine.SetPosition(0, transform.position + Vector3.up * 1f);
+                aimLine.SetPosition(1, player.position + Vector3.up * 1f);
+                aimLine.enabled = (Mathf.FloorToInt(elapsed * 10f) % 2 == 0);
+            }
 
             yield return null;
         }
-        aimLine.enabled = true;
+
+        if (aimLine != null) aimLine.enabled = true;
         yield return new WaitForSeconds(0.15f);
 
-        Instantiate(bullet, transform.position, Quaternion.identity);
+        if (bullet != null && player != null)
+        {
+            Vector3 spawnPos = transform.position + Vector3.up * 1f;
+            Quaternion rot = Quaternion.LookRotation((player.position - spawnPos).normalized);
+            Instantiate(bullet, spawnPos, rot);
+        }
 
-        aimLine.enabled = false;
+        if (aimLine != null) aimLine.enabled = false;
         attackTimer = attackCooldown;
         isAiming = false;
     }

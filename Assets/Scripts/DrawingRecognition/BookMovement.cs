@@ -26,8 +26,7 @@ public class BookMovement : MonoBehaviour
     public float WallSpellTime = 0.5f;
     private Vector3 WallSpellLoc = new Vector3(0.3f, -0.1f, 0.1f);
     private Vector3 WallSpellRot = new Vector3(0, 0, 180);
-    public Transform WallSpawnLoc; 
-
+    public Transform WallSpawnLoc;
 
     private float currentY;
 
@@ -47,9 +46,16 @@ public class BookMovement : MonoBehaviour
 
     void Update()
     {
-        if (!isDisabled)
+        if (isDisabled) return;
+
+        if (Input.GetKeyDown(KeyCode.E))
         {
             ToggleBookState();
+        }
+
+        if (isIdle && !isInanimation)
+        {
+            Spinning();
         }
     }
 
@@ -64,15 +70,13 @@ public class BookMovement : MonoBehaviour
 
     public void ToggleBookState()
     {
-        if (isInanimation) return;
-
-
-        Cursor.lockState = CursorLockMode.None;
+        if (isInanimation || isDisabled) return;
 
         if (isIdle)
         {
             transform.DOKill();
             isIdle = false;
+            Cursor.lockState = CursorLockMode.None;
 
             transform.DOLocalMove(endLoc, timeChange).SetEase(Ease.OutBack);
             transform.DOLocalRotate(endRot, timeChange).SetEase(Ease.OutBack);
@@ -80,15 +84,16 @@ public class BookMovement : MonoBehaviour
         else
         {
             ReturnToIdle();
-
         }
     }
 
     public void ReturnToIdle()
     {
-        isIdle = true;
+        if (isInanimation) return;
 
+        isIdle = true;
         Cursor.lockState = CursorLockMode.Locked;
+
         transform.DOKill();
         transform.DOLocalMove(startLoc, timeChange).SetEase(Ease.OutQuad);
         transform.DOLocalRotate(startRot, timeChange).SetEase(Ease.OutQuad)
@@ -101,6 +106,7 @@ public class BookMovement : MonoBehaviour
     public void WallSpellAnimation()
     {
         isInanimation = true;
+        isIdle = false;
         transform.DOKill();
 
         transform.DOLocalMove(WallSpellLoc, WallSpellTime).SetEase(Ease.OutBack);
@@ -114,10 +120,10 @@ public class BookMovement : MonoBehaviour
                         isInanimation = false;
                         isIdle = true;
                         currentY = startRot.y;
+                        Cursor.lockState = CursorLockMode.Locked;
                     });
             });
     }
-
 
     public void SwingJamAttack(System.Action onSwingApex)
     {
@@ -150,6 +156,7 @@ public class BookMovement : MonoBehaviour
             isInanimation = false;
             isIdle = true;
             currentY = startRot.y;
+            Cursor.lockState = CursorLockMode.Locked;
         });
     }
 
@@ -157,9 +164,14 @@ public class BookMovement : MonoBehaviour
     {
         StartCoroutine(TemporaryDisable(time));
     }
+
     public IEnumerator TemporaryDisable(float time)
     {
         isDisabled = true;
+        if (!isIdle)
+        {
+            ReturnToIdle();
+        }
 
         yield return new WaitForSeconds(time);
 

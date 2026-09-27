@@ -191,7 +191,14 @@ public class GameManager : MonoBehaviour
             else { InstantiateEnemy(swarmEnemy); valueCost -= 3f; }
         }
     }
-
+    public void StartFirstWave()
+    {
+        if (started) return;
+        started = true;
+        currentWave = 1;
+        StartWave(currentWave);
+        startChecking = true;
+    }
     public void SlowEVERYTHING(int time, int percentage)
     {
         StartCoroutine(slowStuff(time, percentage));

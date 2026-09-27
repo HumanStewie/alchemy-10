@@ -21,7 +21,7 @@ public class GenericUpgrade : UpgradeBase
         }
         if (isSpeed)
         {
-            FindFirstObjectByType<PlayerHealthAndStat>().GetComponent<PlayerCharacter>().walkSpeed *= 1.1f;
+            FindFirstObjectByType<PlayerHealthAndStat>().GetComponent<PlayerHealthAndStat>().maxSpeed *= 1.1f;
             FindFirstObjectByType<PlayerHealthAndStat>().GetComponent<PlayerHealthAndStat>().SpeedNormal();
 
         }

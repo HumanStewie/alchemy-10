@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Bullet : MonoBehaviour
@@ -8,20 +5,18 @@ public class Bullet : MonoBehaviour
     public float speed = 15f;
     public float hitRadius = 0.8f;
     public int damage = 5;
-
+    public float lifetime = 5f;
 
     public LayerMask layermask;
 
-    private Transform player;
+    private void Start()
+    {
+        Destroy(gameObject, lifetime);
+    }
 
     private void Update()
     {
         transform.Translate(speed * Time.deltaTime * Vector3.forward, Space.Self);
-
-    }
-    private void Start()
-    {
-        player = FindFirstObjectByType<PlayerCharacter>().transform;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -29,6 +24,10 @@ public class Bullet : MonoBehaviour
         if (other.TryGetComponent(out EnemyBase enemy))
         {
             enemy.takeDamage(damage);
+            Destroy(gameObject);
+        }
+        else if (!other.isTrigger && !other.CompareTag("Player"))
+        {
             Destroy(gameObject);
         }
     }

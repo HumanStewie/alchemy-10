@@ -7,11 +7,10 @@ public class JamProperty : MonoBehaviour
 
     [Header("Modifiers")]
     public float stickySpeedMultiplier = 0.4f;
-    public float slipperySpeedMultiplier = 1.8f; 
+    public float slipperySpeedMultiplier = 1.8f;
 
     private void OnTriggerEnter(Collider other)
     {
-        // 1. Affect Enemies
         EnemyBase enemy = other.GetComponent<EnemyBase>();
         if (enemy != null)
         {
@@ -34,7 +33,6 @@ public class JamProperty : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        // Revert the speed changes when they leave the puddle
         EnemyBase enemy = other.GetComponent<EnemyBase>();
         if (enemy != null)
         {
