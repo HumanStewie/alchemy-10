@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
-[CreateAssetMenu(fileName ="SpellTemp",menuName ="SpellTemp")]
 public abstract class SpellTemplate : ScriptableObject
 {
     public string spellName;

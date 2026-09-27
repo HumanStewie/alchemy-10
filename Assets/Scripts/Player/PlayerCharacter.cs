@@ -39,8 +39,7 @@ public class PlayerCharacter : MonoBehaviour, ICharacterController
     public Transform GetCameraTarget() => cameraTarget;
 
     [Header("Move")]
-    [SerializeField] private float sprintSpeed = 20.0f;
-    [SerializeField] private float walkSpeed = 10.0f;
+    [SerializeField] public float walkSpeed = 10.0f;
     [SerializeField] private float sprintResponse = 15f;
     [SerializeField] private float walkResponse = 25f;
 
@@ -185,7 +184,7 @@ public class PlayerCharacter : MonoBehaviour, ICharacterController
 
         if (character.stance is Stance.Stand) {
             // Walking & Sprinting
-            var speed = requestedSprint ? sprintSpeed : walkSpeed;
+            var speed = requestedSprint ? walkSpeed * 2 : walkSpeed;
             var response = requestedSprint ? sprintResponse : walkResponse;
             currentVelocity = Vector3.Lerp(
                 a: currentVelocity,

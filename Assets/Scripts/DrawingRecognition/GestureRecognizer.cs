@@ -31,6 +31,14 @@ public class GestureRecognizer : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+        for (int i = 0; i < templates.Count; i++)
+        {
+            if (templates[i] != null)
+            {
+                templates[i] = Instantiate(templates[i]);
+            }
+        }
+
     }
 
     private void Update()

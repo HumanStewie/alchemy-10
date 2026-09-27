@@ -31,7 +31,7 @@ public class BookMovement : MonoBehaviour
 
     private float currentY;
 
-    public bool isDisabled = true;
+    public bool isDisabled = false;
 
     private void Awake()
     {
@@ -52,7 +52,7 @@ public class BookMovement : MonoBehaviour
             Spinning();
         }
 
-        if (Input.GetKeyDown(KeyCode.E) || !isDisabled)
+        if (Input.GetKeyDown(KeyCode.E) && !isDisabled)
         {
             ToggleBookState();
         }

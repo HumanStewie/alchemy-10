@@ -444,7 +444,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3788485504342964226, guid: dfdf77287aa78b6d3a952d90110c51f1, type: 3}
       propertyPath: isDisabled
-      value: 1
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5591779626564126824, guid: dfdf77287aa78b6d3a952d90110c51f1, type: 3}
+      propertyPath: drawLayerMask.m_Bits
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5978117166810417901, guid: dfdf77287aa78b6d3a952d90110c51f1, type: 3}
+      propertyPath: m_Layer
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -484,12 +492,17 @@ MonoBehaviour:
   standardSize: 500
   listForChecking: []
   isGettingTemp: 0
-  temp: {fileID: 11400000, guid: 66a700c290ad29149aadf8baef04407f, type: 2}
+  temp: {fileID: 0}
   templates:
+  - {fileID: 11400000, guid: 17fb9490124f0f44bae19ba0fd51e9f6, type: 2}
+  - {fileID: 11400000, guid: 8e47f47162d2f574e828972cfe49216c, type: 2}
   - {fileID: 11400000, guid: 66a700c290ad29149aadf8baef04407f, type: 2}
+  - {fileID: 11400000, guid: 6331b5dfa7fb3664bbb45331b659ce1d, type: 2}
+  - {fileID: 11400000, guid: 0d848884ed591c54bb51ba0ab69f89f3, type: 2}
   - {fileID: 11400000, guid: e250661bd639c074b935fffcc14ecf88, type: 2}
-  maxAllowedError: 50
-  preparedSpell: {fileID: 11400000, guid: e250661bd639c074b935fffcc14ecf88, type: 2}
+  - {fileID: 11400000, guid: 03b7125013cac644c95cface25e589aa, type: 2}
+  maxAllowedError: 100
+  preparedSpell: {fileID: 0}
 --- !u!4 &996634392
 Transform:
   m_ObjectHideFlags: 0

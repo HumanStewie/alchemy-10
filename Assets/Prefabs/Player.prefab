@@ -1168,7 +1168,7 @@ MonoBehaviour:
   currentStroke: []
   labelCollider: {fileID: 9084261120980136660}
   drawCamera: {fileID: 5732961938659608842}
-  minDistanceBetweenPoints: 10
+  minDistanceBetweenPoints: 1.5
   surfaceOffset: 0.005
   standardUVScale: 500
   drawLayerMask:

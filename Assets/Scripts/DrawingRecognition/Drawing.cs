@@ -1,3 +1,4 @@
+using NUnit.Framework;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,8 +8,7 @@ public class Drawing : MonoBehaviour
     public static Drawing Instance;
 
     public LineRenderer lr;
-    // If the brackets still vanish in your view, this is: List followed by < Vector2 >
-    public List<Vector2> currentStroke = new List<Vector2>();
+    public List<Vector2> currentStroke = new();
 
     [Header("Jar References")]
     [SerializeField] private Collider labelCollider;
@@ -32,12 +32,20 @@ public class Drawing : MonoBehaviour
 
     void Start()
     {
-        // Non-generic GetComponent avoids angle brackets entirely
-        lr = (LineRenderer)GetComponent(typeof(LineRenderer));
+        lr = GetComponent<LineRenderer>();
         lr.startWidth = 0.003f;
         lr.endWidth = 0.003f;
         lr.useWorldSpace = false;
         lr.positionCount = 0;
+
+        // Ensure this GameObject follows the label's transform if separate
+        if (labelCollider != null && transform.parent != labelCollider.transform)
+        {
+            transform.SetParent(labelCollider.transform, false);
+            transform.localPosition = Vector3.zero;
+            transform.localRotation = Quaternion.identity;
+            transform.localScale = Vector3.one;
+        }
 
         if (drawCamera == null)
         {
@@ -67,6 +75,12 @@ public class Drawing : MonoBehaviour
     {
         if (BookMovement.Instance != null && (BookMovement.Instance.isIdle || BookMovement.Instance.isInanimation))
         {
+            if (isDrawing)
+            {
+                // Cancel stroke cleanly if animation interrupts
+                isDrawing = false;
+                ClearVisuals();
+            }
             return;
         }
 
@@ -104,7 +118,10 @@ public class Drawing : MonoBehaviour
                 return;
             }
 
-            GestureRecognizer.Instance.DoEverything(currentStroke);
+            if (GestureRecognizer.Instance != null)
+            {
+                GestureRecognizer.Instance.DoEverything(currentStroke);
+            }
         }
     }
 
@@ -171,7 +188,8 @@ public class Drawing : MonoBehaviour
         lastUvPoint = uvPoint;
 
         Vector3 worldPointWithOffset = hit.point + (hit.normal * surfaceOffset);
-        Vector3 localPos = transform.InverseTransformPoint(worldPointWithOffset);
+
+        Vector3 localPos = labelCollider.transform.InverseTransformPoint(worldPointWithOffset);
 
         lr.positionCount = currentStroke.Count;
         lr.SetPosition(currentStroke.Count - 1, localPos);
@@ -186,10 +204,10 @@ public class Drawing : MonoBehaviour
     public void SaveAsTemplate(SpellTemplate targetAsset, List<Vector2> normalizedPoints)
     {
         targetAsset.points = new List<Vector2>(normalizedPoints);
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
         UnityEditor.EditorUtility.SetDirty(targetAsset);
         UnityEditor.AssetDatabase.SaveAssets();
-#endif
+        #endif
         Debug.Log($"Saved {normalizedPoints.Count} points to {targetAsset.spellName}");
     }
 }

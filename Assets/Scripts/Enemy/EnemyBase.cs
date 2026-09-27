@@ -1,3 +1,6 @@
+using System.Collections;
+using Unity.Jobs;
+using Unity.VisualScripting;
 using UnityEngine;
  
 public abstract class EnemyBase : MonoBehaviour
@@ -15,6 +18,13 @@ public abstract class EnemyBase : MonoBehaviour
 
     [SerializeField] private GameObject bloodParticle;
     [SerializeField] private GameObject PoofParticle;
+    [SerializeField] private GameObject poisonParticle;
+    [SerializeField] private GameObject burnParticle;
+
+    public bool isPoisoned = false;
+    public bool isBurning;
+
+
 
     protected virtual void Start()
     {
@@ -62,4 +72,41 @@ public abstract class EnemyBase : MonoBehaviour
         Destroy(gameObject);
     }
     
+
+    public void Poisoned(float damage, float time)
+    {
+        if (isPoisoned) return;
+        StartCoroutine(poisoning(damage, time));
+    }
+
+    IEnumerator poisoning(float damage, float time)
+    {
+
+        float timer = 0;
+
+        while (timer < time)
+        {
+            takeDamage(damage);
+            timer += 1f;
+            yield return new WaitForSeconds(1f);
+        }
+    }
+    public void Burnt(float damage, float time)
+    {
+        if (isBurning) return;
+        StartCoroutine(burning(damage, time));
+    }
+
+    IEnumerator burning(float damage, float time)
+    {
+
+        float timer = 0;
+
+        while (timer < time)
+        {
+            takeDamage(damage);
+            timer += 0.5f;
+            yield return new WaitForSeconds(0.5f);
+        }
+    }
 }

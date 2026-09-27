@@ -8,6 +8,9 @@ public class PlayerHealthAndStat : MonoBehaviour
     public float damage;
     public float currentdamage;
 
+    public float cooldownMultiplier = 1f;
+
+
     [SerializeField] private GameObject bloodParticle;
     [SerializeField] private GameObject PoofParticle;
 
@@ -28,6 +31,18 @@ public class PlayerHealthAndStat : MonoBehaviour
         currentdamage = damage;
     }
 
+    public void ChangeSpeed(float multiplier = 1f)
+    {
+        if (multiplier != 1)
+        {
+            currentdamage *= multiplier;
+        }
+    }
+    public void SpeedNormal()
+    {
+        currentdamage = damage;
+    }
+
     public void takeDamage(float damage)
     {
         currentHP -= damage;
@@ -35,6 +50,13 @@ public class PlayerHealthAndStat : MonoBehaviour
         if (currentHP <= 0)
         {
             Die();
+        }
+    }
+    public void heal(float damage)
+    {
+        currentHP += damage;
+        if (currentHP > maxHP) {
+            currentHP = maxHP;
         }
     }
 
