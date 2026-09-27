@@ -11,8 +11,7 @@ public class MusicManager : MonoBehaviour
     [SerializeField] private AudioSource bgMusic;
     [SerializeField] private AudioSource soundEffectforUI;
 
-
-
+    [Header("UI Volume Sliders")]
     [SerializeField] private Slider masterSlider;
     [SerializeField] private Slider musicSlider;
     [SerializeField] private Slider sfxSlider;
@@ -24,79 +23,98 @@ public class MusicManager : MonoBehaviour
     public bool AudioExisted = false;
     public GameObject ExistedAudio;
 
-    [Header("Global Music & Sounds")]
+    [Header("BGM & Game State")]
     [SerializeField] public AudioClip music;
     [SerializeField, Range(0f, 2f)] public float musicVolume = 0.5f;
 
-    [SerializeField] private AudioClip movement;
-    [SerializeField, Range(0f, 2f)] private float movementVolume = 1f;
+    [SerializeField] private AudioClip gameWin;
+    [SerializeField, Range(0f, 2f)] private float gameWinVolume = 1f;
 
-    [SerializeField] private AudioClip headbutt;
-    [SerializeField, Range(0f, 2f)] private float headbuttVolume = 1f;
+    [SerializeField] private AudioClip gameOver;
+    [SerializeField, Range(0f, 2f)] private float gameOverVolume = 1f;
 
-    [SerializeField] private AudioClip boardtilting;
-    [SerializeField, Range(0f, 2f)] private float boardtiltingVolume = 1f;
+    [Header("Player & Combat Movement")]
+    [SerializeField] private AudioClip walkingSound;
+    [SerializeField, Range(0f, 2f)] private float walkingSoundVolume = 1f;
 
-    [SerializeField] private AudioClip enemySpawn;
-    [SerializeField, Range(0f, 2f)] private float enemySpawnVolume = 1f;
+    [SerializeField] private AudioClip playerHurt;
+    [SerializeField, Range(0f, 2f)] private float playerHurtVolume = 1f;
 
-    [SerializeField] private AudioClip TakingDamage;
-    [SerializeField, Range(0f, 2f)] private float TakingDamageVolume = 1f;
+    [SerializeField] private AudioClip enemyHurt;
+    [SerializeField, Range(0f, 2f)] private float enemyHurtVolume = 1f;
 
-    [SerializeField] private AudioClip EnemyDie;
-    [SerializeField, Range(0f, 2f)] private float EnemyDieVolume = 1f;
+    [SerializeField] private AudioClip dieSound;
+    [SerializeField, Range(0f, 2f)] private float dieSoundVolume = 1f;
 
-    [SerializeField] private AudioClip GameOver;
-    [SerializeField, Range(0f, 2f)] private float GameOverVolume = 1f;
+    [Header("Gesture & Rune Drawing")]
+    [SerializeField] private AudioClip handDrawMode;
+    [SerializeField, Range(0f, 2f)] private float handDrawModeVolume = 1f;
 
-    [SerializeField] private AudioClip GameWin;
-    [SerializeField, Range(0f, 2f)] private float GameWinVolume = 1f;
+    [SerializeField] private AudioClip drawSound;
+    [SerializeField, Range(0f, 2f)] private float drawSoundVolume = 1f;
 
+    [SerializeField] private AudioClip runeMovement;
+    [SerializeField, Range(0f, 2f)] private float runeMovementVolume = 1f;
 
-    [Header("Upgrades & UI")]
-    [SerializeField] private AudioClip UpgradeButton;
-    [SerializeField, Range(0f, 2f)] private float UpgradeButtonVolume = 1f;
+    [SerializeField] private AudioClip spellRecognized;
+    [SerializeField, Range(0f, 2f)] private float spellRecognizedVolume = 1f;
 
-    [SerializeField] private AudioClip HoverSound;
-    [SerializeField, Range(0f, 2f)] private float HoverSoundVolume = 1f;
+    [Header("Spells & Attacks")]
+    [SerializeField] private AudioClip swordSound;
+    [SerializeField, Range(0f, 2f)] private float swordSoundVolume = 1f;
 
-    [SerializeField] private AudioClip Buttons;
-    [SerializeField, Range(0f, 2f)] private float ButtonsVolume = 1f;
+    [SerializeField] private AudioClip createWallSound;
+    [SerializeField, Range(0f, 2f)] private float createWallSoundVolume = 1f;
 
-    [SerializeField] public AudioClip waveTransition;
-    [SerializeField, Range(0f, 2f)] public float waveTransitionVolume = 1f;
+    [SerializeField] private AudioClip spreadSound;
+    [SerializeField, Range(0f, 2f)] private float spreadSoundVolume = 1f;
 
-    [SerializeField] private AudioClip Abilities;
-    [SerializeField, Range(0f, 2f)] private float AbilitiesVolume = 1f;
+    [SerializeField] private AudioClip bazookaSound;
+    [SerializeField, Range(0f, 2f)] private float bazookaSoundVolume = 1f;
 
+    [SerializeField] private AudioClip jamHitSound;
+    [SerializeField, Range(0f, 2f)] private float jamHitSoundVolume = 1f;
 
-    [Header("Enemies")]
-    [SerializeField] private AudioClip HandPoke;
-    [SerializeField, Range(0f, 2f)] private float HandPokeVolume = 1f;
+    [SerializeField] private AudioClip eatingSound;
+    [SerializeField, Range(0f, 2f)] private float eatingSoundVolume = 1f;
 
-    [SerializeField] private AudioClip HandShoot;
-    [SerializeField, Range(0f, 2f)] private float HandShootVolume = 1f;
+    [Header("Enemy Types & Actions")]
+    [SerializeField] private AudioClip simpleFollower;
+    [SerializeField, Range(0f, 2f)] private float simpleFollowerVolume = 1f;
 
-    [SerializeField] private AudioClip HandLazer;
-    [SerializeField, Range(0f, 2f)] private float HandLazerVolume = 1f;
+    [SerializeField] private AudioClip wallSpawnerSound;
+    [SerializeField, Range(0f, 2f)] private float wallSpawnerSoundVolume = 1f;
 
-    [SerializeField] private AudioClip HandLazer2;
-    [SerializeField, Range(0f, 2f)] private float HandLazerVolume2 = 1f;
+    [SerializeField] private AudioClip butterShooter;
+    [SerializeField, Range(0f, 2f)] private float butterShooterVolume = 1f;
 
-    [SerializeField] private AudioClip explosion;
-    [SerializeField, Range(0f, 2f)] private float explosionVolume = 1f;
+    [SerializeField] private AudioClip sniper;
+    [SerializeField, Range(0f, 2f)] private float sniperVolume = 1f;
 
-    [SerializeField] private AudioClip blocktoss;
-    [SerializeField, Range(0f, 2f)] private float blocktossVolume = 1f;
+    [SerializeField] private AudioClip jamToucher;
+    [SerializeField, Range(0f, 2f)] private float jamToucherVolume = 1f;
 
-    [SerializeField] private AudioClip blockPlace;
-    [SerializeField, Range(0f, 2f)] private float blockPlaceVolume = 1f;
+    [SerializeField] private AudioClip charger;
+    [SerializeField, Range(0f, 2f)] private float chargerVolume = 1f;
 
+    [Header("UI Interactions")]
+    [SerializeField] private AudioClip buttonHovering;
+    [SerializeField, Range(0f, 2f)] private float buttonHoveringVolume = 1f;
 
+    [SerializeField] private AudioClip buttonClick;
+    [SerializeField, Range(0f, 2f)] private float buttonClickVolume = 1f;
 
     private void Awake()
     {
-        Instance = this;
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
     }
 
     private void Start()
@@ -122,12 +140,14 @@ public class MusicManager : MonoBehaviour
             sfxSlider.value = masterSFXVolume;
             sfxSlider.onValueChanged.AddListener(SetSFXVolume);
         }
+
         if (SceneManager.GetActiveScene().name == "MainMenu")
         {
-            playMusic(music, musicVolume);
+            PlayMusic(music, musicVolume);
         }
     }
 
+    // --- Volume Setters ---
     public void SetMasterVolume(float volume)
     {
         globalMasterVolume = volume;
@@ -148,31 +168,41 @@ public class MusicManager : MonoBehaviour
         PlayerPrefs.SetFloat("SFXVolume", volume);
     }
 
-
-    public void playMusic(AudioClip clip, float volume = 1f)
+    // --- Base Player Methods ---
+    public void PlayMusic(AudioClip clip, float volume = 1f)
     {
+        if (clip == null || bgMusic == null) return;
         bgMusic.clip = clip;
         bgMusic.volume = volume * masterMusicVolume * globalMasterVolume;
         bgMusic.loop = true;
         bgMusic.Play();
     }
 
-    public void playUISound(AudioClip clip, float volume = 1f)
+    public void PlayUISound(AudioClip clip, float volume = 1f)
     {
-        if (clip != null) soundEffectforUI.PlayOneShot(clip, volume * masterSFXVolume * globalMasterVolume);
+        if (clip != null && soundEffectforUI != null)
+        {
+            soundEffectforUI.PlayOneShot(clip, volume * masterSFXVolume * globalMasterVolume);
+        }
     }
 
     public void PlaySFX(AudioClip clip, Vector3 position, float volume = 1f)
     {
-        if (clip != null) AudioSource.PlayClipAtPoint(clip, position, volume * masterSFXVolume * globalMasterVolume);
+        if (clip != null)
+        {
+            AudioSource.PlayClipAtPoint(clip, position, volume * masterSFXVolume * globalMasterVolume);
+        }
     }
 
     public void PlayTrimmedAudio(AudioClip clip, Vector3 position, float duration, float volume = 1f)
     {
-        if (clip != null) StartCoroutine(TrimmedAudio(clip, position, duration, volume * masterSFXVolume * globalMasterVolume));
+        if (clip != null)
+        {
+            StartCoroutine(TrimmedAudio(clip, position, duration, volume * masterSFXVolume * globalMasterVolume));
+        }
     }
 
-    IEnumerator TrimmedAudio(AudioClip clip, Vector3 position, float duration, float volume = 1f)
+    private IEnumerator TrimmedAudio(AudioClip clip, Vector3 position, float duration, float volume = 1f)
     {
         var tempSound = new GameObject("TempSound");
         tempSound.transform.position = position;
@@ -187,6 +217,7 @@ public class MusicManager : MonoBehaviour
 
         Destroy(tempSound);
     }
+
     public GameObject PlayCanBeDestroyedAudio(AudioClip clip, Vector3 position, float volume = 1f)
     {
         var tempSound = new GameObject("TempSound");
@@ -203,29 +234,36 @@ public class MusicManager : MonoBehaviour
         return tempSound;
     }
 
+    // --- Game State & UI Callbacks ---
+    public void PlayGameWinSound() => PlayUISound(gameWin, gameWinVolume);
+    public void PlayGameOverSound() => PlayUISound(gameOver, gameOverVolume);
+    public void PlayButtonHoveringSound() => PlayUISound(buttonHovering, buttonHoveringVolume);
+    public void PlayButtonClickSound() => PlayUISound(buttonClick, buttonClickVolume);
 
-    public void PlayMovementSound(Vector3 position) => PlaySFX(movement, position, movementVolume);
-    public void PlayHeadbuttSound(Vector3 position) => PlaySFX(headbutt, position, headbuttVolume);
-    public void PlayBoardTiltingSound(Vector3 position) => PlaySFX(boardtilting, position, boardtiltingVolume);
-    public void PlayTakingDamageSound(Vector3 position) => PlaySFX(TakingDamage, position, TakingDamageVolume);
+    // --- Movement & Damage Callbacks ---
+    public void PlayWalkingSound(Vector3 position) => PlaySFX(walkingSound, position, walkingSoundVolume);
+    public void PlayPlayerHurtSound(Vector3 position) => PlaySFX(playerHurt, position, playerHurtVolume);
+    public void PlayEnemyHurtSound(Vector3 position) => PlaySFX(enemyHurt, position, enemyHurtVolume);
+    public void PlayDieSound(Vector3 position) => PlaySFX(dieSound, position, dieSoundVolume);
 
-    public void PlayEnemySpawnSound(Vector3 position) => PlaySFX(enemySpawn, position, enemySpawnVolume);
-    public void PlayEnemyDieSound(Vector3 position) => PlaySFX(EnemyDie, position, EnemyDieVolume);
-    public void PlayGameOverSound() => playUISound(GameOver, GameOverVolume);
-    public void PlayGameWinSound() => playUISound(GameWin, GameWinVolume);
+    public void PlayHandDrawModeSound(Vector3 position) => PlaySFX(handDrawMode, position, handDrawModeVolume);
+    public void PlayDrawSound(Vector3 position) => PlaySFX(drawSound, position, drawSoundVolume);
+    public void PlayRuneMovementSound(Vector3 position) => PlaySFX(runeMovement, position, runeMovementVolume);
+    public void PlaySpellRecognizedSound(Vector3 position) => PlaySFX(spellRecognized, position, spellRecognizedVolume);
 
-    public void PlayUpgradeButtonSound() => playUISound(UpgradeButton, UpgradeButtonVolume);
-    public void PlayHoverSound() => playUISound(HoverSound, HoverSoundVolume);
+    // --- Spells & Attack Callbacks ---
+    public void PlaySwordSound(Vector3 position) => PlaySFX(swordSound, position, swordSoundVolume);
+    public void PlayCreateWallSound(Vector3 position) => PlaySFX(createWallSound, position, createWallSoundVolume);
+    public void PlaySpreadSound(Vector3 position) => PlaySFX(spreadSound, position, spreadSoundVolume);
+    public void PlayBazookaSound(Vector3 position) => PlaySFX(bazookaSound, position, bazookaSoundVolume);
+    public void PlayJamHitSound(Vector3 position) => PlaySFX(jamHitSound, position, jamHitSoundVolume);
+    public void PlayEatingSound(Vector3 position) => PlaySFX(eatingSound, position, eatingSoundVolume);
 
-    public void PlayGenericButtonSound() => playUISound(Buttons, ButtonsVolume);
-    public void PlayAbilitiesSound(Vector3 position, float duration) => PlayTrimmedAudio(Abilities, position, duration, AbilitiesVolume);
-    public void PlayWaveTransitionSound() => playUISound(waveTransition, waveTransitionVolume);
-    public void PlayHandPokeSound(Vector3 position) => PlaySFX(HandPoke, position, HandPokeVolume);
-    public void PlayHandShootSound(Vector3 position) => PlaySFX(HandShoot, position, HandShootVolume);
-    public void PlayHandLazerSound(Vector3 position) => PlaySFX(HandLazer, position, HandLazerVolume);
-    public void PlayHandLazerSoundDuring(Vector3 position) => PlaySFX(HandLazer2, position, HandLazerVolume2);
-
-    public void PlayExplosionSound(Vector3 position) => PlaySFX(explosion, position, explosionVolume);
-    public void PlayBlockTossSound(Vector3 position) => PlaySFX(blocktoss, position, blocktossVolume);
-    public void PlayBlockPlaceSound(Vector3 position) => PlaySFX(blockPlace, position, blockPlaceVolume);
+    // --- Enemy Callbacks ---
+    public void PlaySimpleFollowerSound(Vector3 position) => PlaySFX(simpleFollower, position, simpleFollowerVolume);
+    public void PlayWallSpawnerSound(Vector3 position) => PlaySFX(wallSpawnerSound, position, wallSpawnerSoundVolume);
+    public void PlayButterShooterSound(Vector3 position) => PlaySFX(butterShooter, position, butterShooterVolume);
+    public void PlaySniperSound(Vector3 position) => PlaySFX(sniper, position, sniperVolume);
+    public void PlayJamToucherSound(Vector3 position) => PlaySFX(jamToucher, position, jamToucherVolume);
+    public void PlayChargerSound(Vector3 position) => PlaySFX(charger, position, chargerVolume);
 }

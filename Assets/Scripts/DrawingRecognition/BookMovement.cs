@@ -42,20 +42,14 @@ public class BookMovement : MonoBehaviour
         transform.localPosition = startLoc;
         transform.localRotation = Quaternion.Euler(startRot);
         currentY = startRot.y;
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     void Update()
     {
-        if (isDisabled) return;
-
-        if (Input.GetKeyDown(KeyCode.E))
+        if (!isDisabled && isIdle && !isInanimation)
         {
-            ToggleBookState();
-        }
-
-        if (isIdle && !isInanimation)
-        {
-            Spinning();
         }
     }
 
@@ -77,6 +71,7 @@ public class BookMovement : MonoBehaviour
             transform.DOKill();
             isIdle = false;
             Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
 
             transform.DOLocalMove(endLoc, timeChange).SetEase(Ease.OutBack);
             transform.DOLocalRotate(endRot, timeChange).SetEase(Ease.OutBack);
@@ -93,6 +88,7 @@ public class BookMovement : MonoBehaviour
 
         isIdle = true;
         Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
 
         transform.DOKill();
         transform.DOLocalMove(startLoc, timeChange).SetEase(Ease.OutQuad);
@@ -121,6 +117,7 @@ public class BookMovement : MonoBehaviour
                         isIdle = true;
                         currentY = startRot.y;
                         Cursor.lockState = CursorLockMode.Locked;
+                        Cursor.visible = false;
                     });
             });
     }
@@ -157,6 +154,7 @@ public class BookMovement : MonoBehaviour
             isIdle = true;
             currentY = startRot.y;
             Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
         });
     }
 

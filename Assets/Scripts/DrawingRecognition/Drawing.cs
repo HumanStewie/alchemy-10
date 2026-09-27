@@ -37,7 +37,6 @@ public class Drawing : MonoBehaviour
         lr.useWorldSpace = false;
         lr.positionCount = 0;
 
-        // Ensure this GameObject follows the label's transform if separate
         if (labelCollider != null && transform.parent != labelCollider.transform)
         {
             transform.SetParent(labelCollider.transform, false);
@@ -68,20 +67,34 @@ public class Drawing : MonoBehaviour
             localMeshBounds = new Bounds(box.center, box.size);
             hasCachedBounds = true;
         }
+        else
+        {
+            localMeshBounds = labelCollider.bounds;
+            hasCachedBounds = true;
+        }
     }
 
     void Update()
     {
-        if (BookMovement.Instance != null && (BookMovement.Instance.isIdle || BookMovement.Instance.isInanimation))
+        if (BookMovement.Instance == null) return;
+
+        if (BookMovement.Instance.isIdle || BookMovement.Instance.isInanimation || BookMovement.Instance.isDisabled)
         {
             if (isDrawing)
             {
-                // Cancel stroke cleanly if animation interrupts
                 isDrawing = false;
                 ClearVisuals();
             }
             return;
         }
+
+        if (drawCamera == null)
+        {
+            drawCamera = Camera.main;
+            if (drawCamera == null) return;
+        }
+
+        if (labelCollider == null) return;
 
         if (Input.GetMouseButtonDown(0))
         {
@@ -119,7 +132,7 @@ public class Drawing : MonoBehaviour
 
             if (GestureRecognizer.Instance != null)
             {
-                GestureRecognizer.Instance.DoEverything(currentStroke);
+                GestureRecognizer.Instance.DoEverything(new List<Vector2>(currentStroke));
             }
         }
     }
@@ -128,17 +141,21 @@ public class Drawing : MonoBehaviour
     {
         RaycastHit[] hits = Physics.RaycastAll(ray, Mathf.Infinity, drawLayerMask, QueryTriggerInteraction.Collide);
 
+        float bestDist = float.MaxValue;
+        bool found = false;
+        hitResult = default;
+
         foreach (RaycastHit hit in hits)
         {
-            if (hit.collider == labelCollider)
+            if (hit.collider == labelCollider && hit.distance < bestDist)
             {
+                bestDist = hit.distance;
                 hitResult = hit;
-                return true;
+                found = true;
             }
         }
 
-        hitResult = default;
-        return false;
+        return found;
     }
 
     private Vector2 CalculateUV(RaycastHit hit)
@@ -156,25 +173,23 @@ public class Drawing : MonoBehaviour
         Vector3 localHit = hit.collider.transform.InverseTransformPoint(hit.point);
         Vector3 size = localMeshBounds.size;
         Vector3 min = localMeshBounds.min;
-        Vector3 max = localMeshBounds.max;
 
-        // Flatten along the thinnest axis
         if (size.z <= size.x && size.z <= size.y)
         {
-            float u = Mathf.InverseLerp(min.x, max.x, localHit.x);
-            float v = Mathf.InverseLerp(min.y, max.y, localHit.y);
+            float u = Mathf.InverseLerp(min.x, min.x + size.x, localHit.x);
+            float v = Mathf.InverseLerp(min.y, min.y + size.y, localHit.y);
             return new Vector2(u, v);
         }
         else if (size.x <= size.y && size.x <= size.z)
         {
-            float u = Mathf.InverseLerp(min.z, max.z, localHit.z);
-            float v = Mathf.InverseLerp(min.y, max.y, localHit.y);
+            float u = Mathf.InverseLerp(min.z, min.z + size.z, localHit.z);
+            float v = Mathf.InverseLerp(min.y, min.y + size.y, localHit.y);
             return new Vector2(u, v);
         }
         else
         {
-            float u = Mathf.InverseLerp(min.x, max.x, localHit.x);
-            float v = Mathf.InverseLerp(min.z, max.z, localHit.z);
+            float u = Mathf.InverseLerp(min.x, min.x + size.x, localHit.x);
+            float v = Mathf.InverseLerp(min.z, min.z + size.z, localHit.z);
             return new Vector2(u, v);
         }
     }
@@ -187,7 +202,6 @@ public class Drawing : MonoBehaviour
         lastUvPoint = uvPoint;
 
         Vector3 worldPointWithOffset = hit.point + (hit.normal * surfaceOffset);
-
         Vector3 localPos = labelCollider.transform.InverseTransformPoint(worldPointWithOffset);
 
         lr.positionCount = currentStroke.Count;
@@ -197,16 +211,18 @@ public class Drawing : MonoBehaviour
     public void ClearVisuals()
     {
         currentStroke.Clear();
-        lr.positionCount = 0;
+        if (lr != null) lr.positionCount = 0;
     }
 
     public void SaveAsTemplate(SpellTemplate targetAsset, List<Vector2> normalizedPoints)
     {
+        if (targetAsset == null) return;
+
         targetAsset.points = new List<Vector2>(normalizedPoints);
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         UnityEditor.EditorUtility.SetDirty(targetAsset);
         UnityEditor.AssetDatabase.SaveAssets();
-        #endif
+#endif
         Debug.Log($"Saved {normalizedPoints.Count} points to {targetAsset.spellName}");
     }
 }

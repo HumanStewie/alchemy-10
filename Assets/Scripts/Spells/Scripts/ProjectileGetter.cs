@@ -3,8 +3,8 @@ using UnityEngine;
 public class ProjectileGetter : MonoBehaviour
 {
     public GameObject trapPrefab;
-    [Header("Impact Quad Prefab")]
-    [SerializeField] private float surfaceOffset = 0.005f;
+    [Header("Impact")]
+    [SerializeField] private float surfaceOffset = 0.02f;
 
     private Vector3 velocity;
     private bool hasHit = false;
@@ -39,8 +39,8 @@ public class ProjectileGetter : MonoBehaviour
 
         if (trapPrefab != null)
         {
-            Quaternion splatRotation = Quaternion.LookRotation(-hit.normal, Vector3.right);
-            Vector3 splatPos = hit.point + (hit.normal * surfaceOffset);
+            Vector3 splatPos = hit.point + hit.normal * surfaceOffset;
+            Quaternion splatRotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
 
             GameObject splat = Instantiate(trapPrefab, splatPos, splatRotation);
             splat.transform.SetParent(hit.collider.transform);

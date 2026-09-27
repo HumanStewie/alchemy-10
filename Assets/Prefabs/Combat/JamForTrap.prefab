@@ -138,7 +138,7 @@ TrailRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 2100000, guid: 9acc511e3e4cc7a42b595e9880f57dc1, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -253,7 +253,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileGetter
   trapPrefab: {fileID: 135672270271271035, guid: 6300b5ab91b71b442a12149f53077910, type: 3}
-  splatQuadPrefab: {fileID: 0}
   surfaceOffset: 0.005
 --- !u!64 &56427855632724262
 MeshCollider:

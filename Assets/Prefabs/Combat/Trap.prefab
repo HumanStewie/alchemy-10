@@ -51,7 +51,7 @@ PrefabInstance:
     - target: {fileID: -4683669308469848369, guid: cac234b2ae26fd149a08eb4b07c4233d, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: a3037a52d3ab2e74b935ee6b078eb0f2, type: 2}
+      objectReference: {fileID: 2100000, guid: 3d47772eb071cd842897844a4f410a66, type: 2}
     - target: {fileID: 919132149155446097, guid: cac234b2ae26fd149a08eb4b07c4233d, type: 3}
       propertyPath: m_Name
       value: Trap

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WallSpell
   spellName: Wall Spell
   baseManaCost: 20
-  cooldown: 0.2
+  cooldown: 0.5
   points:
   - {x: -245.26709, y: -247.09953}
   - {x: -243.10583, y: -242.68298}
@@ -82,3 +82,9 @@ MonoBehaviour:
   - {x: -238.51013, y: -240.3102}
   wall: {fileID: 5072859581774275027, guid: c43766395a4dc32478e33b5ec4ba3e8a, type: 3}
   yFinal: 2.75
+  lifetime: 10
+  maxWalls: 1
+  contactDamage: 0
+  sizeMultiplier: 1
+  allowWallWalk: 0
+  runeHeals: 0

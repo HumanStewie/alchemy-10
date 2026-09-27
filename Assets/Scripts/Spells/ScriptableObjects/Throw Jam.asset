@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ThrowJam
   spellName: Throw Jam
   baseManaCost: 20
-  cooldown: 0.2
+  cooldown: 10
   points:
   - {x: 242.22827, y: 242.24365}
   - {x: 225.54395, y: 225.6803}
@@ -80,4 +80,10 @@ MonoBehaviour:
   - {x: 240.48914, y: 240.53741}
   - {x: 223.80957, y: 223.94623}
   - {x: 207.13843, y: 207.3056}
-  wall: {fileID: 0}
+  bazookaBlobPrefab: {fileID: 0}
+  launchSpeed: 22
+  damage: 40
+  blastRadius: 3.5
+  freezeDuration: 0
+  shotsPerCast: 1
+  burstDelay: 0.18
