@@ -12,24 +12,32 @@ public class WallSpell : SpellTemplate
     public float lifetime = 10f;
 
     [Header("Base & Upgrade Stats")]
-    public int maxWalls = 1;                 
-    public float contactDamage = 0f;           
-    public float sizeMultiplier = 1f;         
-    public bool allowWallWalk = false;          
-    public bool runeHeals = false;             
+    public int maxWalls = 1;
+    public float contactDamage = 0f;
+    public float sizeMultiplier = 1f;
+    public bool allowWallWalk = false;
+    public bool runeHeals = false;
 
     private Queue<WallProp> activeWalls = new();
 
     public override void Cast(GameObject caster, Vector3 targetPoint, float scale)
     {
-        BookMovement book = FindAnyObjectByType<BookMovement>();
-        PlayerCharacter player = FindAnyObjectByType<PlayerCharacter>();
+        BookMovement book = Object.FindAnyObjectByType<BookMovement>();
+        PlayerCharacter player = Object.FindAnyObjectByType<PlayerCharacter>();
 
         if (book == null || player == null || wall == null) return;
 
-        book.WallSpellAnimation();
+        // Spawns exactly when the hand completes its arc and slams down to place the jam
+        book.WallSpellAnimation(() =>
+        {
+            SpawnWallInstance(book, player);
+        });
+    }
 
+    private void SpawnWallInstance(BookMovement book, PlayerCharacter player)
+    {
         PruneDestroyedWalls();
+
         while (activeWalls.Count >= maxWalls)
         {
             WallProp oldest = activeWalls.Dequeue();
@@ -39,7 +47,7 @@ public class WallSpell : SpellTemplate
             }
         }
 
-        Vector3 spawnLoc = book.WallSpawnLoc.position;
+        Vector3 spawnLoc = book.WallSpawnLoc != null ? book.WallSpawnLoc.position : player.transform.position + player.transform.forward * 2f;
         Quaternion spawnRot = Quaternion.Euler(-90f, player.transform.eulerAngles.y - 90f, 0f);
 
         GameObject newWallObj = Instantiate(wall, spawnLoc, spawnRot);
@@ -49,6 +57,11 @@ public class WallSpell : SpellTemplate
         {
             wallScript.Initialize(lifetime, contactDamage, sizeMultiplier, allowWallWalk, runeHeals);
             activeWalls.Enqueue(wallScript);
+        }
+
+        if (MusicManager.Instance != null)
+        {
+            MusicManager.Instance.PlayCreateWallSound(spawnLoc);
         }
     }
 

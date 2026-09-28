@@ -1,110 +1,79 @@
-using System.Collections;
 using UnityEngine;
 
 public class SniperEnemy : EnemyBase
 {
-    [Header("Sniper Settings")]
     public LineRenderer aimLine;
-    public float stoppingDistance = 15f;
-    public LayerMask obstacleMask;
+    public GameObject sniperBulletPrefab;
+    public float aimDuration = 1f;
 
-    private Transform player;
-    private float attackTimer;
     private bool isAiming = false;
-
-    public GameObject bullet;
+    private float aimTimer = 0f;
 
     protected override void Start()
     {
+        maxHP = 15f;
+        damage = 10f;
+        moveSpeed = 2.5f;
+        preferRune = false;    
         base.Start();
-        var pc = FindAnyObjectByType<PlayerCharacter>();
-        if (pc != null) player = pc.transform;
-
-        attackTimer = attackCooldown;
 
         if (aimLine != null) aimLine.enabled = false;
     }
 
-    void Update()
+    protected override void BehaviorUpdate()
     {
-        if (player == null || isAiming) return;
+        if (currentTarget == null) return;
 
-        float dist = Vector3.Distance(transform.position, player.position);
-        bool canSeePlayer = HasLineOfSight();
+        float dist = Vector3.Distance(transform.position, currentTarget.position);
+        if (dist < 12f)
+            MoveTowards(transform.position + (transform.position - currentTarget.position).normalized, currentspeed);
 
-        if (!canSeePlayer || dist > stoppingDistance)
+        if (!isAiming && attackCooldownTimer <= 0f)
         {
-            transform.position = Vector3.MoveTowards(transform.position, player.position, currentspeed * Time.deltaTime);
-            transform.LookAt(new Vector3(player.position.x, transform.position.y, player.position.z));
+            StartAiming();
         }
-        else
-        {
-            transform.LookAt(new Vector3(player.position.x, transform.position.y, player.position.z));
 
-            if (attackTimer > 0)
+        if (isAiming)
+        {
+            aimTimer -= Time.deltaTime;
+            UpdateAimLine();
+
+            if (aimTimer <= 0f)
             {
-                attackTimer -= Time.deltaTime;
-            }
-            else
-            {
-                StartCoroutine(AimAndShoot());
+                Shoot();
+                isAiming = false;
+                if (aimLine != null) aimLine.enabled = false;
+                attackCooldownTimer = 5f;
             }
         }
     }
 
-    private bool HasLineOfSight()
-    {
-        if (player == null) return false;
-
-        Vector3 origin = transform.position + Vector3.up * 1f;
-        Vector3 target = player.position + Vector3.up * 1f;
-        Vector3 direction = target - origin;
-        float maxDist = Vector3.Distance(origin, target);
-
-        if (Physics.Raycast(origin, direction, out RaycastHit hit, maxDist, obstacleMask))
-        {
-            if (hit.transform != player && !hit.transform.IsChildOf(player))
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    IEnumerator AimAndShoot()
+    void StartAiming()
     {
         isAiming = true;
-
-        float aimDuration = 1f;
-        float elapsed = 0f;
-
-        while (elapsed < aimDuration)
-        {
-            elapsed += Time.deltaTime;
-
-            if (aimLine != null && player != null)
-            {
-                aimLine.SetPosition(0, transform.position + Vector3.up * 1f);
-                aimLine.SetPosition(1, player.position + Vector3.up * 1f);
-                aimLine.enabled = (Mathf.FloorToInt(elapsed * 10f) % 2 == 0);
-            }
-
-            yield return null;
-        }
-
+        aimTimer = aimDuration;
         if (aimLine != null) aimLine.enabled = true;
-        yield return new WaitForSeconds(0.15f);
+    }
 
-        if (bullet != null && player != null)
-        {
-            Vector3 spawnPos = transform.position + Vector3.up * 1f;
-            Quaternion rot = Quaternion.LookRotation((player.position - spawnPos).normalized);
-            Instantiate(bullet, spawnPos, rot);
-        }
+    void UpdateAimLine()
+    {
+        if (aimLine == null || currentTarget == null) return;
+        aimLine.SetPosition(0, transform.position + Vector3.up * 1.5f);
+        aimLine.SetPosition(1, currentTarget.position + Vector3.up * 1f);
+    }
 
-        if (aimLine != null) aimLine.enabled = false;
-        attackTimer = attackCooldown;
-        isAiming = false;
+    void Shoot()
+    {
+        if (sniperBulletPrefab == null || currentTarget == null) return;
+
+        Vector3 spawn = transform.position + Vector3.up * 1.5f;
+        GameObject bullet = Instantiate(sniperBulletPrefab, spawn, Quaternion.identity);
+        Vector3 dir = (currentTarget.position - spawn).normalized;
+
+        if (bullet.TryGetComponent<Rigidbody>(out var rb))
+            rb.linearVelocity = dir * 40f;
+
+        if (MusicManager.Instance != null)
+            MusicManager.Instance.PlaySniperSound(transform.position);
     }
 }

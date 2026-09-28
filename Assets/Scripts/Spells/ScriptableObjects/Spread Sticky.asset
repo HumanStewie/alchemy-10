@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Spread Sticky
   m_EditorClassIdentifier: Assembly-CSharp::SpreadSticky
   spellName: Spread Sticky
-  baseManaCost: 20
+  baseManaCost: 0
   cooldown: 0.2
   points:
   - {x: -249.95935, y: -250.23575}
@@ -80,5 +80,5 @@ MonoBehaviour:
   - {x: 234.1648, y: 233.90936}
   - {x: 242.10254, y: 241.83685}
   - {x: 250.04053, y: 249.76422}
-  jamBlobPrefab: {fileID: 1205236737125480316, guid: b18b84e8542d457449677f38d0a8a819, type: 3}
+  jamBlobPrefab: {fileID: 1205236737125480316, guid: 19c8988504fe2a74b8fbae201a0db9e0, type: 3}
   projectileSpeed: 28

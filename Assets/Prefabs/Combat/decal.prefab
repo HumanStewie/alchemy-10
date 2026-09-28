@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5671751783395942690}
   - component: {fileID: 3842244631906269088}
   - component: {fileID: 7369546979827936462}
+  - component: {fileID: 3206636781601025257}
   m_Layer: 2
   m_Name: decal
   m_TagString: Untagged
@@ -123,3 +124,18 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
+--- !u!114 &3206636781601025257
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4921880779495830523}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d459c78481e8924f834ef96841e89b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JamProperty
+  patchType: 0
+  stickySpeedMultiplier: 0.4
+  slipperySpeedMultiplier: 1.8

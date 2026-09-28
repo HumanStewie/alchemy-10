@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Sword
   m_EditorClassIdentifier: Assembly-CSharp::SwordSpell
   spellName: Sword
-  baseManaCost: 20
+  baseManaCost: 0
   cooldown: 0.2
   points:
   - {x: -254.5365, y: -254.15965}
@@ -80,4 +80,9 @@ MonoBehaviour:
   - {x: 201.55603, y: 202.09537}
   - {x: 223.50989, y: 223.96732}
   - {x: 245.4635, y: 245.84036}
-  wall: {fileID: 0}
+  slashPrefab: {fileID: 0}
+  baseDamage: 35
+  knockbackForce: 22
+  collisionDamage: 20
+  rangeMultiplier: 1
+  attackTwice: 0

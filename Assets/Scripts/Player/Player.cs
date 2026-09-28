@@ -15,7 +15,7 @@ public class Player : MonoBehaviour
         playerCharacter.Initialize();
         playerCamera.Initialize(playerCharacter.GetCameraTarget());
         // playerCamera.Initialize(playerCharacter.GetCameraTarget());
-        
+
     }
 
     private void Update()
@@ -24,18 +24,19 @@ public class Player : MonoBehaviour
         var deltaTime = Time.deltaTime;
         // Same idea as below, this is how we read look data
         var cameraInput = new CameraInput { Look = input.Look.ReadValue<Vector2>() };
-        if (BookMovement.Instance.isIdle)
+        if (BookMovement.Instance != null && BookMovement.Instance.isIdle)
         {
             playerCamera.UpdateRotation(cameraInput, playerCharacter.GetCameraTarget());
         }
 
-        
+        Vector2 moveVector = input.Move.ReadValue<Vector2>();
+
         // Get character input and update it. This is mainly how we will take InputAction and use them
         // Essentially, we "queue" the input, preparing to throw into UpdateInput.
         var characterInput = new CharacterInput
         {
             Rotation = playerCamera.transform.rotation,
-            Movement = input.Move.ReadValue<Vector2>(),
+            Movement = moveVector,
             Sprint = input.Sprint.IsPressed(),
             Jump = input.Jump.WasPressedThisFrame(),
             JumpSustain = input.Jump.IsPressed(),
@@ -45,14 +46,29 @@ public class Player : MonoBehaviour
         };
         playerCharacter.UpdateInput(characterInput);
         playerCharacter.UpdateBody(deltaTime);
-        
 
+        bool isMoving = moveVector.sqrMagnitude > 0.01f ||
+                        Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.S) ||
+                        Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.W);
+
+        if (MusicManager.Instance != null)
+        {
+            MusicManager.Instance.SetWalkingSound(isMoving);
+        }
     }
 
     private void LateUpdate()
     {
         // playerCamera.UpdatePosition(playerCharacter.GetCameraTarget());
         playerCamera.UpdatePosition(playerCharacter.GetCameraTarget());
+    }
+
+    private void OnDisable()
+    {
+        if (MusicManager.Instance != null)
+        {
+            MusicManager.Instance.SetWalkingSound(false);
+        }
     }
 
     private void OnDestroy()

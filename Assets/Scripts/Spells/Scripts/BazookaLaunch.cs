@@ -61,7 +61,7 @@ public class BazookaLaunch : MonoBehaviour
         {
             Instantiate(explosionVFX, hit.point, Quaternion.identity);
         }
-
+        MusicManager.Instance.PlayJamHitSound(hit.point);
         Collider[] hits = Physics.OverlapSphere(hit.point, blastRadius);
         foreach (Collider col in hits)
         {

@@ -36,10 +36,15 @@ public class JamAmmo : MonoBehaviour
     private void HitSurface(RaycastHit hit)
     {
         hasHit = true;
+        MusicManager.Instance.PlayJamHitSound(hit.point);
+        if (hit.collider.CompareTag("Enemy") || hit.collider.CompareTag("Player"))
+        {
+            Destroy(gameObject);
+            return;
+        }
 
         if (splatQuadPrefab != null)
         {
-            // Lock rotation against the wall while keeping it horizontally level
             Quaternion splatRotation = Quaternion.LookRotation(-hit.normal, Vector3.up);
             Vector3 splatPos = hit.point + (hit.normal * surfaceOffset);
 

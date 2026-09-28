@@ -36,6 +36,9 @@ public class UpgradeButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     public void OnClick()
     {
         PlayerUpgradeManager.Instance.upgrades.Add(upgradeData);
+        if (MusicManager.Instance != null)
+            MusicManager.Instance.PlayUpgradeButtonSound();
+
     }
 
     private void Update()
@@ -58,6 +61,8 @@ public class UpgradeButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     public void OnPointerEnter(PointerEventData eventData)
     {
         isHovered = true;
+        if (MusicManager.Instance != null)
+            MusicManager.Instance.PlayButtonHoveringSound();
     }
     public void OnPointerExit(PointerEventData eventData)
     {

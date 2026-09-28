@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Bread Trap
   m_EditorClassIdentifier: Assembly-CSharp::BreadTrap
   spellName: Bread Trap
-  baseManaCost: 20
-  cooldown: 0.2
+  baseManaCost: 0
+  cooldown: 2
   points:
   - {x: -249.9779, y: -250.12842}
   - {x: -242.04181, y: -242.18964}
@@ -82,3 +82,7 @@ MonoBehaviour:
   - {x: 250.0221, y: 249.87155}
   jamBlobPrefab: {fileID: 1205236737125480316, guid: 4093a02645df3bd49b33d217b4a7de65, type: 3}
   projectileSpeed: 28
+  isTier11: 0
+  isTier12: 0
+  isTier21: 0
+  isTier22: 0

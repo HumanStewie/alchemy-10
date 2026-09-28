@@ -8,13 +8,13 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
 
     [Header("Enemies")]
-    public GameObject simpleFollower;
-    public GameObject shootingEnemy;
-    public GameObject wallSpawner;
-    public GameObject charger;
-    public GameObject sniper;
-    public GameObject jamToucher;
-    public GameObject swarmEnemy;
+    [HideInInspector]  public GameObject simpleFollower;
+    [HideInInspector] public GameObject shootingEnemy;
+    [HideInInspector] public GameObject wallSpawner;
+    [HideInInspector] public GameObject charger;
+    [HideInInspector] public GameObject sniper;
+    [HideInInspector] public GameObject jamToucher;
+    [HideInInspector] public GameObject swarmEnemy;
 
     [Header("Wave State")]
     public int currentWave = 1;
@@ -23,15 +23,36 @@ public class GameManager : MonoBehaviour
     public bool checking = false;
 
     [Header("Spawn Settings")]
-    public float spawnRadius = 15f;
+    [SerializeField] private float spawnRadius = 15f;
     public Transform player;
-    public bool startChecking;
+    [SerializeField] private bool startChecking;
 
-    public GameObject SkillPanel;
+    [SerializeField] private GameObject SkillCanvas;
+    [SerializeField] private GameObject GameCanvas;
+
+
+    [HideInInspector] public GameObject burningEffect;
+    [HideInInspector] public GameObject poisonEffect;
+    [HideInInspector] public GameObject bloodEffect;
+    [HideInInspector] public GameObject poofEffect;
+
+
 
     private void Awake()
     {
         Instance = this;
+
+        burningEffect = (GameObject)Resources.Load("Particle/burning");
+        poisonEffect = (GameObject)Resources.Load("Particle/poison");
+        bloodEffect = (GameObject)Resources.Load("Particle/blood");
+        poofEffect = (GameObject)Resources.Load("Particle/poof");
+        charger = (GameObject)Resources.Load("Particle/Charger");
+        jamToucher = (GameObject)Resources.Load("Particle/Jam Toucher");
+
+        simpleFollower = (GameObject)Resources.Load("Particle/Simple Follower");
+        shootingEnemy = (GameObject)Resources.Load("Particle/Butter Shooter");
+        wallSpawner = (GameObject)Resources.Load("Particle/Wall Spawner");
+        sniper = (GameObject)Resources.Load("Particle/Sniper");
     }
     void StartWave(int wave)
     {
@@ -57,15 +78,22 @@ public class GameManager : MonoBehaviour
         {
             if (!FindFirstObjectByType<EnemyBase>())
             {
-                SkillPanel.SetActive(true);
+                SkillCanvas.SetActive(true);
+                GameCanvas.SetActive(false);
                 startChecking = false;
             }
+        }
+
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            StartFirstWave();
         }
     }
 
     public void GoNextWave()
     {
         currentWave++;
+        GameCanvas.SetActive(true);
         StartWave(currentWave);
         startChecking = true;
     }
@@ -277,5 +305,26 @@ public class GameManager : MonoBehaviour
 
 
         Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
+    }
+    public void SpawnSwarmAt(Vector3 centerPosition)
+    {
+        if (simpleFollower == null) return;
+
+        for (int i = 0; i < 5; i++)
+        {
+            Vector2 offset = Random.insideUnitCircle * 1.5f;
+            Vector3 spawnPos = centerPosition + new Vector3(offset.x, 0f, offset.y);
+
+            GameObject mini = Instantiate(simpleFollower, spawnPos, Quaternion.identity);
+
+            mini.transform.localScale = Vector3.one * 0.3f;
+
+            if (mini.TryGetComponent<SwarmFollower>(out var enemy))
+            {
+                enemy.maxHP = 1f;
+                enemy.currentHP = 1f;
+                enemy.damage = 3f;
+            }
+        }
     }
 }

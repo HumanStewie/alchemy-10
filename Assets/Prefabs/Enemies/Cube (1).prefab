@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &6321787485947231704
+--- !u!1 &6057588852269218405
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,47 +8,48 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5587955671163214511}
-  - component: {fileID: 3162086404765867597}
-  - component: {fileID: 5173368835825107135}
-  - component: {fileID: 4885780913653621464}
+  - component: {fileID: 1573669939013035779}
+  - component: {fileID: 2292738196717452531}
+  - component: {fileID: 3550674674332337113}
+  - component: {fileID: 4666504332406344632}
+  - component: {fileID: 6204648459391145783}
   m_Layer: 0
-  m_Name: SplashQuad
+  m_Name: Cube (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &5587955671163214511
+--- !u!4 &1573669939013035779
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6321787485947231704}
+  m_GameObject: {fileID: 6057588852269218405}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.11161, y: 1.076, z: -0.68006}
-  m_LocalScale: {x: 2, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &3162086404765867597
+--- !u!33 &2292738196717452531
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6321787485947231704}
-  m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
---- !u!23 &5173368835825107135
+  m_GameObject: {fileID: 6057588852269218405}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!23 &3550674674332337113
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6321787485947231704}
+  m_GameObject: {fileID: 6057588852269218405}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -67,7 +68,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 48c49b2b0c89e174f85871d9dd6e9159, type: 2}
+  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -91,18 +92,56 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &4885780913653621464
+--- !u!65 &4666504332406344632
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6057588852269218405}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &6204648459391145783
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6321787485947231704}
+  m_GameObject: {fileID: 6057588852269218405}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4cbc132fe68cf814483c4fa95d0d7dab, type: 3}
+  m_Script: {fileID: 11500000, guid: 829f55008a70c524e8229cea89e1ec30, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::JamSpread
-  duration: 8
-  fadeDuration: 1.2
-  popDuration: 0.1
+  m_EditorClassIdentifier: Assembly-CSharp::SimpleFollow
+  maxHP: 10
+  currentHP: 0
+  damage: 5
+  currentdamage: 0
+  speed: 6
+  currentspeed: 0
+  attackCooldown: 0
+  bloodParticle: {fileID: 0}
+  PoofParticle: {fileID: 0}
+  poisonParticle: {fileID: 0}
+  burnParticle: {fileID: 0}
+  isPoisoned: 0
+  isBurning: 0
+  attackRange: 1.5
+  hitboxOffset: {x: 0, y: 0, z: 1}
+  hitboxRadius: 1
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  preWarmAttack: 0.5

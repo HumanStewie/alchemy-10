@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Throw Jam
   m_EditorClassIdentifier: Assembly-CSharp::ThrowJam
   spellName: Throw Jam
-  baseManaCost: 20
-  cooldown: 10
+  baseManaCost: 0
+  cooldown: 5
   points:
   - {x: 242.22827, y: 242.24365}
   - {x: 225.54395, y: 225.6803}

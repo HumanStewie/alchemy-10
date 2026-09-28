@@ -1,39 +1,38 @@
-using Unity.Collections;
-using Unity.Jobs;
-using UnityEditor;
 using UnityEngine;
 
-public enum WallBranch
+public enum TrapBranch
 {
-    PoisonousTrap,
-    EvolvedTrap,
-    BurningTrap,
-    RagebaitedTrap
+    PoisonousTrap,   // isTier11
+    EvolvedTrap,     // isTier21
+    BurningTrap,     // isTier12 (also bigger + longer)
+    RagebaitedTrap   // isTier22 (death explosion)
 }
 
-[CreateAssetMenu(fileName = "New Upgrade", menuName = "Upgades/Trap")]
-
+[CreateAssetMenu(fileName = "TrapUpgrade", menuName = "Upgrades/Trap")]
 public class TrapUpgrade : UpgradeBase
 {
-    public WallBranch selectedUpgrade;
+    public TrapBranch selectedUpgrade;
+
     public override void Upgrade()
     {
-        BreadTrap eating = GestureRecognizer.Instance.templates.Find(s => s is BreadTrap) as BreadTrap;
-        if (selectedUpgrade == WallBranch.PoisonousTrap)
+        BreadTrap trap = GestureRecognizer.Instance.templates.Find(s => s is BreadTrap) as BreadTrap;
+        if (trap == null) return;
+
+
+        switch (selectedUpgrade)
         {
-            eating.isTier11 = true;
-        }
-        if (selectedUpgrade == WallBranch.EvolvedTrap)
-        {
-            eating.isTier21 = true;
-        }
-        if (selectedUpgrade == WallBranch.BurningTrap)
-        {
-            eating.isTier12 = true;
-        }
-        if (selectedUpgrade == WallBranch.RagebaitedTrap)
-        {
-            eating.isTier22 = true;
+            case TrapBranch.PoisonousTrap:
+                trap.isTier11 = true;
+                break;
+            case TrapBranch.EvolvedTrap:
+                trap.isTier21 = true;
+                break;
+            case TrapBranch.BurningTrap:
+                trap.isTier12 = true;
+                break;
+            case TrapBranch.RagebaitedTrap:
+                trap.isTier22 = true;
+                break;
         }
     }
 }

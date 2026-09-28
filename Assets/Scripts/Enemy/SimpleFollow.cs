@@ -1,83 +1,34 @@
-using System.Collections;
 using UnityEngine;
 
-public class SimpleFollow : EnemyBase
+public class SimpleFollower : EnemyBase
 {
-    [SerializeField] private float attackRange = 1.5f;
-    private Transform player;
-    private float attackTimer;
-
-    [Header("Hitbox Settings")]
-    public Vector3 hitboxOffset = new Vector3(0, 0, 1f);
-    public float hitboxRadius = 1f;
-    public LayerMask playerLayer;
-
-    [SerializeField] private float preWarmAttack = 0.5f;
-    private bool isAttacking;
-
     protected override void Start()
     {
+        maxHP = 7f;
+        damage = 5f;
+        moveSpeed = 5f;
+        attackRange = 1.8f;
+        preferRune = true;
         base.Start();
-        var pc = FindAnyObjectByType<PlayerCharacter>();
-        if (pc != null) player = pc.transform;
-        attackTimer = attackCooldown;
     }
 
-    void Update()
+    protected override void BehaviorUpdate()
     {
-        if (player == null || isAttacking) return;
+        float dist = Vector3.Distance(transform.position, currentTarget.position);
 
-        attackTimer -= Time.deltaTime;
-
-        if (Vector3.Distance(transform.position, player.position) > attackRange)
+        if (dist > attackRange)
         {
-            transform.position = Vector3.MoveTowards(transform.position, player.position, currentspeed * Time.deltaTime);
-            transform.LookAt(new Vector3(player.position.x, transform.position.y, player.position.z));
+            MoveTowards(currentTarget.position, currentspeed);
         }
-        else
+        else if (attackCooldownTimer <= 0f)
         {
-            if (attackTimer <= 0f)
+            if (currentTarget.CompareTag("Player"))
             {
-                StartCoroutine(AttackSeq());
+                var health = currentTarget.GetComponent<PlayerHealthAndStat>();
+                if (health != null) health.takeDamage(damage);
             }
+
+            attackCooldownTimer = 2f;
         }
-    }
-
-    IEnumerator AttackSeq()
-    {
-        isAttacking = true;
-        attackTimer = attackCooldown;
-
-        yield return new WaitForSeconds(preWarmAttack);
-
-        if (player == null)
-        {
-            isAttacking = false;
-            yield break;
-        }
-
-        Vector3 hitCenter = transform.position + transform.TransformDirection(hitboxOffset);
-        Collider[] hitTargets = Physics.OverlapSphere(hitCenter, hitboxRadius, playerLayer);
-
-        foreach (Collider hit in hitTargets)
-        {
-            if (hit.CompareTag("Player"))
-            {
-                var health = hit.GetComponent<PlayerHealthAndStat>();
-                if (health != null)
-                {
-                    health.takeDamage(currentdamage > 0 ? currentdamage : 5f);
-                }
-            }
-        }
-
-        isAttacking = false;
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.red;
-        Vector3 hitCenter = transform.position + transform.TransformDirection(hitboxOffset);
-        Gizmos.DrawWireSphere(hitCenter, hitboxRadius);
     }
 }

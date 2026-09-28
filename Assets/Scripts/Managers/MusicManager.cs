@@ -11,6 +11,11 @@ public class MusicManager : MonoBehaviour
     [SerializeField] private AudioSource bgMusic;
     [SerializeField] private AudioSource soundEffectforUI;
 
+    [Header("Dedicated Looping Sources")]
+    [SerializeField] private AudioSource drawLoopSource;
+    [SerializeField] private AudioSource walkingLoopSource;
+    [SerializeField] private AudioSource runeLoopSource;
+
     [Header("UI Volume Sliders")]
     [SerializeField] private Slider masterSlider;
     [SerializeField] private Slider musicSlider;
@@ -69,6 +74,9 @@ public class MusicManager : MonoBehaviour
     [SerializeField] private AudioClip spreadSound;
     [SerializeField, Range(0f, 2f)] private float spreadSoundVolume = 1f;
 
+    [SerializeField] private AudioClip jamThrow;
+    [SerializeField, Range(0f, 2f)] private float jamThrowVolume = 1f;
+
     [SerializeField] private AudioClip bazookaSound;
     [SerializeField, Range(0f, 2f)] private float bazookaSoundVolume = 1f;
 
@@ -109,12 +117,32 @@ public class MusicManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+            InitializeLoopSources();
         }
         else
         {
             Destroy(gameObject);
             return;
         }
+    }
+
+    private void InitializeLoopSources()
+    {
+        if (drawLoopSource == null) drawLoopSource = gameObject.AddComponent<AudioSource>();
+        if (walkingLoopSource == null) walkingLoopSource = gameObject.AddComponent<AudioSource>();
+        if (runeLoopSource == null) runeLoopSource = gameObject.AddComponent<AudioSource>();
+
+        ConfigureLoopSource(drawLoopSource, drawSound, drawSoundVolume);
+        ConfigureLoopSource(walkingLoopSource, walkingSound, walkingSoundVolume);
+        ConfigureLoopSource(runeLoopSource, runeMovement, runeMovementVolume);
+    }
+
+    private void ConfigureLoopSource(AudioSource src, AudioClip clip, float baseVol)
+    {
+        src.clip = clip;
+        src.loop = true;
+        src.playOnAwake = false;
+        src.volume = baseVol * masterSFXVolume * globalMasterVolume;
     }
 
     private void Start()
@@ -152,6 +180,7 @@ public class MusicManager : MonoBehaviour
     {
         globalMasterVolume = volume;
         if (bgMusic != null) bgMusic.volume = musicVolume * masterMusicVolume * globalMasterVolume;
+        UpdateLoopVolumes();
         PlayerPrefs.SetFloat("GlobalMasterVolume", volume);
     }
 
@@ -165,7 +194,54 @@ public class MusicManager : MonoBehaviour
     public void SetSFXVolume(float volume)
     {
         masterSFXVolume = volume;
+        UpdateLoopVolumes();
         PlayerPrefs.SetFloat("SFXVolume", volume);
+    }
+
+    private void UpdateLoopVolumes()
+    {
+        float sfxVol = masterSFXVolume * globalMasterVolume;
+        if (drawLoopSource != null) drawLoopSource.volume = drawSoundVolume * sfxVol;
+        if (walkingLoopSource != null) walkingLoopSource.volume = walkingSoundVolume * sfxVol;
+        if (runeLoopSource != null) runeLoopSource.volume = runeMovementVolume * sfxVol;
+    }
+
+    // --- Loop Controls ---
+    public void SetDrawingSound(bool isPlaying)
+    {
+        ToggleLoopSource(drawLoopSource, drawSound, drawSoundVolume, isPlaying);
+    }
+
+    public void SetWalkingSound(bool isPlaying)
+    {
+        ToggleLoopSource(walkingLoopSource, walkingSound, walkingSoundVolume, isPlaying);
+    }
+
+    public void SetRuneMovementSound(bool isPlaying, Vector3? position = null)
+    {
+        if (runeLoopSource != null && position.HasValue)
+        {
+            runeLoopSource.transform.position = position.Value;
+            runeLoopSource.spatialBlend = 1f; // 3D sound so player hears where rune is
+        }
+        ToggleLoopSource(runeLoopSource, runeMovement, runeMovementVolume, isPlaying);
+    }
+
+    private void ToggleLoopSource(AudioSource src, AudioClip clip, float baseVol, bool play)
+    {
+        if (src == null || clip == null) return;
+
+        if (src.clip != clip) src.clip = clip;
+        src.volume = baseVol * masterSFXVolume * globalMasterVolume;
+
+        if (play)
+        {
+            if (!src.isPlaying) src.Play();
+        }
+        else
+        {
+            if (src.isPlaying) src.Stop();
+        }
     }
 
     // --- Base Player Methods ---
@@ -234,13 +310,11 @@ public class MusicManager : MonoBehaviour
         return tempSound;
     }
 
-    // --- Game State & UI Callbacks ---
     public void PlayGameWinSound() => PlayUISound(gameWin, gameWinVolume);
     public void PlayGameOverSound() => PlayUISound(gameOver, gameOverVolume);
     public void PlayButtonHoveringSound() => PlayUISound(buttonHovering, buttonHoveringVolume);
-    public void PlayButtonClickSound() => PlayUISound(buttonClick, buttonClickVolume);
+    public void PlayUpgradeButtonSound() => PlayUISound(buttonClick, buttonClickVolume);
 
-    // --- Movement & Damage Callbacks ---
     public void PlayWalkingSound(Vector3 position) => PlaySFX(walkingSound, position, walkingSoundVolume);
     public void PlayPlayerHurtSound(Vector3 position) => PlaySFX(playerHurt, position, playerHurtVolume);
     public void PlayEnemyHurtSound(Vector3 position) => PlaySFX(enemyHurt, position, enemyHurtVolume);
@@ -251,10 +325,11 @@ public class MusicManager : MonoBehaviour
     public void PlayRuneMovementSound(Vector3 position) => PlaySFX(runeMovement, position, runeMovementVolume);
     public void PlaySpellRecognizedSound(Vector3 position) => PlaySFX(spellRecognized, position, spellRecognizedVolume);
 
-    // --- Spells & Attack Callbacks ---
     public void PlaySwordSound(Vector3 position) => PlaySFX(swordSound, position, swordSoundVolume);
     public void PlayCreateWallSound(Vector3 position) => PlaySFX(createWallSound, position, createWallSoundVolume);
     public void PlaySpreadSound(Vector3 position) => PlaySFX(spreadSound, position, spreadSoundVolume);
+    public void PlayJamThrowSound(Vector3 position) => PlaySFX(jamThrow, position, jamThrowVolume);
+
     public void PlayBazookaSound(Vector3 position) => PlaySFX(bazookaSound, position, bazookaSoundVolume);
     public void PlayJamHitSound(Vector3 position) => PlaySFX(jamHitSound, position, jamHitSoundVolume);
     public void PlayEatingSound(Vector3 position) => PlaySFX(eatingSound, position, eatingSoundVolume);

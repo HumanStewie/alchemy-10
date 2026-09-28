@@ -1,82 +1,62 @@
 using UnityEngine;
 
-public class ButterShooter : EnemyBase
+public class ShootingEnemy : EnemyBase
 {
-    [SerializeField] private Animator animator;
+    [Header("Shooting")]
+    public GameObject butterProjectile;
+    public float preferredDistance = 4f;
+    public float circleSpeed = 3f;
 
-    [Header("Shooting Stats")]
-    public GameObject projectile;
-    public float bulletSpeed = 15f;
-    public float maxDistance = 30f;
-    public float distanceTraveled = 0f;
-    public float hitRadius = 0.8f;
-
-    [Header("Movement Thresholds")]
-    public float distanceBeforeStop = 4f;
-    public float distanceBeforeShoot = 6f;
-    public float orbitSpeed = 45f;
-
-    public bool isAttacking = false;
-
-    private Transform player;
-    private float attackTimer;
+    private bool isCircling = false;
 
     protected override void Start()
     {
+        maxHP = 7f;
+        damage = 3f;
+        moveSpeed = 4f;
+        preferRune = true;
         base.Start();
-        var pc = FindFirstObjectByType<PlayerCharacter>();
-        if (pc != null) player = pc.transform;
-        attackTimer = attackCooldown;
     }
 
-    private void Update()
+    protected override void BehaviorUpdate()
     {
-        if (player == null) return;
+        if (currentTarget == null) return;
 
-        float distance = Vector3.Distance(player.position, transform.position);
+        float dist = Vector3.Distance(transform.position, currentTarget.position);
 
-        if (distance <= distanceBeforeStop)
+        if (dist > preferredDistance + 1f)
         {
-            isAttacking = true;
-        }
-        else if (distance > distanceBeforeShoot)
-        {
-            isAttacking = false;
-        }
-
-        transform.LookAt(new Vector3(player.position.x, transform.position.y, player.position.z));
-
-        if (!isAttacking)
-        {
-            transform.position += transform.forward * (currentspeed * Time.deltaTime);
+            isCircling = false;
+            MoveTowards(currentTarget.position, currentspeed);
         }
         else
         {
-            transform.RotateAround(player.position, Vector3.up, orbitSpeed * Time.deltaTime);
+            isCircling = true;
+            Vector3 dir = (transform.position - currentTarget.position).normalized;
+            Vector3 tangent = Vector3.Cross(Vector3.up, dir);
+            transform.position += tangent * circleSpeed * Time.deltaTime;
+            transform.LookAt(new Vector3(currentTarget.position.x, transform.position.y, currentTarget.position.z));
+        }
 
-            if (distance > distanceBeforeStop)
-            {
-                transform.position += transform.forward * (currentspeed * Time.deltaTime);
-            }
-            else if (distance < distanceBeforeStop - 0.5f)
-            {
-                transform.position -= transform.forward * (currentspeed * Time.deltaTime);
-            }
-
-            attackTimer -= Time.deltaTime;
-            if (attackTimer <= 0)
-            {
-                PerformShoot();
-                attackTimer = attackCooldown;
-            }
+        if (attackCooldownTimer <= 0f)
+        {
+            Shoot();
+            attackCooldownTimer = 5f;
         }
     }
 
-    private void PerformShoot()
+    void Shoot()
     {
-        if (projectile != null)
-        {
-            Instantiate(projectile, transform.position, transform.rotation);
-        }
+        if (butterProjectile == null || currentTarget == null) return;
+
+        Vector3 spawnPos = transform.position + transform.forward * 1.2f + Vector3.up * 0.5f;
+        GameObject proj = Instantiate(butterProjectile, spawnPos, Quaternion.identity);
+
+        Vector3 dir = (currentTarget.position - spawnPos).normalized;
+        if (proj.TryGetComponent<Rigidbody>(out var rb))
+            rb.linearVelocity = dir * 18f;
+
+        if (MusicManager.Instance != null)
+            MusicManager.Instance.PlayButterShooterSound(transform.position);
     }
 }

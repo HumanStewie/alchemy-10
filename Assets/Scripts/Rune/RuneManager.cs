@@ -8,19 +8,18 @@ public class RuneManager : MonoBehaviour
     public float moveDuration = 5f;
     public float moveSpeed = 6f;
 
-
-    [Header("Timings & Speeds")]
+    [Header("Health")]
     public float currentHealth;
     public float maxHealth;
 
     [Header("Detection Settings")]
     public LayerMask obstacleMask;
     public float castRadius = 0.4f;
-    public float raycastCheckDist = 0.5f; 
+    public float raycastCheckDist = 0.5f;
     public float groundSnapDistance = 1.5f;
 
     [Header("Visuals")]
-    public Transform arrowVisual; 
+    public Transform arrowVisual;
 
     private Vector3 _currentMoveDirection;
     private bool _isMoving = false;
@@ -39,20 +38,41 @@ public class RuneManager : MonoBehaviour
             PickNewDirection();
             if (arrowVisual != null) arrowVisual.gameObject.SetActive(true);
 
+            _isMoving = false;
+            if (MusicManager.Instance != null)
+            {
+                MusicManager.Instance.SetRuneMovementSound(false);
+            }
+
             yield return new WaitForSeconds(waitDuration);
 
             if (arrowVisual != null) arrowVisual.gameObject.SetActive(false);
             _isMoving = true;
+
+            if (MusicManager.Instance != null)
+            {
+                MusicManager.Instance.SetRuneMovementSound(true, transform.position);
+            }
 
             float elapsed = 0f;
             while (elapsed < moveDuration)
             {
                 elapsed += Time.deltaTime;
                 PerformMovement();
+
+                if (MusicManager.Instance != null)
+                {
+                    MusicManager.Instance.SetRuneMovementSound(true, transform.position);
+                }
+
                 yield return null;
             }
 
             _isMoving = false;
+            if (MusicManager.Instance != null)
+            {
+                MusicManager.Instance.SetRuneMovementSound(false);
+            }
         }
     }
 
@@ -64,7 +84,6 @@ public class RuneManager : MonoBehaviour
         Vector3 origin = transform.position + Vector3.up * castRadius;
         if (Physics.SphereCast(origin, castRadius, moveDir, out RaycastHit wallHit, raycastCheckDist, obstacleMask))
         {
-
             Vector3 wallTangent = Vector3.Cross(wallHit.normal, Vector3.up);
             Vector3 climbDir = Vector3.Cross(wallTangent, wallHit.normal).normalized;
 
@@ -104,6 +123,14 @@ public class RuneManager : MonoBehaviour
         if (arrowVisual != null)
         {
             arrowVisual.rotation = Quaternion.LookRotation(_currentMoveDirection, Vector3.up);
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (MusicManager.Instance != null)
+        {
+            MusicManager.Instance.SetRuneMovementSound(false);
         }
     }
 

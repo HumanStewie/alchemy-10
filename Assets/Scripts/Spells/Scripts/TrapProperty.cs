@@ -15,23 +15,25 @@ public class TrapProperty : MonoBehaviour
 
     private Dictionary<Collider, float> activeEnemies = new Dictionary<Collider, float>();
     private List<Collider> toRemove = new List<Collider>();
-
-    private BreadTrap trap;
     private bool isQuitting = false;
 
     private void Start()
     {
-        if (GestureRecognizer.Instance != null && GestureRecognizer.Instance.templates != null)
-        {
-            trap = GestureRecognizer.Instance.templates.Find(s => s is BreadTrap) as BreadTrap;
-        }
-
-        ApplyUpgrades();
+        ApplyUpgradesFromLiveTemplate();
         Destroy(gameObject, lifetime);
     }
 
-    private void ApplyUpgrades()
+    private BreadTrap GetLiveTrap()
     {
+        if (GestureRecognizer.Instance == null || GestureRecognizer.Instance.templates == null)
+            return null;
+
+        return GestureRecognizer.Instance.templates.Find(s => s is BreadTrap) as BreadTrap;
+    }
+
+    private void ApplyUpgradesFromLiveTemplate()
+    {
+        BreadTrap trap = GetLiveTrap();
         if (trap == null) return;
 
         if (trap.isTier12)
@@ -62,9 +64,7 @@ public class TrapProperty : MonoBehaviour
         }
 
         foreach (Collider col in toRemove)
-        {
             activeEnemies.Remove(col);
-        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -79,9 +79,7 @@ public class TrapProperty : MonoBehaviour
     private void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Enemy") && activeEnemies.ContainsKey(other))
-        {
             activeEnemies.Remove(other);
-        }
     }
 
     private void ApplyEffects(Collider enemy)
@@ -92,33 +90,27 @@ public class TrapProperty : MonoBehaviour
         enemyScript.takeDamage(damage);
 
         if (explosionVFX != null)
-        {
             Instantiate(explosionVFX, enemy.transform.position, Quaternion.identity);
-        }
 
+        BreadTrap trap = GetLiveTrap();
         if (trap == null) return;
 
         if (trap.isTier11)
-        {
             enemyScript.Poisoned(1f, 5f);
-        }
 
         if (trap.isTier21)
-        {
             enemyScript.Burnt(0.5f, 6f);
-        }
     }
 
     private void OnDestroy()
     {
         if (isQuitting || !gameObject.scene.isLoaded) return;
 
+        BreadTrap trap = GetLiveTrap();
         if (trap != null && trap.isTier22)
         {
             if (explosionVFX != null)
-            {
                 Instantiate(explosionVFX, transform.position, Quaternion.identity);
-            }
 
             Collider[] hits = Physics.OverlapSphere(transform.position, deathExplosionRadius);
             foreach (Collider col in hits)
@@ -127,9 +119,7 @@ public class TrapProperty : MonoBehaviour
                 {
                     EnemyBase enemy = col.GetComponentInParent<EnemyBase>();
                     if (enemy != null)
-                    {
                         enemy.takeDamage(deathExplosionDamage);
-                    }
                 }
             }
         }

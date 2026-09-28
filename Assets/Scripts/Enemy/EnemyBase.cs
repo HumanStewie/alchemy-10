@@ -1,132 +1,120 @@
-using System.Collections;
-using Unity.Jobs;
-using Unity.VisualScripting;
 using UnityEngine;
- 
-public abstract class EnemyBase : MonoBehaviour
+
+public class EnemyBase : MonoBehaviour
 {
-    public float maxHP;
+    public float maxHP = 10f;
     public float currentHP;
+    public float damage = 5f;
+    public float moveSpeed = 4f;
+    public float currentspeed;        
 
-    public float damage;
-    public float currentdamage;
+    public float attackRange = 2f;
+    public float detectionRange = 30f;
+    public bool preferRune = false;   
 
-    public float speed;
-    public float currentspeed;
+    public GameObject runeSymbol;      
 
-    public float attackCooldown;
+    protected Transform player;
+    protected Transform runeTarget;
+    protected Transform currentTarget;
+    protected float attackCooldownTimer = 0f;
 
-    [SerializeField] private GameObject bloodParticle;
-    [SerializeField] private GameObject PoofParticle;
-    [SerializeField] private GameObject poisonParticle;
-    [SerializeField] private GameObject burnParticle;
-
-    public bool isPoisoned = false;
-    public bool isBurning;
-
-    private Coroutine freezeCoroutine;
+    private GameObject burningEffect;
+    private GameObject poisonEffect;
+    private GameObject bloodEffect;
+    private GameObject poofEffect;
 
 
     protected virtual void Start()
     {
         currentHP = maxHP;
-        currentdamage = damage;
-        currentspeed = speed;
+        currentspeed = moveSpeed;
+
+        var p = Object.FindFirstObjectByType<PlayerCharacter>();
+        if (p != null) player = p.transform;
+
+        var rune = Object.FindFirstObjectByType<RuneManager>();
+        if (rune != null) runeTarget = rune.transform;
+
+        burningEffect = GameManager.Instance.burningEffect;
+        poisonEffect = GameManager.Instance.poisonEffect;
+        bloodEffect = GameManager.Instance.bloodEffect;
+        poofEffect = GameManager.Instance.poofEffect;
+
+        ChooseTarget();
     }
 
-    public void ChangeSpeed(float multiplier = 1f)
+    protected virtual void Update()
     {
-        if (multiplier != 1)
-        {
-            currentspeed *= multiplier;
-        }
-    }
-    public void SpeedNormal()
-    {
-        currentspeed = speed;
-    }
-    public void ChangeAttack(float multiplier = 1f)
-    {
-        if (multiplier != 1)
-        {
-            currentdamage *= multiplier;
-        }
-    }
-    public void AttackNormal()
-    {
-        currentdamage = damage;
+        if (currentTarget == null) ChooseTarget();
+        if (currentTarget == null) return;
+
+        attackCooldownTimer -= Time.deltaTime;
+        BehaviorUpdate();
     }
 
-    public void takeDamage(float damage)
+    protected virtual void ChooseTarget()
     {
-        currentHP -= damage;
-        Instantiate(bloodParticle, transform.position, Quaternion.identity);
-        if (currentHP <= 0)
+        if (preferRune && runeTarget != null && Random.value < 0.5f)
         {
-            Die();
+            currentTarget = runeTarget;
+            if (runeSymbol != null) runeSymbol.SetActive(true);
+        }
+        else
+        {
+            currentTarget = player;
+            if (runeSymbol != null) runeSymbol.SetActive(false);
         }
     }
 
-    public void Die()
+    protected virtual void BehaviorUpdate() { }
+
+    public virtual void takeDamage(float amount)
     {
-        Instantiate(PoofParticle, transform.position, Quaternion.identity);
+        currentHP -= amount;
+        if (MusicManager.Instance != null)
+            MusicManager.Instance.PlayEnemyHurtSound(transform.position);
+
+        if (currentHP <= 0) Die();
+    }
+
+    public virtual void Die()
+    {
+        if (MusicManager.Instance != null)
+            MusicManager.Instance.PlayDieSound(transform.position);
+
         Destroy(gameObject);
     }
 
-    public void Freeze(float duration)
+    public virtual void Poisoned(float dps, float duration) => StartCoroutine(StatusDamage(dps, duration));
+    public virtual void Burnt(float dps, float duration) => StartCoroutine(StatusDamage(dps, duration));
+    public virtual void Freeze(float duration)
     {
-        if (freezeCoroutine != null) StopCoroutine(freezeCoroutine);
-        freezeCoroutine = StartCoroutine(Freezing(duration));
+        float original = currentspeed;
+        currentspeed = 0f;
+        Invoke(nameof(Unfreeze), duration);
+        void Unfreeze() => currentspeed = original;
     }
 
-    private IEnumerator Freezing(float duration)
+    System.Collections.IEnumerator StatusDamage(float dps, float duration)
     {
-        float originalSpeed = currentspeed;
-        currentspeed = 0f; // Halt movement
-
-        yield return new WaitForSeconds(duration);
-
-        currentspeed = originalSpeed; // Restore speed
-        freezeCoroutine = null;
-    }
-    public void Poisoned(float damage, float time)
-    {
-        if (isPoisoned) return;
-        StartCoroutine(poisoning(damage, time));
-    }
-
-    IEnumerator poisoning(float damage, float time)
-    {
-        isPoisoned = true;
-
-        float timer = 0;
-
-        while (timer < time)
+        float t = 0f;
+        while (t < duration)
         {
-            takeDamage(damage);
-            timer += 1f;
-            yield return new WaitForSeconds(1f);
+            takeDamage(dps * Time.deltaTime);
+            t += Time.deltaTime;
+            yield return null;
         }
-        isPoisoned = false;
-    }
-    public void Burnt(float damage, float time)
-    {
-        if (isBurning) return;
-        StartCoroutine(burning(damage, time));
     }
 
-    IEnumerator burning(float damage, float time)
+    protected void MoveTowards(Vector3 targetPos, float speed)
     {
-        isBurning = true;
-
-        float timer = 0;
-
-        while (timer < time)
+        Vector3 dir = (targetPos - transform.position);
+        dir.y = 0f;
+        if (dir.sqrMagnitude > 0.01f)
         {
-            takeDamage(damage);
-            timer += 0.5f;
-            yield return new WaitForSeconds(0.5f);
+            transform.position += dir.normalized * speed * Time.deltaTime;
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), 8f * Time.deltaTime);
         }
-        isBurning = false;
     }
 }

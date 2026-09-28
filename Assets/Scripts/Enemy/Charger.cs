@@ -1,94 +1,50 @@
-using System.Collections;
 using UnityEngine;
 
-public class Charger : EnemyBase
+public class ChargerEnemy : EnemyBase
 {
-    [Header("Charge Settings")]
-    public float chargeSpeedMultiplier = 4f;
-    public float chargeDuration = 1f;
-    public float windUpTime = 0.5f;
-    public float hitboxRadius = 1.5f;
-    public LayerMask playerLayer;
-
-    private bool isAttacking;
-    private float attackTimer;
-    private Transform player;
+    public float chargeSpeed = 18f;
+    public float chargeDistance = 12f;
+    private bool isCharging = false;
+    private Vector3 chargeDir;
 
     protected override void Start()
     {
+        maxHP = 10f;
+        damage = 20f;
+        moveSpeed = 4f;
+        preferRune = true;
         base.Start();
-        attackTimer = attackCooldown;
-
-        var pc = FindAnyObjectByType<PlayerCharacter>();
-        if (pc != null) player = pc.transform;
     }
 
-    void Update()
+    protected override void BehaviorUpdate()
     {
-        if (player == null || isAttacking) return;
-
-        attackTimer -= Time.deltaTime;
-
-        if (attackTimer <= 0f)
+        if (isCharging)
         {
-            StartCoroutine(AttackSeq());
-        }
-        else
-        {
-            transform.position = Vector3.MoveTowards(transform.position, player.position, currentspeed * Time.deltaTime);
-            transform.LookAt(new Vector3(player.position.x, transform.position.y, player.position.z));
-        }
-    }
+            transform.position += chargeDir * chargeSpeed * Time.deltaTime;
 
-    IEnumerator AttackSeq()
-    {
-        isAttacking = true;
-
-        if (player != null)
-        {
-            transform.LookAt(new Vector3(player.position.x, transform.position.y, player.position.z));
-        }
-        Vector3 chargeDirection = transform.forward;
-
-        yield return new WaitForSeconds(windUpTime);
-
-        float elapsed = 0f;
-        bool hasHitPlayer = false;
-
-        while (elapsed < chargeDuration)
-        {
-            elapsed += Time.deltaTime;
-
-            transform.position += chargeDirection * (currentspeed * chargeSpeedMultiplier * Time.deltaTime);
-
-            if (!hasHitPlayer)
+            if (Vector3.Distance(transform.position, currentTarget.position) < 1.5f || attackCooldownTimer < 8f)
             {
-                Collider[] hits = Physics.OverlapSphere(transform.position, hitboxRadius, playerLayer);
-                foreach (Collider hit in hits)
+                isCharging = false;
+                if (currentTarget.CompareTag("Player"))
                 {
-                    if (hit.CompareTag("Player"))
-                    {
-                        hasHitPlayer = true;
-                        var health = hit.GetComponent<PlayerHealthAndStat>();
-                        if (health != null)
-                        {
-                            health.takeDamage(currentdamage > 0 ? currentdamage : 10f);
-                        }
-                        break;
-                    }
+                    var health = currentTarget.GetComponent<PlayerHealthAndStat>();
+                    if (health != null) health.takeDamage(damage);
                 }
             }
-
-            yield return null;
+            return;
         }
 
-        attackTimer = attackCooldown;
-        isAttacking = false;
-    }
+        MoveTowards(currentTarget.position, currentspeed);
 
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, hitboxRadius);
+        if (attackCooldownTimer <= 0f && Vector3.Distance(transform.position, currentTarget.position) < chargeDistance)
+        {
+            isCharging = true;
+            chargeDir = (currentTarget.position - transform.position).normalized;
+            chargeDir.y = 0;
+            attackCooldownTimer = 10f;
+
+            if (MusicManager.Instance != null)
+                MusicManager.Instance.PlayChargerSound(transform.position);
+        }
     }
 }

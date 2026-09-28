@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 [CreateAssetMenu(fileName = "BreadTrap", menuName = "Spells/BreadTrap")]
 public class BreadTrap : SpellTemplate
@@ -16,7 +16,7 @@ public class BreadTrap : SpellTemplate
     {
         if (BookMovement.Instance != null)
         {
-            BookMovement.Instance.SwingJamAttack(() =>
+            BookMovement.Instance.ThrowTrapAnimation(() =>
             {
                 ShootSingleJam(targetPoint);
             });
@@ -33,7 +33,7 @@ public class BreadTrap : SpellTemplate
 
         Vector3 spawnOrigin = Camera.main.transform.position + (Camera.main.transform.forward * 0.4f);
         Vector3 shootDir = (targetPoint - spawnOrigin).normalized;
-
+        MusicManager.Instance.PlayJamThrowSound(spawnOrigin);
         GameObject blob = Instantiate(jamBlobPrefab, spawnOrigin, Quaternion.identity);
         if (blob.TryGetComponent<ProjectileGetter>(out var jamScript))
         {

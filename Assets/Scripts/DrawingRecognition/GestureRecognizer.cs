@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class GestureRecognizer : MonoBehaviour
@@ -27,6 +28,8 @@ public class GestureRecognizer : MonoBehaviour
     [Header("Equipped Spell & Cooldown")]
     public SpellTemplate preparedSpell;
     private float nextCastTime = 0f;
+
+    [SerializeField] TMP_Text spellText;
 
     private void Awake()
     {
@@ -224,10 +227,18 @@ public class GestureRecognizer : MonoBehaviour
         {
             preparedSpell = bestTemp;
             Debug.Log(preparedSpell.spellName);
+            spellText.text = $"Current Spell: {preparedSpell.spellName})";
+
+            if (MusicManager.Instance != null && Camera.main != null)
+            {
+                MusicManager.Instance.PlaySpellRecognizedSound(Camera.main.transform.position);
+            }
+
         }
         else
         {
             Debug.Log($"Failed to recognize gesture. Closest was: {bestTemp?.spellName} ({lowestDistance:F1})");
+            spellText.text = $"Failed to recognize gesture. Closest was: {bestTemp?.spellName})";
         }
     }
 }

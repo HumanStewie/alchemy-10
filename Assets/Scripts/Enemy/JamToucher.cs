@@ -1,40 +1,33 @@
 using UnityEngine;
 
-public class JamToucher : EnemyBase
+public class JamToucherEnemy : EnemyBase
 {
-    Transform player;
-
-    public float rotateFast = 5f;
-    public float rotateLength = 4f;
-    public float contactDamage = 5f;
+    public float jamBlockDuration = 4f;
 
     protected override void Start()
     {
+        maxHP = 1f;
+        damage = 0f;
+        moveSpeed = 8f;
+        preferRune = false;
         base.Start();
-        var pc = FindFirstObjectByType<PlayerCharacter>();
-        if (pc != null) player = pc.transform;
     }
 
-    void Update()
+    protected override void BehaviorUpdate()
     {
-        if (player == null) return;
-
-        transform.LookAt(new Vector3(player.position.x, transform.position.y, player.position.z));
-
-        Vector3 forwardMove = transform.forward * currentspeed * Time.deltaTime;
-        Vector3 sideWayMove = transform.right * Mathf.Sin(Time.time * rotateFast) * rotateLength * Time.deltaTime;
-        transform.position += forwardMove + sideWayMove;
+        if (currentTarget == null) return;
+        MoveTowards(currentTarget.position, currentspeed);
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider other)
     {
-        if (collision.transform.TryGetComponent<PlayerHealthAndStat>(out PlayerHealthAndStat playerHealth))
+        if (other.CompareTag("Player"))
         {
-            playerHealth.takeDamage(contactDamage > 0 ? contactDamage : currentdamage);
-            if (BookMovement.Instance != null)
-            {
-                BookMovement.Instance.Disabler(4f);
-            }
+            BookMovement.Instance.TemporaryDisable(4);
+            if (MusicManager.Instance != null)
+                MusicManager.Instance.PlayJamToucherSound(transform.position);
+
+            Die();
         }
     }
 }

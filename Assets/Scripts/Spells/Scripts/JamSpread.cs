@@ -3,6 +3,7 @@
 using UnityEngine.Rendering.Universal;
 
 using DG.Tweening;
+using Unity.VisualScripting;
 
 
 
@@ -85,7 +86,7 @@ public class JamSpread : MonoBehaviour
 
         triggerBox.size = new Vector3(0f, 0f, triggerThickness);
 
-
+        MusicManager.Instance.PlaySpreadSound(transform.position);
 
         DOTween.To(() => projector.size, s =>
 
@@ -113,7 +114,6 @@ public class JamSpread : MonoBehaviour
         {
 
             triggerBox.enabled = false;
-
         }
         DOTween.To(() => projector.fadeFactor, f => projector.fadeFactor = f, 0f, fadeDuration)
 

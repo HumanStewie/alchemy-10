@@ -33,7 +33,7 @@ public class SwordSpell : SpellTemplate
         Quaternion slashRotation = Quaternion.LookRotation(caster.transform.forward);
 
         GameObject slashObj = Instantiate(slashPrefab, spawnOrigin, slashRotation);
-
+        MusicManager.Instance.PlaySwordSound(spawnOrigin);
         if (slashObj.TryGetComponent<SwordSlash>(out var slashScript))
         {
             slashScript.Initialize(baseDamage, knockbackForce, collisionDamage, rangeMultiplier, attackTwice);

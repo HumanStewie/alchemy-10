@@ -1,71 +1,45 @@
-using DG.Tweening;
-using System.Collections;
 using UnityEngine;
 
-public class WallSpawner : EnemyBase
+public class WallSpawnerEnemy : EnemyBase
 {
-    public GameObject wall;
-
-    private Transform player;
-    private BookMovement bookMovement;
-    private float attackTimer;
-    private bool isSummoning;
+    public GameObject smallWallPrefab;
+    public float spawnDistance = 3f;
 
     protected override void Start()
     {
-        currentHP = maxHP;
-        currentdamage = damage;
-        currentspeed = speed;
+        maxHP = 15f;
+        damage = 0f;
+        moveSpeed = 3.5f;
+        preferRune = true;
+        base.Start();
 
-        var pc = FindAnyObjectByType<PlayerCharacter>();
-        if (pc != null) player = pc.transform;
-
-        bookMovement = FindAnyObjectByType<BookMovement>();
-
-        attackTimer = attackCooldown;
+        smallWallPrefab = (GameObject )Resources.Load("Prefab/Small Wall");
     }
 
-    void Update()
+    protected override void BehaviorUpdate()
     {
-        if (player == null) return;
+        if (currentTarget != null)
+            MoveTowards(currentTarget.position, currentspeed * 0.6f);
 
-        if (attackTimer > 0)
+        if (attackCooldownTimer <= 0f)
         {
-            attackTimer -= Time.deltaTime;
-        }
-
-        float dist = Vector3.Distance(player.position, transform.position);
-
-        if (dist > 7f)
-        {
-            transform.position = Vector3.MoveTowards(transform.position, player.position, currentspeed * Time.deltaTime);
-            transform.LookAt(new Vector3(player.position.x, transform.position.y, player.position.z));
-        }
-        else
-        {
-            if (attackTimer <= 0f && !isSummoning)
-            {
-                StartCoroutine(SummonWall());
-            }
+            SpawnWalls();
+            attackCooldownTimer = 7f;
         }
     }
 
-    IEnumerator SummonWall()
+    void SpawnWalls()
     {
-        isSummoning = true;
+        if (smallWallPrefab == null || currentTarget == null) return;
 
-        yield return new WaitForSeconds(2f);
+        Vector3 forward = (currentTarget.position - transform.position).normalized;
+        Vector3 pos1 = currentTarget.position + forward * spawnDistance;
+        Vector3 pos2 = currentTarget.position - forward * spawnDistance;
 
-        if (wall != null && bookMovement != null && bookMovement.WallSpawnLoc != null && player != null)
-        {
-            GameObject spawnedWall = Instantiate(
-                wall,
-                bookMovement.WallSpawnLoc.position,
-                Quaternion.Euler(-90f, player.eulerAngles.y - 90f, 0f)
-            );
-            spawnedWall.transform.DOMoveY(2.75f, 0.5f).SetEase(Ease.InOutSine);
-        }
-        attackTimer = attackCooldown;
-        isSummoning = false;
+        Instantiate(smallWallPrefab, pos1, Quaternion.LookRotation(forward));
+        Instantiate(smallWallPrefab, pos2, Quaternion.LookRotation(-forward));
+
+        if (MusicManager.Instance != null)
+            MusicManager.Instance.PlayWallSpawnerSound(transform.position);
     }
 }

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Spread Slippery
   m_EditorClassIdentifier: Assembly-CSharp::SpreadSlippery
   spellName: Spread Slippery
-  baseManaCost: 20
+  baseManaCost: 0
   cooldown: 0.2
   points:
   - {x: -242.16711, y: -242.20396}
@@ -80,4 +80,5 @@ MonoBehaviour:
   - {x: 237.72266, y: 237.67178}
   - {x: 245.78406, y: 245.75415}
   - {x: 253.84631, y: 253.83197}
-  wall: {fileID: 0}
+  jamBlobPrefab: {fileID: 1205236737125480316, guid: b18b84e8542d457449677f38d0a8a819, type: 3}
+  projectileSpeed: 28

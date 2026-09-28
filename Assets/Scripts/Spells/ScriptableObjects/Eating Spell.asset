@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Eating Spell
   m_EditorClassIdentifier: Assembly-CSharp::EatingSpell
   spellName: Eating Spell
-  baseManaCost: 20
-  cooldown: 0.2
+  baseManaCost: 0
+  cooldown: 20
   points:
   - {x: -290.6786, y: -290.83063}
   - {x: -278.7035, y: -278.84366}
@@ -80,4 +80,7 @@ MonoBehaviour:
   - {x: -18.218506, y: -18.508911}
   - {x: -13.158325, y: -8.565216}
   - {x: -1.3709717, y: 4.377655}
-  wall: {fileID: 0}
+  isTier11: 0
+  isTier21: 0
+  isTier12: 0
+  isTier22: 0

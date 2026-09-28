@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Wall Spell
   m_EditorClassIdentifier: Assembly-CSharp::WallSpell
   spellName: Wall Spell
-  baseManaCost: 20
+  baseManaCost: 0
   cooldown: 0.5
   points:
   - {x: -245.26709, y: -247.09953}

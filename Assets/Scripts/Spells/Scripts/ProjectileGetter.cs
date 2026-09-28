@@ -37,11 +37,18 @@ public class ProjectileGetter : MonoBehaviour
     {
         hasHit = true;
 
+        if (hit.collider.CompareTag("Enemy") || hit.collider.CompareTag("Player"))
+        {
+
+            Destroy(gameObject);
+            return;
+        }
+
         if (trapPrefab != null)
         {
             Vector3 splatPos = hit.point + hit.normal * surfaceOffset;
             Quaternion splatRotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
-
+            MusicManager.Instance.PlayJamHitSound(hit.point);
             GameObject splat = Instantiate(trapPrefab, splatPos, splatRotation);
             splat.transform.SetParent(hit.collider.transform);
 
@@ -50,6 +57,7 @@ public class ProjectileGetter : MonoBehaviour
                 splatScript.InitSplat();
             }
         }
+
         Destroy(gameObject);
     }
 }

@@ -116,6 +116,10 @@ public class PlayerCharacter : MonoBehaviour, ICharacterController
             BookMovement.Instance.ToggleBookState();
             armsAnimator.SetBool("IsDrawing", !BookMovement.Instance.isIdle);
             jarAnimator.SetBool("IsDrawing", !BookMovement.Instance.isIdle);
+            if (MusicManager.Instance != null)
+            {
+                MusicManager.Instance.PlayHandDrawModeSound(transform.position);
+            }
 
         }
     }
