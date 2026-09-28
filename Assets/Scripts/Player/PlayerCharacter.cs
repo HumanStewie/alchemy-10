@@ -139,14 +139,14 @@ public class PlayerCharacter : MonoBehaviour, ICharacterController
             Vector3.ProjectOnPlane(requestedRotation * Vector3.forward, motor.CharacterUp),
             motor.CharacterUp
         );
-        if (motor.GroundingStatus.FoundAnyGround)
-        {
-            currentRotation = Quaternion.Lerp(
-                currentRotation,
-                Quaternion.FromToRotation(motor.CharacterUp, motor.GroundingStatus.GroundNormal) * currentRotation, 
-                1.0f - Mathf.Exp(-walkResponse * deltaTime)
-            );
-        }
+            if (motor.GroundingStatus.FoundAnyGround && motor.GroundingStatus.GroundCollider.gameObject.layer == LayerMask.NameToLayer("CurvedFloor"))
+            {
+                currentRotation = Quaternion.Lerp(
+                    currentRotation,
+                    Quaternion.FromToRotation(motor.CharacterUp, motor.GroundingStatus.GroundNormal) * currentRotation, 
+                    1.0f - Mathf.Exp(-walkResponse * deltaTime)
+                );
+            }
         
     }
 
