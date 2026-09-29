@@ -30,6 +30,13 @@ public class RuneManager : MonoBehaviour
     {
         StartCoroutine(RuneRoutine());
     }
+    private void Update()
+    {
+        if (currentHealth == 0)
+        {
+            GameManager.Instance.Lose();
+        }
+    }
 
     private IEnumerator RuneRoutine()
     {

@@ -34,6 +34,7 @@ public class SwordSpell : SpellTemplate
 
         GameObject slashObj = Instantiate(slashPrefab, spawnOrigin, slashRotation);
         MusicManager.Instance.PlaySwordSound(spawnOrigin);
+        CameraShake.Instance.ShakeLight();
         if (slashObj.TryGetComponent<SwordSlash>(out var slashScript))
         {
             slashScript.Initialize(baseDamage, knockbackForce, collisionDamage, rangeMultiplier, attackTwice);

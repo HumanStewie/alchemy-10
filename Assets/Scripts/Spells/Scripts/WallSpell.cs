@@ -63,6 +63,7 @@ public class WallSpell : SpellTemplate
         {
             MusicManager.Instance.PlayCreateWallSound(spawnLoc);
         }
+        CameraShake.Instance.ShakeLight();
     }
 
     private void PruneDestroyedWalls()

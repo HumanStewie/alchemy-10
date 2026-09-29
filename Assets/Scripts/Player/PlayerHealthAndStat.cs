@@ -24,6 +24,13 @@ public class PlayerHealthAndStat : MonoBehaviour
         bloodParticle = GameManager.Instance.bloodEffect;
         PoofParticle = GameManager.Instance.poofEffect;
     }
+    private void LateUpdate()
+    {
+        if (currentHP == 0)
+        {
+            GameManager.Instance.Lose();
+        }
+    }
     public void ChangeAttack(float multiplier = 1f)
     {
         if (multiplier != 1)
@@ -53,6 +60,7 @@ public class PlayerHealthAndStat : MonoBehaviour
         currentHP -= damage;
         Instantiate(bloodParticle, transform.position, Quaternion.identity);
         MusicManager.Instance.PlayPlayerHurtSound(transform.position);
+        CameraShake.Instance.ShakeLight();
         if (currentHP <= 0)
         {
             Die();
@@ -70,6 +78,8 @@ public class PlayerHealthAndStat : MonoBehaviour
     {
         MusicManager.Instance.PlayDieSound(transform.position);
         Instantiate(PoofParticle, transform.position, Quaternion.identity);
+        CameraShake.Instance.ShakeHeavy();
+
         Destroy(gameObject);
     }
 

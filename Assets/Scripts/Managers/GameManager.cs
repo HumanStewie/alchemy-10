@@ -2,6 +2,8 @@ using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
@@ -31,6 +33,10 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private GameObject SkillCanvas;
     [SerializeField] private GameObject GameCanvas;
+    [SerializeField] private GameObject LoseCanvas;
+    [SerializeField] private GameObject WinCanvas;
+
+
 
     [HideInInspector] public GameObject burningEffect;
     [HideInInspector] public GameObject poisonEffect;
@@ -102,10 +108,17 @@ public class GameManager : MonoBehaviour
 
     public void GoNextWave()
     {
-        currentWave++;
-        if (GameCanvas != null) GameCanvas.SetActive(true);
-        StartWave(currentWave);
-        startChecking = true;
+        if (currentWave == 10)
+        {
+            Win();
+        }
+        else
+        {
+            currentWave++;
+            if (GameCanvas != null) GameCanvas.SetActive(true);
+            StartWave(currentWave);
+            startChecking = true;
+        }
     }
 
     void Wave1()
@@ -363,5 +376,34 @@ public class GameManager : MonoBehaviour
                 enemy.damage = 3f;
             }
         }
+    }
+
+    public void Lose()
+    {
+        LoseCanvas.SetActive(true);
+
+        LoseCanvas.AddComponent<EventTrigger>();
+
+        EventTrigger.Entry entry = new EventTrigger.Entry();
+        entry.eventID = EventTriggerType.PointerClick;
+
+        entry.callback.AddListener((data) => SceneManager.LoadScene("MainMenu"));
+
+        LoseCanvas.GetComponent<EventTrigger>().triggers.Add(entry);
+
+    }
+    public void Win()
+    {
+        WinCanvas.SetActive(true);
+
+        WinCanvas.AddComponent<EventTrigger>();
+
+        EventTrigger.Entry entry = new EventTrigger.Entry();
+        entry.eventID = EventTriggerType.PointerClick;
+
+        entry.callback.AddListener((data) => SceneManager.LoadScene("MainMenu"));
+
+        WinCanvas.GetComponent<EventTrigger>().triggers.Add(entry);
+
     }
 }
