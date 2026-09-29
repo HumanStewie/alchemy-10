@@ -1,6 +1,8 @@
+using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -34,6 +36,8 @@ public class GameManager : MonoBehaviour
     [HideInInspector] public GameObject poisonEffect;
     [HideInInspector] public GameObject bloodEffect;
     [HideInInspector] public GameObject poofEffect;
+
+    [SerializeField] private GameObject healthBar;
 
     private void Awake()
     {
@@ -89,6 +93,8 @@ public class GameManager : MonoBehaviour
         {
             StartFirstWave();
         }
+
+        healthBar.GetComponent<Image>().DOFillAmount(FindFirstObjectByType<PlayerHealthAndStat>().currentHP / FindFirstObjectByType<PlayerHealthAndStat>().maxHP, 0.1f);
     }
 
     public void GoNextWave()
