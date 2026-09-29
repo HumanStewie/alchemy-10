@@ -2188,18 +2188,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    - target: {fileID: 3567521141822494302, guid: dfdf77287aa78b6d3a952d90110c51f1, type: 3}
-      propertyPath: maxPitchAngle
-      value: 89
-      objectReference: {fileID: 0}
-    - target: {fileID: 3567521141822494302, guid: dfdf77287aa78b6d3a952d90110c51f1, type: 3}
-      propertyPath: minPitchAngle
-      value: -89
-      objectReference: {fileID: 0}
-    - target: {fileID: 6215098478801804140, guid: dfdf77287aa78b6d3a952d90110c51f1, type: 3}
-      propertyPath: wallWalkResponse
-      value: 5
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

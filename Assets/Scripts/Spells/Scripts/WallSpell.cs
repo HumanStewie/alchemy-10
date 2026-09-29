@@ -1,5 +1,4 @@
 using DG.Tweening;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -19,6 +18,8 @@ public class WallSpell : SpellTemplate
     public bool runeHeals = false;
 
     private Queue<WallProp> activeWalls = new();
+
+    
 
     public override void Cast(GameObject caster, Vector3 targetPoint, float scale)
     {

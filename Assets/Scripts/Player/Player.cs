@@ -5,6 +5,8 @@ public class Player : MonoBehaviour
     [Header("Needed Objects")]
     [SerializeField] private PlayerCharacter playerCharacter;
     [SerializeField] private PlayerCamera playerCamera;
+    [SerializeField] private CameraSpring cameraSpring;
+    [SerializeField] private CameraLean cameraLean;
 
     private PlayerActionInputs inputActions;
     private void Start()
@@ -15,7 +17,9 @@ public class Player : MonoBehaviour
         playerCharacter.Initialize();
         playerCamera.Initialize(playerCharacter.GetCameraTarget());
         // playerCamera.Initialize(playerCharacter.GetCameraTarget());
-
+        
+        cameraSpring.Initialize();
+        cameraLean.Initialize();
     }
 
     private void Update()
@@ -59,8 +63,11 @@ public class Player : MonoBehaviour
 
     private void LateUpdate()
     {
+        var deltaTime = Time.deltaTime;
         // playerCamera.UpdatePosition(playerCharacter.GetCameraTarget());
         playerCamera.UpdatePosition(playerCharacter.GetCameraTarget());
+        cameraSpring.UpdateSpring(deltaTime, playerCharacter.GetCameraTarget().up);
+        cameraLean.UpdateLean(deltaTime, playerCharacter.GetCharacterData().acceleration, playerCharacter.GetCameraTarget().up);
     }
 
     private void OnDisable()

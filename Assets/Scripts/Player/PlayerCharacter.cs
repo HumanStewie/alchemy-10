@@ -17,6 +17,7 @@ public struct Character
     public CharacterState state;
     public Stance stance;
     public Vector3 velocity;
+    public Vector3 acceleration;
 }
 public enum CharacterState
 {
@@ -32,6 +33,8 @@ public enum Stance
 
 public class PlayerCharacter : MonoBehaviour, ICharacterController
 {
+    public Character GetCharacterData() => character;
+
     [Header("Dependencies")]
     [SerializeField] private KinematicCharacterMotor motor;
     [SerializeField] private Transform meshTarget;
@@ -40,7 +43,9 @@ public class PlayerCharacter : MonoBehaviour, ICharacterController
     [SerializeField] private Transform cameraTarget;
     public Transform GetCameraTarget() => cameraTarget;
     [SerializeField] private Animator armsAnimator;
+    public Animator ArmsAnimator => armsAnimator;
     [SerializeField] private Animator jarAnimator;
+    public Animator JarAnimator => jarAnimator;
 
     [Header("Move")]
     [SerializeField] public float walkSpeed = 10.0f;
@@ -156,9 +161,10 @@ public class PlayerCharacter : MonoBehaviour, ICharacterController
 
     public void UpdateVelocity(ref Vector3 currentVelocity, float deltaTime)
     {
-        Debug.Log(motor.CharacterUp);
         armsAnimator.SetBool("IsGroundedMoving", false);
         jarAnimator.SetBool("IsGroundedMoving", false);
+
+        character.acceleration = Vector3.zero;
 
         // State checking
         // Check air or ground
@@ -227,11 +233,14 @@ public class PlayerCharacter : MonoBehaviour, ICharacterController
             // Walking & Sprinting
             var speed = requestedSprint ? walkSpeed * 2 : walkSpeed;
             var response = requestedSprint ? sprintResponse : walkResponse;
-            currentVelocity = Vector3.Lerp(
+            var moveVelocity = Vector3.Lerp(
                 a: currentVelocity,
                 b: groundedMovement * speed,
                 t: 1.0f - Mathf.Exp(-response * deltaTime)
             );
+            
+            character.acceleration = moveVelocity - currentVelocity;
+            currentVelocity = moveVelocity;
         }
         velocityBeforeJump = currentVelocity;
         if (requestedJump) Jump(ref currentVelocity, deltaTime);

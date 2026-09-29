@@ -26,6 +26,18 @@ public class BookMovement : MonoBehaviour
     [Header("Wall Animation Setup")]
     public float WallSpellTime = 0.5f;
     public Transform WallSpawnLoc;
+    [SerializeField] private Animator armsAnimator;
+    [SerializeField] private Animator jarAnimator;
+
+
+    private static readonly int DropWallArms = Animator.StringToHash("rig_001|08_Arms Jar DropGround");
+    private static readonly int DropWallJar = Animator.StringToHash("Armature|08_Jar Arms DropGround");
+    private static readonly int EatArms = Animator.StringToHash("rig_001|07_Arms Jar Eat");
+    private static readonly int EatJar = Animator.StringToHash("Armature|07_Jar Arms Eat");
+    private static readonly int BazookaArms = Animator.StringToHash("rig_001|05_Arms Jar StartBazooka");
+    private static readonly int BazookaJar = Animator.StringToHash("Armature|05_Jar Arms StartBazooka");
+    private static readonly int SideWeepArms = Animator.StringToHash("rig_001|13_Arms Jar Splat");
+    private static readonly int SideWeepJar = Animator.StringToHash("Armature|13_Jar Arms Splat");
 
     private float currentY;
     public bool isDisabled = false;
@@ -69,35 +81,54 @@ public class BookMovement : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
+    private IEnumerator ArmsAndJarAnimation(int armHash, int jarHash, float transitionDuration, float earlyCutOff, Action onFinishAnimation)
+    {
+        armsAnimator.CrossFadeInFixedTime(armHash, transitionDuration);
+        jarAnimator.CrossFadeInFixedTime(jarHash, transitionDuration);
 
+        yield return new WaitForSeconds(transitionDuration);
+
+        AnimatorStateInfo stateInfo = armsAnimator.GetCurrentAnimatorStateInfo(0);
+
+        while(stateInfo.shortNameHash == armHash && stateInfo.normalizedTime < earlyCutOff)
+        {
+            Debug.Log("running");
+            stateInfo = armsAnimator.GetCurrentAnimatorStateInfo(0);
+            yield return null;
+        }
+        onFinishAnimation.Invoke();
+        ResetToIdleState();
+    }
     public void SwingJamAttack(Action onSwingApex)
     {
         if (isInanimation) return;
 
         isInanimation = true;
         isIdle = false;
-        transform.DOKill();
+        // transform.DOKill();
 
-        Vector3 prepLoc = new Vector3(startLoc.x - 0.22f, startLoc.y + 0.08f, startLoc.z);
-        Vector3 prepRot = new Vector3(10f, -30f, 20f);
+        // Vector3 prepLoc = new Vector3(startLoc.x - 0.22f, startLoc.y + 0.08f, startLoc.z);
+        // Vector3 prepRot = new Vector3(10f, -30f, 20f);
 
-        Vector3 swingLoc = new Vector3(startLoc.x + 0.28f, startLoc.y - 0.04f, startLoc.z + 0.12f);
-        Vector3 swingRot = new Vector3(-15f, 45f, -35f);
+        // Vector3 swingLoc = new Vector3(startLoc.x + 0.28f, startLoc.y - 0.04f, startLoc.z + 0.12f);
+        // Vector3 swingRot = new Vector3(-15f, 45f, -35f);
 
-        Sequence swingSeq = DOTween.Sequence();
+        // Sequence swingSeq = DOTween.Sequence();
 
-        swingSeq.Append(transform.DOLocalMove(prepLoc, 0.1f).SetEase(Ease.OutQuad));
-        swingSeq.Join(transform.DOLocalRotate(prepRot, 0.1f).SetEase(Ease.OutQuad));
+        // swingSeq.Append(transform.DOLocalMove(prepLoc, 0.1f).SetEase(Ease.OutQuad));
+        // swingSeq.Join(transform.DOLocalRotate(prepRot, 0.1f).SetEase(Ease.OutQuad));
 
-        swingSeq.Append(transform.DOLocalMove(swingLoc, 0.12f).SetEase(Ease.InCubic));
-        swingSeq.Join(transform.DOLocalRotate(swingRot, 0.12f).SetEase(Ease.InCubic));
+        // swingSeq.Append(transform.DOLocalMove(swingLoc, 0.12f).SetEase(Ease.InCubic));
+        // swingSeq.Join(transform.DOLocalRotate(swingRot, 0.12f).SetEase(Ease.InCubic));
 
-        swingSeq.AppendCallback(() => onSwingApex?.Invoke());
+        // swingSeq.AppendCallback(() => onSwingApex?.Invoke());
 
-        swingSeq.Append(transform.DOLocalMove(startLoc, 0.25f).SetEase(Ease.OutQuad));
-        swingSeq.Join(transform.DOLocalRotate(startRot, 0.25f).SetEase(Ease.OutQuad));
+        // swingSeq.Append(transform.DOLocalMove(startLoc, 0.25f).SetEase(Ease.OutQuad));
+        // swingSeq.Join(transform.DOLocalRotate(startRot, 0.25f).SetEase(Ease.OutQuad));
 
-        swingSeq.OnComplete(ResetToIdleState);
+        // swingSeq.OnComplete(ResetToIdleState);
+
+        StartCoroutine(ArmsAndJarAnimation(SideWeepArms, SideWeepJar, 0.2f, 1.0f, onSwingApex));
     }
 
 
@@ -106,69 +137,76 @@ public class BookMovement : MonoBehaviour
         if (isInanimation) return;
         isInanimation = true;
         isIdle = false;
-        transform.DOKill();
+        // transform.DOKill();
 
-        Sequence wallSeq = DOTween.Sequence();
+        // Sequence wallSeq = DOTween.Sequence();
 
-        Vector3 midArcLoc = new Vector3(0.18f, 0.16f, 0.15f);
-        Vector3 midArcRot = new Vector3(-20f, -15f, 25f);
+        // Vector3 midArcLoc = new Vector3(0.18f, 0.16f, 0.15f);
+        // Vector3 midArcRot = new Vector3(-20f, -15f, 25f);
 
-        Vector3 centerLoc = new Vector3(0.0f, 0.18f, 0.25f);
-        Vector3 centerRot = new Vector3(-35f, 0f, 0f);
+        // Vector3 centerLoc = new Vector3(0.0f, 0.18f, 0.25f);
+        // Vector3 centerRot = new Vector3(-35f, 0f, 0f);
 
-        Vector3 slamLoc = new Vector3(0.0f, -0.28f, 0.22f);
-        Vector3 slamRot = new Vector3(30f, 0f, 0f);
+        // Vector3 slamLoc = new Vector3(0.0f, -0.28f, 0.22f);
+        // Vector3 slamRot = new Vector3(30f, 0f, 0f);
 
-        wallSeq.Append(transform.DOLocalMove(midArcLoc, 0.18f).SetEase(Ease.OutSine));
-        wallSeq.Join(transform.DOLocalRotate(midArcRot, 0.18f).SetEase(Ease.OutSine));
+        // wallSeq.Append(transform.DOLocalMove(midArcLoc, 0.18f).SetEase(Ease.OutSine));
+        // wallSeq.Join(transform.DOLocalRotate(midArcRot, 0.18f).SetEase(Ease.OutSine));
 
-        wallSeq.Append(transform.DOLocalMove(centerLoc, 0.16f).SetEase(Ease.OutQuad));
-        wallSeq.Join(transform.DOLocalRotate(centerRot, 0.16f).SetEase(Ease.OutQuad));
+        // wallSeq.Append(transform.DOLocalMove(centerLoc, 0.16f).SetEase(Ease.OutQuad));
+        // wallSeq.Join(transform.DOLocalRotate(centerRot, 0.16f).SetEase(Ease.OutQuad));
 
-        wallSeq.Append(transform.DOLocalMove(slamLoc, 0.12f).SetEase(Ease.InExpo));
-        wallSeq.Join(transform.DOLocalRotate(slamRot, 0.12f).SetEase(Ease.InQuad));
+        // wallSeq.Append(transform.DOLocalMove(slamLoc, 0.12f).SetEase(Ease.InExpo));
+        // wallSeq.Join(transform.DOLocalRotate(slamRot, 0.12f).SetEase(Ease.InQuad));
 
-        wallSeq.AppendCallback(() => onSlamDown?.Invoke());
+        // wallSeq.AppendCallback(() => onSlamDown?.Invoke());
 
-        wallSeq.Append(transform.DOLocalMove(startLoc, 0.22f).SetEase(Ease.OutQuad));
-        wallSeq.Join(transform.DOLocalRotate(startRot, 0.22f).SetEase(Ease.OutQuad));
+        // wallSeq.Append(transform.DOLocalMove(startLoc, 0.22f).SetEase(Ease.OutQuad));
+        // wallSeq.Join(transform.DOLocalRotate(startRot, 0.22f).SetEase(Ease.OutQuad));
 
-        wallSeq.OnComplete(ResetToIdleState);
+        // wallSeq.OnComplete(ResetToIdleState);
+
+        StartCoroutine(ArmsAndJarAnimation(DropWallArms, DropWallJar, 0.2f, 0.65f, onSlamDown));
     }
 
+    
 
     public void EatAnimation(Action onEatComplete = null)
     {
         if (isInanimation) return;
         isInanimation = true;
         isIdle = false;
-        transform.DOKill();
+        // transform.DOKill();
 
-        Sequence eatSeq = DOTween.Sequence();
+        // Sequence eatSeq = DOTween.Sequence();
 
-        Vector3 mouthLoc = new Vector3(0.08f, -0.05f, -0.1f);
-        Vector3 mouthRot = new Vector3(35f, -25f, 15f);
+        // Vector3 mouthLoc = new Vector3(0.08f, -0.05f, -0.1f);
+        // Vector3 mouthRot = new Vector3(35f, -25f, 15f);
 
-        eatSeq.Append(transform.DOLocalMove(mouthLoc, 0.12f).SetEase(Ease.OutBack));
-        eatSeq.Join(transform.DOLocalRotate(mouthRot, 0.12f).SetEase(Ease.OutQuad));
+        // eatSeq.Append(transform.DOLocalMove(mouthLoc, 0.12f).SetEase(Ease.OutBack));
+        // eatSeq.Join(transform.DOLocalRotate(mouthRot, 0.12f).SetEase(Ease.OutQuad));
 
-        for (int i = 0; i < 4; i++)
-        {
-            Vector3 biteDip = mouthLoc + new Vector3(0f, -0.035f, 0.02f);
-            eatSeq.Append(transform.DOLocalMove(biteDip, 0.033f).SetEase(Ease.InQuad));
-            eatSeq.Append(transform.DOLocalMove(mouthLoc, 0.033f).SetEase(Ease.OutQuad));
-        }
+        // for (int i = 0; i < 4; i++)
+        // {
+        //     Vector3 biteDip = mouthLoc + new Vector3(0f, -0.035f, 0.02f);
+        //     eatSeq.Append(transform.DOLocalMove(biteDip, 0.033f).SetEase(Ease.InQuad));
+        //     eatSeq.Append(transform.DOLocalMove(mouthLoc, 0.033f).SetEase(Ease.OutQuad));
+        // }
 
-        eatSeq.AppendCallback(() =>
-        {
-            if (MusicManager.Instance != null) MusicManager.Instance.PlayEatingSound(transform.position);
-            onEatComplete?.Invoke();
-        });
+        // eatSeq.AppendCallback(() =>
+        // {
+        //     if (MusicManager.Instance != null) MusicManager.Instance.PlayEatingSound(transform.position);
+        //     onEatComplete?.Invoke();
+        // });
 
-        eatSeq.Append(transform.DOLocalMove(startLoc, 0.12f).SetEase(Ease.OutQuad));
-        eatSeq.Join(transform.DOLocalRotate(startRot, 0.12f).SetEase(Ease.OutQuad));
+        // eatSeq.Append(transform.DOLocalMove(startLoc, 0.12f).SetEase(Ease.OutQuad));
+        // eatSeq.Join(transform.DOLocalRotate(startRot, 0.12f).SetEase(Ease.OutQuad));
 
-        eatSeq.OnComplete(ResetToIdleState);
+        // eatSeq.OnComplete(ResetToIdleState);
+        if (MusicManager.Instance != null) MusicManager.Instance.PlayEatingSound(transform.position);
+        StartCoroutine(ArmsAndJarAnimation(EatArms, EatJar, 0.2f, 1.0f,() => {
+            onEatComplete.Invoke();
+        } ));
     }
 
  
@@ -177,28 +215,29 @@ public class BookMovement : MonoBehaviour
         if (isInanimation) return;
         isInanimation = true;
         isIdle = false;
-        transform.DOKill();
+        // transform.DOKill();
 
-        Sequence throwSeq = DOTween.Sequence();
+        // Sequence throwSeq = DOTween.Sequence();
 
-        Vector3 windBackLoc = new Vector3(startLoc.x + 0.08f, startLoc.y - 0.14f, startLoc.z - 0.12f);
-        Vector3 windBackRot = new Vector3(-25f, 20f, -10f);
+        // Vector3 windBackLoc = new Vector3(startLoc.x + 0.08f, startLoc.y - 0.14f, startLoc.z - 0.12f);
+        // Vector3 windBackRot = new Vector3(-25f, 20f, -10f);
 
-        Vector3 throwApexLoc = new Vector3(0.05f, 0.12f, 0.32f);
-        Vector3 throwApexRot = new Vector3(55f, -10f, 0f);
+        // Vector3 throwApexLoc = new Vector3(0.05f, 0.12f, 0.32f);
+        // Vector3 throwApexRot = new Vector3(55f, -10f, 0f);
 
-        throwSeq.Append(transform.DOLocalMove(windBackLoc, 0.12f).SetEase(Ease.OutQuad));
-        throwSeq.Join(transform.DOLocalRotate(windBackRot, 0.12f).SetEase(Ease.OutQuad));
+        // throwSeq.Append(transform.DOLocalMove(windBackLoc, 0.12f).SetEase(Ease.OutQuad));
+        // throwSeq.Join(transform.DOLocalRotate(windBackRot, 0.12f).SetEase(Ease.OutQuad));
 
-        throwSeq.Append(transform.DOLocalMove(throwApexLoc, 0.14f).SetEase(Ease.InCubic));
-        throwSeq.Join(transform.DOLocalRotate(throwApexRot, 0.14f).SetEase(Ease.InBack));
+        // throwSeq.Append(transform.DOLocalMove(throwApexLoc, 0.14f).SetEase(Ease.InCubic));
+        // throwSeq.Join(transform.DOLocalRotate(throwApexRot, 0.14f).SetEase(Ease.InBack));
 
-        throwSeq.AppendCallback(() => onTrapApex?.Invoke());
+        // throwSeq.AppendCallback(() => onTrapApex?.Invoke());
 
-        throwSeq.Append(transform.DOLocalMove(startLoc, 0.22f).SetEase(Ease.OutQuad));
-        throwSeq.Join(transform.DOLocalRotate(startRot, 0.22f).SetEase(Ease.OutQuad));
+        // throwSeq.Append(transform.DOLocalMove(startLoc, 0.22f).SetEase(Ease.OutQuad));
+        // throwSeq.Join(transform.DOLocalRotate(startRot, 0.22f).SetEase(Ease.OutQuad));
 
-        throwSeq.OnComplete(ResetToIdleState);
+        // throwSeq.OnComplete(ResetToIdleState);
+        StartCoroutine(ArmsAndJarAnimation(SideWeepArms, SideWeepJar, 0.2f, 1.0f, onTrapApex));
     }
 
     public void SpreadCardThrowAnimation(Action onFlick = null)
@@ -206,28 +245,30 @@ public class BookMovement : MonoBehaviour
         if (isInanimation) return;
         isInanimation = true;
         isIdle = false;
-        transform.DOKill();
+        // transform.DOKill();
 
-        Sequence flickSeq = DOTween.Sequence();
+        // Sequence flickSeq = DOTween.Sequence();
 
-        Vector3 leftPrepLoc = new Vector3(-0.25f, -0.02f, 0.08f);
-        Vector3 leftPrepRot = new Vector3(15f, -40f, 45f);
+        // Vector3 leftPrepLoc = new Vector3(-0.25f, -0.02f, 0.08f);
+        // Vector3 leftPrepRot = new Vector3(15f, -40f, 45f);
 
-        Vector3 rightFlickLoc = new Vector3(0.48f, 0.04f, 0.22f);
-        Vector3 rightFlickRot = new Vector3(-20f, 50f, -50f);
+        // Vector3 rightFlickLoc = new Vector3(0.48f, 0.04f, 0.22f);
+        // Vector3 rightFlickRot = new Vector3(-20f, 50f, -50f);
 
-        flickSeq.Append(transform.DOLocalMove(leftPrepLoc, 0.14f).SetEase(Ease.OutQuad));
-        flickSeq.Join(transform.DOLocalRotate(leftPrepRot, 0.14f).SetEase(Ease.OutQuad));
+        // flickSeq.Append(transform.DOLocalMove(leftPrepLoc, 0.14f).SetEase(Ease.OutQuad));
+        // flickSeq.Join(transform.DOLocalRotate(leftPrepRot, 0.14f).SetEase(Ease.OutQuad));
 
-        flickSeq.Append(transform.DOLocalMove(rightFlickLoc, 0.13f).SetEase(Ease.InSine));
-        flickSeq.Join(transform.DOLocalRotate(rightFlickRot, 0.13f).SetEase(Ease.InSine));
+        // flickSeq.Append(transform.DOLocalMove(rightFlickLoc, 0.13f).SetEase(Ease.InSine));
+        // flickSeq.Join(transform.DOLocalRotate(rightFlickRot, 0.13f).SetEase(Ease.InSine));
 
-        flickSeq.AppendCallback(() => onFlick?.Invoke());
+        // flickSeq.AppendCallback(() => onFlick?.Invoke());
 
-        flickSeq.Append(transform.DOLocalMove(startLoc, 0.2f).SetEase(Ease.OutQuad));
-        flickSeq.Join(transform.DOLocalRotate(startRot, 0.2f).SetEase(Ease.OutQuad));
+        // flickSeq.Append(transform.DOLocalMove(startLoc, 0.2f).SetEase(Ease.OutQuad));
+        // flickSeq.Join(transform.DOLocalRotate(startRot, 0.2f).SetEase(Ease.OutQuad));
 
-        flickSeq.OnComplete(ResetToIdleState);
+        // flickSeq.OnComplete(ResetToIdleState);
+
+        StartCoroutine(ArmsAndJarAnimation(SideWeepArms, SideWeepJar, 0.2f, 1.0f, onFlick));
     }
 
     public void ToggleBookState()

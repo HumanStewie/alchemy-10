@@ -50,10 +50,12 @@ Material:
     - _BlendModePreserveSpecular: 1
     - _CastShadows: 1
     - _Cull: 2
-    - _Dissolve: -1.019
+    - _Cutoff: -0.86
+    - _Dissolve: -0.004
     - _DstBlend: 0
     - _DstBlendAlpha: 0
-    - _NoiseScale: 22.6
+    - _NoiseScale: 10
+    - _OutlineWidth: 0.04
     - _QueueControl: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
@@ -65,7 +67,7 @@ Material:
     - _ZWrite: 1
     - _ZWriteControl: 0
     m_Colors:
-    - _OutlineColor: {r: 1, g: 0, b: 0, a: 0}
+    - _OutlineColor: {r: 7.9999995, g: 1.437907, b: 0, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &277656452309089869
