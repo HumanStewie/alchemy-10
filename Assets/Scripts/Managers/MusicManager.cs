@@ -112,6 +112,11 @@ public class MusicManager : MonoBehaviour
     [SerializeField] private AudioClip buttonClick;
     [SerializeField, Range(0f, 2f)] private float buttonClickVolume = 1f;
 
+    [SerializeField] private AudioClip WaveWinSound;
+    [SerializeField, Range(0f, 2f)] private float WaveWinSoundVolume = 1f;
+    [SerializeField] private AudioClip LazerCharge;
+    [SerializeField, Range(0f, 2f)] private float LazerChargeVolume = 1f;
+
     private void Awake()
     {
         if (Instance == null)
@@ -325,6 +330,9 @@ public class MusicManager : MonoBehaviour
     public void PlayRuneMovementSound(Vector3 position) => PlaySFX(runeMovement, position, runeMovementVolume);
     public void PlaySpellRecognizedSound(Vector3 position) => PlaySFX(spellRecognized, position, spellRecognizedVolume);
 
+    public void PlayLazerChargeSound(Vector3 position) => PlaySFX(LazerCharge, position, LazerChargeVolume);
+
+    public void PlayWaveWinSound(Vector3 position) => PlaySFX(WaveWinSound, position, WaveWinSoundVolume);
     public void PlaySwordSound(Vector3 position) => PlaySFX(swordSound, position, swordSoundVolume);
     public void PlayCreateWallSound(Vector3 position) => PlaySFX(createWallSound, position, createWallSoundVolume);
     public void PlaySpreadSound(Vector3 position) => PlaySFX(spreadSound, position, spreadSoundVolume);

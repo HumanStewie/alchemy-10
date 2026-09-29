@@ -2849,7 +2849,7 @@ MonoBehaviour:
   spellRecognizedVolume: 1
   swordSound: {fileID: 8300000, guid: b74cd04425d6c9040961cd902ee28a12, type: 3}
   swordSoundVolume: 1
-  createWallSound: {fileID: 0}
+  createWallSound: {fileID: 8300000, guid: e03d172fc05af7d49bf358c54c79af97, type: 3}
   createWallSoundVolume: 1
   spreadSound: {fileID: 8300000, guid: ab50d048681d6bf4fb00106764173e32, type: 3}
   spreadSoundVolume: 1
@@ -2859,24 +2859,28 @@ MonoBehaviour:
   bazookaSoundVolume: 1
   jamHitSound: {fileID: 8300000, guid: 67f1a3dd935b9cd41b3f59a8b80d007e, type: 3}
   jamHitSoundVolume: 1
-  eatingSound: {fileID: 0}
+  eatingSound: {fileID: 8300000, guid: 134e682ec3919394f8ec85288b7c6709, type: 3}
   eatingSoundVolume: 1
   simpleFollower: {fileID: 8300000, guid: 26f16405fcaf5744cb0a72e6ba9dd845, type: 3}
   simpleFollowerVolume: 1
-  wallSpawnerSound: {fileID: 0}
+  wallSpawnerSound: {fileID: 8300000, guid: e03d172fc05af7d49bf358c54c79af97, type: 3}
   wallSpawnerSoundVolume: 1
-  butterShooter: {fileID: 0}
+  butterShooter: {fileID: 8300000, guid: f5372d53d01bec040a24852c184de265, type: 3}
   butterShooterVolume: 1
-  sniper: {fileID: 0}
+  sniper: {fileID: 8300000, guid: f9efa3b262cb035439be5b0fe3a5bf67, type: 3}
   sniperVolume: 1
   jamToucher: {fileID: 8300000, guid: bfee6cb52cc253b4680b7fc3ebbe10ac, type: 3}
   jamToucherVolume: 1
-  charger: {fileID: 0}
+  charger: {fileID: 8300000, guid: 7739f0d091a60eb4c9bf6eeb8e015f42, type: 3}
   chargerVolume: 1
   buttonHovering: {fileID: 8300000, guid: f9caf8cbaf7091f419bc90128397a380, type: 3}
   buttonHoveringVolume: 1
   buttonClick: {fileID: 8300000, guid: b0dc81c4544b845498ccdd1b59eff931, type: 3}
   buttonClickVolume: 1
+  WaveWinSound: {fileID: 8300000, guid: b670ce723edc635449a4ab73bb96a814, type: 3}
+  WaveWinSoundVolume: 1
+  LazerCharge: {fileID: 8300000, guid: 28e551609de59614683b28daacf54608, type: 3}
+  LazerChargeVolume: 1
 --- !u!1 &1127301740
 GameObject:
   m_ObjectHideFlags: 0

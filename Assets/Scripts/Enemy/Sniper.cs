@@ -31,6 +31,7 @@ public class SniperEnemy : EnemyBase
         if (!isAiming && attackCooldownTimer <= 0f)
         {
             StartAiming();
+            MusicManager.Instance.PlayLazerChargeSound(transform.position);
         }
 
         if (isAiming)
@@ -41,6 +42,8 @@ public class SniperEnemy : EnemyBase
             if (aimTimer <= 0f)
             {
                 Shoot();
+                MusicManager.Instance.PlaySniperSound(transform.position);
+
                 isAiming = false;
                 if (aimLine != null) aimLine.enabled = false;
                 attackCooldownTimer = 5f;
