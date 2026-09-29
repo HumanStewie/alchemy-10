@@ -46,7 +46,7 @@ public class PlayerCharacter : MonoBehaviour, ICharacterController
     [SerializeField] public float walkSpeed = 10.0f;
     [SerializeField] private float sprintResponse = 15f;
     [SerializeField] private float walkResponse = 25f;
-
+    [SerializeField] private float wallWalkResponse = 25f;
 
     [Header("Jump")]
     [SerializeField] private float jumpStrength = 20f;
@@ -148,7 +148,7 @@ public class PlayerCharacter : MonoBehaviour, ICharacterController
                 currentRotation = Quaternion.Lerp(
                     currentRotation,
                     Quaternion.FromToRotation(motor.CharacterUp, motor.GroundingStatus.GroundNormal) * currentRotation, 
-                    1.0f - Mathf.Exp(-walkResponse * deltaTime)
+                    1.0f - Mathf.Exp(-wallWalkResponse * deltaTime)
                 );
             }
         
