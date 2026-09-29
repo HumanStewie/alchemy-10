@@ -38,6 +38,7 @@ public class GameManager : MonoBehaviour
     [HideInInspector] public GameObject poofEffect;
 
     [SerializeField] private GameObject healthBar;
+    [SerializeField] private GameObject runeHealthbar;
 
     private void Awake()
     {
@@ -95,6 +96,8 @@ public class GameManager : MonoBehaviour
         }
 
         healthBar.GetComponent<Image>().DOFillAmount(FindFirstObjectByType<PlayerHealthAndStat>().currentHP / FindFirstObjectByType<PlayerHealthAndStat>().maxHP, 0.1f);
+        healthBar.GetComponent<Image>().DOFillAmount(FindFirstObjectByType<RuneManager>().currentHealth / FindFirstObjectByType<RuneManager>().maxHealth, 0.1f);
+
     }
 
     public void GoNextWave()
