@@ -1,20 +1,24 @@
+using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel.Design.Serialization;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
     [Header("Enemies")]
-    [HideInInspector]  public GameObject simpleFollower;
+    [HideInInspector] public GameObject simpleFollower;
     [HideInInspector] public GameObject shootingEnemy;
     [HideInInspector] public GameObject wallSpawner;
     [HideInInspector] public GameObject charger;
     [HideInInspector] public GameObject sniper;
     [HideInInspector] public GameObject jamToucher;
     [HideInInspector] public GameObject swarmEnemy;
+    [HideInInspector] public GameObject Fatass;
 
     [Header("Wave State")]
     public int currentWave = 1;
@@ -29,6 +33,9 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private GameObject SkillCanvas;
     [SerializeField] private GameObject GameCanvas;
+    [SerializeField] private GameObject LoseCanvas;
+    [SerializeField] private GameObject WinCanvas;
+
 
 
     [HideInInspector] public GameObject burningEffect;
@@ -36,24 +43,29 @@ public class GameManager : MonoBehaviour
     [HideInInspector] public GameObject bloodEffect;
     [HideInInspector] public GameObject poofEffect;
 
-
+    [SerializeField] private GameObject healthBar;
+    [SerializeField] private GameObject runeHealthbar;
 
     private void Awake()
     {
         Instance = this;
 
-        burningEffect = (GameObject)Resources.Load("Particle/burning");
-        poisonEffect = (GameObject)Resources.Load("Particle/poison");
-        bloodEffect = (GameObject)Resources.Load("Particle/blood");
-        poofEffect = (GameObject)Resources.Load("Particle/poof");
-        charger = (GameObject)Resources.Load("Particle/Charger");
-        jamToucher = (GameObject)Resources.Load("Particle/Jam Toucher");
+        burningEffect = Resources.Load<GameObject>("Particle/burning");
+        poisonEffect = Resources.Load<GameObject>("Particle/poison");
+        bloodEffect = Resources.Load<GameObject>("Particle/blood");
+        poofEffect = Resources.Load<GameObject>("Particle/poof");
 
-        simpleFollower = (GameObject)Resources.Load("Particle/Simple Follower");
-        shootingEnemy = (GameObject)Resources.Load("Particle/Butter Shooter");
-        wallSpawner = (GameObject)Resources.Load("Particle/Wall Spawner");
-        sniper = (GameObject)Resources.Load("Particle/Sniper");
+        simpleFollower = Resources.Load<GameObject>("Enemy/Simple Follower");
+        shootingEnemy = Resources.Load<GameObject>("Enemy/Butter Shooter");
+        wallSpawner = Resources.Load<GameObject>("Enemy/Wall Spawner");
+        sniper = Resources.Load<GameObject>("Enemy/Sniper");
+        charger = Resources.Load<GameObject>("Enemy/Charger");
+        jamToucher = Resources.Load<GameObject>("Enemy/Jam Toucher");
+        Fatass = Resources.Load<GameObject>("Enemy/Fatass");
+
+        swarmEnemy = simpleFollower;
     }
+
     void StartWave(int wave)
     {
         switch (wave)
@@ -78,8 +90,8 @@ public class GameManager : MonoBehaviour
         {
             if (!FindFirstObjectByType<EnemyBase>())
             {
-                SkillCanvas.SetActive(true);
-                GameCanvas.SetActive(false);
+                if (SkillCanvas != null) SkillCanvas.SetActive(true);
+                if (GameCanvas != null) GameCanvas.SetActive(false);
                 startChecking = false;
             }
         }
@@ -88,15 +100,27 @@ public class GameManager : MonoBehaviour
         {
             StartFirstWave();
         }
+
+        healthBar.GetComponent<Image>().DOFillAmount(FindFirstObjectByType<PlayerHealthAndStat>().currentHP / FindFirstObjectByType<PlayerHealthAndStat>().maxHP, 0.1f);
+        healthBar.GetComponent<Image>().DOFillAmount(FindFirstObjectByType<RuneManager>().currentHealth / FindFirstObjectByType<RuneManager>().maxHealth, 0.1f);
+
     }
 
     public void GoNextWave()
     {
-        currentWave++;
-        GameCanvas.SetActive(true);
-        StartWave(currentWave);
-        startChecking = true;
+        if (currentWave == 10)
+        {
+            Win();
+        }
+        else
+        {
+            currentWave++;
+            if (GameCanvas != null) GameCanvas.SetActive(true);
+            StartWave(currentWave);
+            startChecking = true;
+        }
     }
+
     void Wave1()
     {
         float valueCost = 5f;
@@ -146,6 +170,9 @@ public class GameManager : MonoBehaviour
     void Wave5()
     {
         float valueCost = 17f;
+        InstantiateEnemy(Fatass);
+        valueCost -= 4f;
+
         while (valueCost > 0)
         {
             int roll = Random.Range(0, 100);
@@ -159,113 +186,101 @@ public class GameManager : MonoBehaviour
 
     void Wave6()
     {
-        float valueCost = 20f;
+        float valueCost = 21f;
         while (valueCost > 0)
         {
             int roll = Random.Range(0, 100);
-            if (roll < 30) { InstantiateEnemy(simpleFollower); valueCost -= 1f; }
-            else if (roll < 45) { InstantiateEnemy(shootingEnemy); valueCost -= 1.5f; }
-            else if (roll < 60) { InstantiateEnemy(wallSpawner); valueCost -= 2f; }
-            else if (roll < 75) { InstantiateEnemy(charger); valueCost -= 3f; }
-            else if (roll < 90) { InstantiateEnemy(sniper); valueCost -= 3f; }
-            else { InstantiateEnemy(jamToucher); valueCost -= 2.5f; }
+            if (roll < 25) { InstantiateEnemy(simpleFollower); valueCost -= 1f; }
+            else if (roll < 40) { InstantiateEnemy(shootingEnemy); valueCost -= 1.5f; }
+            else if (roll < 55) { InstantiateEnemy(wallSpawner); valueCost -= 2f; }
+            else if (roll < 70) { InstantiateEnemy(charger); valueCost -= 3f; }
+            else if (roll < 80) { InstantiateEnemy(sniper); valueCost -= 3f; }
+            else if (roll < 90) { InstantiateEnemy(jamToucher); valueCost -= 2.5f; }
+            else { InstantiateEnemy(Fatass); valueCost -= 4f; }
         }
     }
 
     void Wave7()
     {
-        float valueCost = 25f;
+        float valueCost = 26f;
         while (valueCost > 0)
         {
             int roll = Random.Range(0, 100);
             if (roll < 20) { InstantiateEnemy(simpleFollower); valueCost -= 1f; }
-            else if (roll < 40) { InstantiateEnemy(shootingEnemy); valueCost -= 1.5f; }
-            else if (roll < 55) { InstantiateEnemy(wallSpawner); valueCost -= 2f; }
-            else if (roll < 70) { InstantiateEnemy(charger); valueCost -= 3f; }
-            else if (roll < 85) { InstantiateEnemy(sniper); valueCost -= 3f; }
-            else if (roll < 95) { InstantiateEnemy(jamToucher); valueCost -= 2.5f; }
-            else { InstantiateEnemy(swarmEnemy); valueCost -= 3f; }
+            else if (roll < 35) { InstantiateEnemy(shootingEnemy); valueCost -= 1.5f; }
+            else if (roll < 50) { InstantiateEnemy(wallSpawner); valueCost -= 2f; }
+            else if (roll < 65) { InstantiateEnemy(charger); valueCost -= 3f; }
+            else if (roll < 75) { InstantiateEnemy(sniper); valueCost -= 3f; }
+            else if (roll < 85) { InstantiateEnemy(jamToucher); valueCost -= 2.5f; }
+            else if (roll < 95) { InstantiateEnemy(swarmEnemy); valueCost -= 3f; }
+            else { InstantiateEnemy(Fatass); valueCost -= 4f; }
         }
     }
 
     void Wave8()
     {
-        float valueCost = 30f;
+        float valueCost = 32f;
         while (valueCost > 0)
         {
             int roll = Random.Range(0, 100);
             if (roll < 10) { InstantiateEnemy(simpleFollower); valueCost -= 1f; }
-            else if (roll < 30) { InstantiateEnemy(shootingEnemy); valueCost -= 1.5f; }
-            else if (roll < 40) { InstantiateEnemy(wallSpawner); valueCost -= 2f; }
-            else if (roll < 60) { InstantiateEnemy(charger); valueCost -= 3f; }
-            else if (roll < 80) { InstantiateEnemy(sniper); valueCost -= 3f; }
-            else if (roll < 90) { InstantiateEnemy(jamToucher); valueCost -= 2.5f; }
-            else { InstantiateEnemy(swarmEnemy); valueCost -= 3f; }
+            else if (roll < 25) { InstantiateEnemy(shootingEnemy); valueCost -= 1.5f; }
+            else if (roll < 35) { InstantiateEnemy(wallSpawner); valueCost -= 2f; }
+            else if (roll < 50) { InstantiateEnemy(charger); valueCost -= 3f; }
+            else if (roll < 65) { InstantiateEnemy(sniper); valueCost -= 3f; }
+            else if (roll < 75) { InstantiateEnemy(jamToucher); valueCost -= 2.5f; }
+            else if (roll < 90) { InstantiateEnemy(swarmEnemy); valueCost -= 3f; }
+            else { InstantiateEnemy(Fatass); valueCost -= 4f; }
         }
     }
 
     void Wave9()
     {
-        float valueCost = 35f;
+        float valueCost = 38f;
         while (valueCost > 0)
         {
             int roll = Random.Range(0, 100);
-            if (roll < 15) { InstantiateEnemy(simpleFollower); valueCost -= 1f; }
-            else if (roll < 25) { InstantiateEnemy(shootingEnemy); valueCost -= 1.5f; }
-            else if (roll < 45) { InstantiateEnemy(wallSpawner); valueCost -= 2f; }
-            else if (roll < 55) { InstantiateEnemy(charger); valueCost -= 3f; }
-            else if (roll < 65) { InstantiateEnemy(sniper); valueCost -= 3f; }
-            else if (roll < 80) { InstantiateEnemy(jamToucher); valueCost -= 2.5f; }
-            else { InstantiateEnemy(swarmEnemy); valueCost -= 3f; }
+            if (roll < 10) { InstantiateEnemy(simpleFollower); valueCost -= 1f; }
+            else if (roll < 20) { InstantiateEnemy(shootingEnemy); valueCost -= 1.5f; }
+            else if (roll < 35) { InstantiateEnemy(wallSpawner); valueCost -= 2f; }
+            else if (roll < 45) { InstantiateEnemy(charger); valueCost -= 3f; }
+            else if (roll < 55) { InstantiateEnemy(sniper); valueCost -= 3f; }
+            else if (roll < 70) { InstantiateEnemy(jamToucher); valueCost -= 2.5f; }
+            else if (roll < 85) { InstantiateEnemy(swarmEnemy); valueCost -= 3f; }
+            else { InstantiateEnemy(Fatass); valueCost -= 4f; }
         }
-    }
-    public void StartFirstWave()
-    {
-        if (started) return;
-        started = true;
-        currentWave = 1;
-        StartWave(currentWave);
-        startChecking = true;
-    }
-    public void SlowEVERYTHING(int time, int percentage)
-    {
-        StartCoroutine(slowStuff(time, percentage));
-    }
-
-    IEnumerator slowStuff(int time, int percentage)
-    {
-        Time.timeScale *= (100 - percentage)/100;
-        yield return new WaitForSeconds(time);
-        Time.timeScale = 1f;
     }
 
     void Wave10()
     {
-        float valueCost = 40f;
+        float valueCost = 45f;
 
+        InstantiateEnemy(Fatass);
+        InstantiateEnemy(Fatass);
         InstantiateEnemy(swarmEnemy);
         InstantiateEnemy(swarmEnemy);
-        valueCost -= 6f;
+        valueCost -= 14f;
 
         while (valueCost > 0)
         {
             int roll = Random.Range(0, 100);
             if (roll < 10) { InstantiateEnemy(simpleFollower); valueCost -= 1f; }
-            else if (roll < 25) { InstantiateEnemy(shootingEnemy); valueCost -= 1.5f; }
-            else if (roll < 40) { InstantiateEnemy(wallSpawner); valueCost -= 2f; }
-            else if (roll < 55) { InstantiateEnemy(charger); valueCost -= 3f; }
-            else if (roll < 70) { InstantiateEnemy(sniper); valueCost -= 3f; }
-            else if (roll < 85) { InstantiateEnemy(jamToucher); valueCost -= 2.5f; }
-            else { InstantiateEnemy(swarmEnemy); valueCost -= 3f; }
+            else if (roll < 20) { InstantiateEnemy(shootingEnemy); valueCost -= 1.5f; }
+            else if (roll < 35) { InstantiateEnemy(wallSpawner); valueCost -= 2f; }
+            else if (roll < 50) { InstantiateEnemy(charger); valueCost -= 3f; }
+            else if (roll < 65) { InstantiateEnemy(sniper); valueCost -= 3f; }
+            else if (roll < 75) { InstantiateEnemy(jamToucher); valueCost -= 2.5f; }
+            else if (roll < 90) { InstantiateEnemy(swarmEnemy); valueCost -= 3f; }
+            else { InstantiateEnemy(Fatass); valueCost -= 4f; }
         }
     }
 
     void WaveEndless()
     {
         float valueCost = addedDifficulty;
-        addedDifficulty += 5f; 
+        addedDifficulty += 6f;
 
-        int themeRoll = Random.Range(0, 4); 
+        int themeRoll = Random.Range(0, 5);
 
         while (valueCost > 0)
         {
@@ -279,8 +294,9 @@ public class GameManager : MonoBehaviour
             }
             else if (themeRoll == 1)
             {
-                if (roll < 50) { InstantiateEnemy(charger); valueCost -= 3f; }
-                else { InstantiateEnemy(sniper); valueCost -= 3f; }
+                if (roll < 45) { InstantiateEnemy(charger); valueCost -= 3f; }
+                else if (roll < 80) { InstantiateEnemy(sniper); valueCost -= 3f; }
+                else { InstantiateEnemy(Fatass); valueCost -= 4f; }
             }
             else if (themeRoll == 2)
             {
@@ -288,24 +304,59 @@ public class GameManager : MonoBehaviour
                 else if (roll < 70) { InstantiateEnemy(sniper); valueCost -= 3f; }
                 else { InstantiateEnemy(wallSpawner); valueCost -= 2f; }
             }
-            else 
+            else if (themeRoll == 3)
             {
                 if (roll < 40) { InstantiateEnemy(jamToucher); valueCost -= 2.5f; }
-                else if (roll < 80) { InstantiateEnemy(swarmEnemy); valueCost -= 3f; }
-                else { InstantiateEnemy(simpleFollower); valueCost -= 1f; }
+                else if (roll < 75) { InstantiateEnemy(swarmEnemy); valueCost -= 3f; }
+                else { InstantiateEnemy(Fatass); valueCost -= 4f; }
+            }
+            else 
+            {
+                if (roll < 40) { InstantiateEnemy(Fatass); valueCost -= 4f; }
+                else if (roll < 70) { InstantiateEnemy(wallSpawner); valueCost -= 2f; }
+                else { InstantiateEnemy(shootingEnemy); valueCost -= 1.5f; }
             }
         }
     }
 
+    public void StartFirstWave()
+    {
+        if (started) return;
+        started = true;
+        currentWave = 1;
+        StartWave(currentWave);
+        startChecking = true;
+    }
+
+    public void SlowEVERYTHING(int time, int percentage)
+    {
+        StartCoroutine(slowStuff(time, percentage));
+    }
+
+    IEnumerator slowStuff(int time, int percentage)
+    {
+        Time.timeScale *= (100 - percentage) / 100f;
+        yield return new WaitForSeconds(time);
+        Time.timeScale = 1f;
+    }
+
     void InstantiateEnemy(GameObject enemyPrefab)
     {
-        Vector2 randomPoint = Random.insideUnitCircle * spawnRadius;
+        if (enemyPrefab == null) return;
 
+        Vector2 randomPoint = Random.insideUnitCircle * spawnRadius;
         Vector3 spawnPos = new Vector3(randomPoint.x, currentWave * 2, randomPoint.y);
 
-
-        Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
+        if (enemyPrefab == swarmEnemy)
+        {
+            SpawnSwarmAt(spawnPos);
+        }
+        else
+        {
+            Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
+        }
     }
+
     public void SpawnSwarmAt(Vector3 centerPosition)
     {
         if (simpleFollower == null) return;
@@ -316,15 +367,43 @@ public class GameManager : MonoBehaviour
             Vector3 spawnPos = centerPosition + new Vector3(offset.x, 0f, offset.y);
 
             GameObject mini = Instantiate(simpleFollower, spawnPos, Quaternion.identity);
-
             mini.transform.localScale = Vector3.one * 0.3f;
 
-            if (mini.TryGetComponent<SwarmFollower>(out var enemy))
+            if (mini.TryGetComponent<EnemyBase>(out var enemy))
             {
                 enemy.maxHP = 1f;
                 enemy.currentHP = 1f;
                 enemy.damage = 3f;
             }
         }
+    }
+
+    public void Lose()
+    {
+        LoseCanvas.SetActive(true);
+
+        LoseCanvas.AddComponent<EventTrigger>();
+
+        EventTrigger.Entry entry = new EventTrigger.Entry();
+        entry.eventID = EventTriggerType.PointerClick;
+
+        entry.callback.AddListener((data) => SceneManager.LoadScene("MainMenu"));
+
+        LoseCanvas.GetComponent<EventTrigger>().triggers.Add(entry);
+
+    }
+    public void Win()
+    {
+        WinCanvas.SetActive(true);
+
+        WinCanvas.AddComponent<EventTrigger>();
+
+        EventTrigger.Entry entry = new EventTrigger.Entry();
+        entry.eventID = EventTriggerType.PointerClick;
+
+        entry.callback.AddListener((data) => SceneManager.LoadScene("MainMenu"));
+
+        WinCanvas.GetComponent<EventTrigger>().triggers.Add(entry);
+
     }
 }

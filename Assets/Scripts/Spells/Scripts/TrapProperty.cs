@@ -111,6 +111,8 @@ public class TrapProperty : MonoBehaviour
         {
             if (explosionVFX != null)
                 Instantiate(explosionVFX, transform.position, Quaternion.identity);
+            CameraShake.Instance.ShakeLight();
+            MusicManager.Instance.PlayExplosionSound(transform.position);
 
             Collider[] hits = Physics.OverlapSphere(transform.position, deathExplosionRadius);
             foreach (Collider col in hits)

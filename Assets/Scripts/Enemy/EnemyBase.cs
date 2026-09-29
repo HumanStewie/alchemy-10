@@ -1,18 +1,26 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyBase : MonoBehaviour
 {
+    [Header("Base Stats")]
     public float maxHP = 10f;
     public float currentHP;
     public float damage = 5f;
     public float moveSpeed = 4f;
-    public float currentspeed;        
+    public float currentspeed;
 
+    [Header("Detection & Targeting")]
     public float attackRange = 2f;
     public float detectionRange = 30f;
-    public bool preferRune = false;   
+    public bool preferRune = false;
 
-    public GameObject runeSymbol;      
+    public GameObject runeSymbol;
+
+    [Header("Hit Flash Settings")]
+    [SerializeField] private Color flashColor = Color.white;
+    [SerializeField] private float flashDuration = 0.08f;
 
     protected Transform player;
     protected Transform runeTarget;
@@ -24,6 +32,19 @@ public class EnemyBase : MonoBehaviour
     private GameObject bloodEffect;
     private GameObject poofEffect;
 
+    // Hit Flash Internal Variables
+    private List<Renderer> _renderers = new List<Renderer>();
+    private MaterialPropertyBlock _propBlock;
+    private Coroutine _flashRoutine;
+
+    private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+    private static readonly int ColorId = Shader.PropertyToID("_Color");
+
+    protected virtual void Awake()
+    {
+        _propBlock = new MaterialPropertyBlock();
+        GetComponentsInChildren<Renderer>(true, _renderers);
+    }
 
     protected virtual void Start()
     {
@@ -36,10 +57,13 @@ public class EnemyBase : MonoBehaviour
         var rune = Object.FindFirstObjectByType<RuneManager>();
         if (rune != null) runeTarget = rune.transform;
 
-        burningEffect = GameManager.Instance.burningEffect;
-        poisonEffect = GameManager.Instance.poisonEffect;
-        bloodEffect = GameManager.Instance.bloodEffect;
-        poofEffect = GameManager.Instance.poofEffect;
+        if (GameManager.Instance != null)
+        {
+            burningEffect = GameManager.Instance.burningEffect;
+            poisonEffect = GameManager.Instance.poisonEffect;
+            bloodEffect = GameManager.Instance.bloodEffect;
+            poofEffect = GameManager.Instance.poofEffect;
+        }
 
         ChooseTarget();
     }
@@ -72,6 +96,9 @@ public class EnemyBase : MonoBehaviour
     public virtual void takeDamage(float amount)
     {
         currentHP -= amount;
+
+        TriggerHitFlash();
+
         if (MusicManager.Instance != null)
             MusicManager.Instance.PlayEnemyHurtSound(transform.position);
 
@@ -96,7 +123,7 @@ public class EnemyBase : MonoBehaviour
         void Unfreeze() => currentspeed = original;
     }
 
-    System.Collections.IEnumerator StatusDamage(float dps, float duration)
+    IEnumerator StatusDamage(float dps, float duration)
     {
         float t = 0f;
         while (t < duration)
@@ -116,5 +143,52 @@ public class EnemyBase : MonoBehaviour
             transform.position += dir.normalized * speed * Time.deltaTime;
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), 8f * Time.deltaTime);
         }
+    }
+
+    public void TriggerHitFlash()
+    {
+        if (_flashRoutine != null)
+        {
+            StopCoroutine(_flashRoutine);
+        }
+        _flashRoutine = StartCoroutine(HitFlashRoutine());
+    }
+
+    private IEnumerator HitFlashRoutine()
+    {
+        SetRendererColors(flashColor);
+        yield return new WaitForSeconds(flashDuration);
+        ResetRendererColors();
+        _flashRoutine = null;
+    }
+
+    private void SetRendererColors(Color color)
+    {
+        for (int i = 0; i < _renderers.Count; i++)
+        {
+            Renderer rend = _renderers[i];
+            if (rend == null) continue;
+
+            rend.GetPropertyBlock(_propBlock);
+            _propBlock.SetColor(BaseColorId, color);
+            _propBlock.SetColor(ColorId, color);
+            rend.SetPropertyBlock(_propBlock);
+        }
+    }
+
+    private void ResetRendererColors()
+    {
+        for (int i = 0; i < _renderers.Count; i++)
+        {
+            Renderer rend = _renderers[i];
+            if (rend == null) continue;
+
+            rend.SetPropertyBlock(null);
+        }
+    }
+
+    protected virtual void OnDisable()
+    {
+        ResetRendererColors();
     }
 }

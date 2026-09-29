@@ -46,6 +46,7 @@ public class ThrowJam : SpellTemplate
         Vector3 dir = (targetPoint - spawnOrigin).normalized;
         MusicManager.Instance.PlayBazookaSound(spawnOrigin);
         GameObject blob = Instantiate(bazookaBlobPrefab, spawnOrigin, Quaternion.identity);
+        CameraShake.Instance.ShakeHeavy();
         if (blob.TryGetComponent<BazookaLaunch>(out var blobScript))
         {
             blobScript.Launch(dir, launchSpeed, damage, blastRadius, freezeDuration);

@@ -357,4 +357,17 @@ public class PlayerCharacter : MonoBehaviour, ICharacterController
     {
     }
 
+
+    public void SetHandVisibility(bool visible)
+    {
+        if (armsAnimator != null)
+        {
+            armsAnimator.SetBool("IsDrawing", !visible);
+        }
+        if (jarAnimator != null)
+        {
+            jarAnimator.SetBool("IsDrawing", !visible);
+        }
+    }
+
 }
