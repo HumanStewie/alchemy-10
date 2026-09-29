@@ -27,6 +27,9 @@ public class BookMovement : MonoBehaviour
     public float WallSpellTime = 0.5f;
     public Transform WallSpawnLoc;
 
+    [Header("Player Character Reference")]
+    [SerializeField] private PlayerCharacter playerCharacter;
+
     private float currentY;
     public bool isDisabled = false;
 
@@ -42,6 +45,11 @@ public class BookMovement : MonoBehaviour
         currentY = startRot.y;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        if (playerCharacter == null)
+        {
+            playerCharacter = FindFirstObjectByType<PlayerCharacter>();
+        }
     }
 
     void Update()
@@ -61,6 +69,18 @@ public class BookMovement : MonoBehaviour
         transform.localRotation = Quaternion.Euler(startRot.x, currentY, startRot.z);
     }
 
+    private void OnStartSpellAnimation()
+    {
+        isInanimation = true;
+        isIdle = false;
+        transform.DOKill();
+
+        if (playerCharacter != null)
+        {
+            playerCharacter.SetHandVisibility(false);
+        }
+    }
+
     private void ResetToIdleState()
     {
         isInanimation = false;
@@ -68,15 +88,18 @@ public class BookMovement : MonoBehaviour
         currentY = startRot.y;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        if (playerCharacter != null)
+        {
+            playerCharacter.SetHandVisibility(true);
+        }
     }
 
+    // --- BASE SWING ATTACK ---
     public void SwingJamAttack(Action onSwingApex)
     {
         if (isInanimation) return;
-
-        isInanimation = true;
-        isIdle = false;
-        transform.DOKill();
+        OnStartSpellAnimation();
 
         Vector3 prepLoc = new Vector3(startLoc.x - 0.22f, startLoc.y + 0.08f, startLoc.z);
         Vector3 prepRot = new Vector3(10f, -30f, 20f);
@@ -100,13 +123,11 @@ public class BookMovement : MonoBehaviour
         swingSeq.OnComplete(ResetToIdleState);
     }
 
-
+    // --- 1. WALL SPELL ANIMATION ---
     public void WallSpellAnimation(Action onSlamDown = null)
     {
         if (isInanimation) return;
-        isInanimation = true;
-        isIdle = false;
-        transform.DOKill();
+        OnStartSpellAnimation();
 
         Sequence wallSeq = DOTween.Sequence();
 
@@ -136,13 +157,10 @@ public class BookMovement : MonoBehaviour
         wallSeq.OnComplete(ResetToIdleState);
     }
 
-
     public void EatAnimation(Action onEatComplete = null)
     {
         if (isInanimation) return;
-        isInanimation = true;
-        isIdle = false;
-        transform.DOKill();
+        OnStartSpellAnimation();
 
         Sequence eatSeq = DOTween.Sequence();
 
@@ -161,7 +179,10 @@ public class BookMovement : MonoBehaviour
 
         eatSeq.AppendCallback(() =>
         {
-            if (MusicManager.Instance != null) MusicManager.Instance.PlayEatingSound(transform.position);
+            if (MusicManager.Instance != null)
+            {
+                MusicManager.Instance.PlayEatingSound(transform.position);
+            }
             onEatComplete?.Invoke();
         });
 
@@ -171,13 +192,10 @@ public class BookMovement : MonoBehaviour
         eatSeq.OnComplete(ResetToIdleState);
     }
 
- 
     public void ThrowTrapAnimation(Action onTrapApex = null)
     {
         if (isInanimation) return;
-        isInanimation = true;
-        isIdle = false;
-        transform.DOKill();
+        OnStartSpellAnimation();
 
         Sequence throwSeq = DOTween.Sequence();
 
@@ -193,7 +211,7 @@ public class BookMovement : MonoBehaviour
         throwSeq.Append(transform.DOLocalMove(throwApexLoc, 0.14f).SetEase(Ease.InCubic));
         throwSeq.Join(transform.DOLocalRotate(throwApexRot, 0.14f).SetEase(Ease.InBack));
 
-        throwSeq.AppendCallback(() => onTrapApex?.Invoke());
+        throwSeq.InsertCallback(0.26f, () => onTrapApex?.Invoke());
 
         throwSeq.Append(transform.DOLocalMove(startLoc, 0.22f).SetEase(Ease.OutQuad));
         throwSeq.Join(transform.DOLocalRotate(startRot, 0.22f).SetEase(Ease.OutQuad));
@@ -204,9 +222,7 @@ public class BookMovement : MonoBehaviour
     public void SpreadCardThrowAnimation(Action onFlick = null)
     {
         if (isInanimation) return;
-        isInanimation = true;
-        isIdle = false;
-        transform.DOKill();
+        OnStartSpellAnimation();
 
         Sequence flickSeq = DOTween.Sequence();
 
@@ -222,7 +238,7 @@ public class BookMovement : MonoBehaviour
         flickSeq.Append(transform.DOLocalMove(rightFlickLoc, 0.13f).SetEase(Ease.InSine));
         flickSeq.Join(transform.DOLocalRotate(rightFlickRot, 0.13f).SetEase(Ease.InSine));
 
-        flickSeq.AppendCallback(() => onFlick?.Invoke());
+        flickSeq.InsertCallback(0.27f, () => onFlick?.Invoke());
 
         flickSeq.Append(transform.DOLocalMove(startLoc, 0.2f).SetEase(Ease.OutQuad));
         flickSeq.Join(transform.DOLocalRotate(startRot, 0.2f).SetEase(Ease.OutQuad));
@@ -264,6 +280,10 @@ public class BookMovement : MonoBehaviour
             .OnComplete(() =>
             {
                 currentY = startRot.y;
+                if (playerCharacter != null)
+                {
+                    playerCharacter.SetHandVisibility(true);
+                }
             });
     }
 
