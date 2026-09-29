@@ -3,6 +3,10 @@ using UnityEngine;
 
 public class TrapProperty : MonoBehaviour
 {
+    // Global tracker to limit total active traps to 2
+    public static List<TrapProperty> ActiveTraps = new List<TrapProperty>();
+    private const int MaxTrapCount = 2;
+
     [Header("Trap Settings")]
     public float lifetime = 10f;
     public float damage = 4f;
@@ -16,6 +20,20 @@ public class TrapProperty : MonoBehaviour
     private Dictionary<Collider, float> activeEnemies = new Dictionary<Collider, float>();
     private List<Collider> toRemove = new List<Collider>();
     private bool isQuitting = false;
+
+    private void Awake()
+    {
+        ActiveTraps.Add(this);
+        if (ActiveTraps.Count > MaxTrapCount)
+        {
+            TrapProperty oldestTrap = ActiveTraps[0];
+            ActiveTraps.RemoveAt(0);
+            if (oldestTrap != null)
+            {
+                Destroy(oldestTrap.gameObject);
+            }
+        }
+    }
 
     private void Start()
     {
@@ -104,6 +122,8 @@ public class TrapProperty : MonoBehaviour
 
     private void OnDestroy()
     {
+        ActiveTraps.Remove(this);
+
         if (isQuitting || !gameObject.scene.isLoaded) return;
 
         BreadTrap trap = GetLiveTrap();
@@ -111,8 +131,12 @@ public class TrapProperty : MonoBehaviour
         {
             if (explosionVFX != null)
                 Instantiate(explosionVFX, transform.position, Quaternion.identity);
-            CameraShake.Instance.ShakeLight();
-            MusicManager.Instance.PlayExplosionSound(transform.position);
+
+            if (CameraShake.Instance != null)
+                CameraShake.Instance.ShakeLight();
+
+            if (MusicManager.Instance != null)
+                MusicManager.Instance.PlayExplosionSound(transform.position);
 
             Collider[] hits = Physics.OverlapSphere(transform.position, deathExplosionRadius);
             foreach (Collider col in hits)

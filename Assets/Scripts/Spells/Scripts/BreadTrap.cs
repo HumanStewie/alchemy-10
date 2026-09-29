@@ -18,23 +18,43 @@ public class BreadTrap : SpellTemplate
         {
             BookMovement.Instance.ThrowTrapAnimation(() =>
             {
-                ShootSingleJam(targetPoint);
+                ShootSingleJam(targetPoint, caster);
             });
         }
         else
         {
-            ShootSingleJam(targetPoint);
+            ShootSingleJam(targetPoint, caster);
         }
     }
 
-    private void ShootSingleJam(Vector3 targetPoint)
+    private void ShootSingleJam(Vector3 targetPoint, GameObject caster)
     {
         if (Camera.main == null || jamBlobPrefab == null) return;
 
-        Vector3 spawnOrigin = Camera.main.transform.position + (Camera.main.transform.forward * 0.4f);
+        Vector3 spawnOrigin = Camera.main.transform.position + (Camera.main.transform.forward * 0.8f);
         Vector3 shootDir = (targetPoint - spawnOrigin).normalized;
-        MusicManager.Instance.PlayJamThrowSound(spawnOrigin);
+
+        if (MusicManager.Instance != null)
+        {
+            MusicManager.Instance.PlayJamThrowSound(spawnOrigin);
+        }
+
         GameObject blob = Instantiate(jamBlobPrefab, spawnOrigin, Quaternion.identity);
+
+        if (caster != null)
+        {
+            Collider[] playerColliders = caster.GetComponentsInChildren<Collider>();
+            Collider blobCollider = blob.GetComponent<Collider>();
+
+            if (blobCollider != null)
+            {
+                foreach (Collider playerCol in playerColliders)
+                {
+                    Physics.IgnoreCollision(blobCollider, playerCol, true);
+                }
+            }
+        }
+
         if (blob.TryGetComponent<ProjectileGetter>(out var jamScript))
         {
             jamScript.Launch(shootDir, projectileSpeed);

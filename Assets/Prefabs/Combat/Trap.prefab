@@ -65,6 +65,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -8391222552659086748, guid: cac234b2ae26fd149a08eb4b07c4233d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6233668299122736260}
+    - targetCorrespondingSourceObject: {fileID: -8391222552659086748, guid: cac234b2ae26fd149a08eb4b07c4233d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8211402215925570162}
   m_SourcePrefab: {fileID: 100100000, guid: cac234b2ae26fd149a08eb4b07c4233d, type: 3}
 --- !u!1 &481616243148513102 stripped
 GameObject:
@@ -93,3 +96,21 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: -5495902117074765545, guid: cac234b2ae26fd149a08eb4b07c4233d, type: 3}
+--- !u!114 &8211402215925570162
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 481616243148513102}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 489515347ab94824482afdc6cdd75fad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrapProperty
+  lifetime: 10
+  damage: 4
+  damageInterval: 1
+  explosionVFX: {fileID: 3192898620222058802, guid: 46b13fda358aec74ab9f0c1874e3deaa, type: 3}
+  deathExplosionRadius: 3
+  deathExplosionDamage: 10

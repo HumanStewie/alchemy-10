@@ -43,7 +43,7 @@ public class GameManager : MonoBehaviour
     [HideInInspector] public GameObject bloodEffect;
     [HideInInspector] public GameObject poofEffect;
 
-    [SerializeField] private GameObject healthBar;
+    [SerializeField] public GameObject healthBar;
     [SerializeField] private GameObject runeHealthbar;
 
     private void Awake()
@@ -381,6 +381,7 @@ public class GameManager : MonoBehaviour
     public void Lose()
     {
         LoseCanvas.SetActive(true);
+        GameCanvas.SetActive(false);
 
         LoseCanvas.AddComponent<EventTrigger>();
 
@@ -395,6 +396,7 @@ public class GameManager : MonoBehaviour
     public void Win()
     {
         WinCanvas.SetActive(true);
+        GameCanvas.SetActive(false);    
 
         WinCanvas.AddComponent<EventTrigger>();
 

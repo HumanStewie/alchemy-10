@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerHealthAndStat : MonoBehaviour
 {
@@ -19,6 +20,7 @@ public class PlayerHealthAndStat : MonoBehaviour
     protected virtual void Start()
     {
         currentHP = maxHP;
+        GameManager.Instance.healthBar.GetComponent<Image>().fillAmount = 1;
         currentdamage = damage;
 
         bloodParticle = GameManager.Instance.bloodEffect;

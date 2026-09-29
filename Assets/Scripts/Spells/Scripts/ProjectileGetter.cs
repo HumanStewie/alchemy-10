@@ -5,6 +5,7 @@ public class ProjectileGetter : MonoBehaviour
     public GameObject trapPrefab;
     [Header("Impact")]
     [SerializeField] private float surfaceOffset = 0.02f;
+    [SerializeField] private LayerMask hitLayers = ~0;
 
     private Vector3 velocity;
     private bool hasHit = false;
@@ -23,7 +24,7 @@ public class ProjectileGetter : MonoBehaviour
         float moveStep = velocity.magnitude * Time.deltaTime;
         Ray ray = new Ray(transform.position, velocity.normalized);
 
-        if (Physics.Raycast(ray, out RaycastHit hit, moveStep))
+        if (Physics.Raycast(ray, out RaycastHit hit, moveStep, hitLayers, QueryTriggerInteraction.Ignore))
         {
             HitSurface(hit);
         }
@@ -37,9 +38,10 @@ public class ProjectileGetter : MonoBehaviour
     {
         hasHit = true;
 
-        if (hit.collider.CompareTag("Enemy") || hit.collider.CompareTag("Player"))
+        if (hit.collider.CompareTag("Player") ||
+            hit.collider.GetComponentInParent<PlayerCharacter>() != null ||
+            hit.collider.CompareTag("Enemy"))
         {
-
             Destroy(gameObject);
             return;
         }
@@ -48,13 +50,17 @@ public class ProjectileGetter : MonoBehaviour
         {
             Vector3 splatPos = hit.point + hit.normal * surfaceOffset;
             Quaternion splatRotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
-            MusicManager.Instance.PlayJamHitSound(hit.point);
-            GameObject splat = Instantiate(trapPrefab, splatPos, splatRotation);
-            splat.transform.SetParent(hit.collider.transform);
 
-            if (splat.TryGetComponent<JamSpread>(out var splatScript))
+            if (MusicManager.Instance != null)
             {
-                splatScript.InitSplat();
+                MusicManager.Instance.PlayJamHitSound(hit.point);
+            }
+
+            GameObject splat = Instantiate(trapPrefab, splatPos, splatRotation);
+
+            if (!hit.collider.CompareTag("Player") && hit.collider.GetComponentInParent<PlayerCharacter>() == null)
+            {
+                splat.transform.SetParent(hit.collider.transform);
             }
         }
 

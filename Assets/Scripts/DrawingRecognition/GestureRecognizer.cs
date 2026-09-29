@@ -25,9 +25,10 @@ public class GestureRecognizer : MonoBehaviour
     public List<SpellTemplate> templates = new List<SpellTemplate>();
     [SerializeField] private float maxAllowedError = 50f;
 
-    [Header("Equipped Spell & Cooldown")]
+    [Header("Equipped Spell & Cooldowns")]
     public SpellTemplate preparedSpell;
-    private float nextCastTime = 0f;
+
+    private Dictionary<string, float> spellCooldowns = new Dictionary<string, float>();
 
     [SerializeField] TMP_Text spellText;
 
@@ -41,7 +42,6 @@ public class GestureRecognizer : MonoBehaviour
                 templates[i] = Instantiate(templates[i]);
             }
         }
-
     }
 
     private void Update()
@@ -52,6 +52,8 @@ public class GestureRecognizer : MonoBehaviour
             Debug.Log($"Record Mode: {isGettingTemp}");
         }
 
+        UpdateSpellHUDText();
+
         if (BookMovement.Instance != null && BookMovement.Instance.isIdle && !BookMovement.Instance.isInanimation && !BookMovement.Instance.isDisabled)
         {
             if (Input.GetMouseButtonDown(0))
@@ -61,14 +63,39 @@ public class GestureRecognizer : MonoBehaviour
         }
     }
 
+    private void UpdateSpellHUDText()
+    {
+        if (spellText == null || preparedSpell == null) return;
+
+        if (spellCooldowns.TryGetValue(preparedSpell.spellName, out float readyTime))
+        {
+            float remaining = readyTime - Time.time;
+            if (remaining > 0f)
+            {
+                spellText.text = $"{preparedSpell.spellName} (CD: {remaining:F1}s)";
+                return;
+            }
+        }
+
+        spellText.text = $"{preparedSpell.spellName} [READY]";
+    }
+
     private void TryCastSpell()
     {
         if (preparedSpell == null) return;
 
-        if (Time.time < nextCastTime)
+        if (spellCooldowns.TryGetValue(preparedSpell.spellName, out float spellReadyTime))
         {
-            Debug.Log($"Cooldown active! {nextCastTime - Time.time:F1}s remaining.");
-            return;
+            if (Time.time < spellReadyTime)
+            {
+                float remainingTime = spellReadyTime - Time.time;
+                Debug.Log($"{preparedSpell.spellName} cooldown active! {remainingTime:F1}s remaining.");
+                if (spellText != null)
+                {
+                    spellText.text = $"{preparedSpell.spellName} on Cooldown: {remainingTime:F1}s";
+                }
+                return;
+            }
         }
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -79,7 +106,8 @@ public class GestureRecognizer : MonoBehaviour
         }
 
         preparedSpell.Cast(gameObject, targetPoint, 1f);
-        nextCastTime = Time.time + preparedSpell.cooldown;
+
+        spellCooldowns[preparedSpell.spellName] = Time.time + preparedSpell.cooldown;
     }
 
     public void DoEverything(List<Vector2> points)
@@ -227,18 +255,26 @@ public class GestureRecognizer : MonoBehaviour
         {
             preparedSpell = bestTemp;
             Debug.Log(preparedSpell.spellName);
-            spellText.text = $"Current Spell: {preparedSpell.spellName})";
+
+            if (spellCooldowns.TryGetValue(preparedSpell.spellName, out float readyTime) && Time.time < readyTime)
+            {
+                float remaining = readyTime - Time.time;
+                spellText.text = $"Current Spell: {preparedSpell.spellName} (CD: {remaining:F1}s)";
+            }
+            else
+            {
+                spellText.text = $"Current Spell: {preparedSpell.spellName}";
+            }
 
             if (MusicManager.Instance != null && Camera.main != null)
             {
                 MusicManager.Instance.PlaySpellRecognizedSound(Camera.main.transform.position);
             }
-
         }
         else
         {
             Debug.Log($"Failed to recognize gesture. Closest was: {bestTemp?.spellName} ({lowestDistance:F1})");
-            spellText.text = $"Failed to recognize gesture. Closest was: {bestTemp?.spellName})";
+            spellText.text = $"Failed to recognize gesture. Closest was: {bestTemp?.spellName}";
         }
     }
 }
