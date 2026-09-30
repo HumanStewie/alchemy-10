@@ -64,6 +64,10 @@ PrefabInstance:
       propertyPath: m_ConstrainProportionsScale
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: d1566de9a852bae49a1afc9d4f9143d7, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 186198d7b9ab818448b8d369324959b1, type: 2}
     - target: {fileID: 919132149155446097, guid: d1566de9a852bae49a1afc9d4f9143d7, type: 3}
       propertyPath: m_Name
       value: JamForTrap
@@ -254,6 +258,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileGetter
   trapPrefab: {fileID: 135672270271271035, guid: 6300b5ab91b71b442a12149f53077910, type: 3}
   surfaceOffset: 0.005
+  hitLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!64 &56427855632724262
 MeshCollider:
   m_ObjectHideFlags: 0

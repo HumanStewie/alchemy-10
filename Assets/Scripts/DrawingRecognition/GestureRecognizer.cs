@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -27,10 +28,20 @@ public class GestureRecognizer : MonoBehaviour
 
     [Header("Equipped Spell & Cooldowns")]
     public SpellTemplate preparedSpell;
-
     private Dictionary<string, float> spellCooldowns = new Dictionary<string, float>();
 
     [SerializeField] TMP_Text spellText;
+
+    [System.Serializable]
+    public struct SpellMaterialPair
+    {
+        public SpellTemplate spell;
+        public Material jamMaterial;
+    }
+
+    [Header("Jam Materials Mapping")]
+    [SerializeField] private List<SpellMaterialPair> spellJamMaterials = new List<SpellMaterialPair>();
+    [SerializeField] private Material defaultJamMaterial;
 
     private void Awake()
     {
@@ -41,6 +52,18 @@ public class GestureRecognizer : MonoBehaviour
             {
                 templates[i] = Instantiate(templates[i]);
             }
+        }
+    }
+
+    private void Start()
+    {
+        if (preparedSpell != null)
+        {
+            ApplyJamMaterialForSpell(preparedSpell);
+        }
+        else if (defaultJamMaterial != null && BookMovement.Instance != null)
+        {
+            BookMovement.Instance.SetJamMaterial(defaultJamMaterial);
         }
     }
 
@@ -108,6 +131,28 @@ public class GestureRecognizer : MonoBehaviour
         preparedSpell.Cast(gameObject, targetPoint, 1f);
 
         spellCooldowns[preparedSpell.spellName] = Time.time + preparedSpell.cooldown;
+    }
+
+    private void ApplyJamMaterialForSpell(SpellTemplate spell)
+    {
+        if (BookMovement.Instance == null || spell == null) return;
+
+        Material selectedMat = defaultJamMaterial;
+
+        for (int i = 0; i < spellJamMaterials.Count; i++)
+        {
+            if (spellJamMaterials[i].spell != null &&
+               (spellJamMaterials[i].spell == spell || spellJamMaterials[i].spell.spellName == spell.spellName))
+            {
+                selectedMat = spellJamMaterials[i].jamMaterial;
+                break;
+            }
+        }
+
+        if (selectedMat != null)
+        {
+            BookMovement.Instance.SetJamMaterial(selectedMat);
+        }
     }
 
     public void DoEverything(List<Vector2> points)
@@ -254,7 +299,7 @@ public class GestureRecognizer : MonoBehaviour
         if (lowestDistance <= maxAllowedError && bestTemp != null)
         {
             preparedSpell = bestTemp;
-            Debug.Log(preparedSpell.spellName);
+            ApplyJamMaterialForSpell(preparedSpell);
 
             if (spellCooldowns.TryGetValue(preparedSpell.spellName, out float readyTime) && Time.time < readyTime)
             {

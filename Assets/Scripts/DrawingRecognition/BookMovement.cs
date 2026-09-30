@@ -16,7 +16,13 @@ public class BookMovement : MonoBehaviour
 
     public bool isInanimation = false;
     public bool isIdle = true;
+ 
+    
     public float timeChange = 0.2f;
+
+
+    [SerializeField] public GameObject jam1;
+    [SerializeField] private GameObject jam2;
 
     [Header("Bobbing & Spinning")]
     [SerializeField] private float bobSpeed = 2.5f;
@@ -151,7 +157,6 @@ public class BookMovement : MonoBehaviour
         StartCoroutine(ArmsAndJarAnimation(SideWeepArms, SideWeepJar, 0.2f, 1.0f, onSwingApex, 0.4f));
     }
 
-    // --- 1. WALL SPELL ANIMATION ---
     public void WallSpellAnimation(Action onSlamDown = null)
     {
         if (isInanimation) return;
@@ -251,5 +256,19 @@ public class BookMovement : MonoBehaviour
         if (!isIdle) ReturnToIdle();
         yield return new WaitForSeconds(time);
         isDisabled = false;
+    }
+    public void SetJamMaterial(Material newMat)
+    {
+        if (newMat == null) return;
+
+        if (jam1 != null && jam1.TryGetComponent<Renderer>(out var rend1))
+        {
+            rend1.material = newMat;
+        }
+
+        if (jam2 != null && jam2.TryGetComponent<Renderer>(out var rend2))
+        {
+            rend2.material = newMat;
+        }
     }
 }

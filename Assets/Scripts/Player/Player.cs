@@ -28,10 +28,10 @@ public class Player : MonoBehaviour
         var deltaTime = Time.deltaTime;
         // Same idea as below, this is how we read look data
         var cameraInput = new CameraInput { Look = input.Look.ReadValue<Vector2>() };
-        if (BookMovement.Instance != null && BookMovement.Instance.isIdle)
-        {
+        //if (BookMovement.Instance != null && BookMovement.Instance.isIdle)
+        //{
             playerCamera.UpdateRotation(cameraInput, playerCharacter.GetCameraTarget());
-        }
+        //}
 
         Vector2 moveVector = input.Move.ReadValue<Vector2>();
 

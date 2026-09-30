@@ -2708,6 +2708,11 @@ MonoBehaviour:
   purchasedColor: {r: 0.6, g: 0.9, b: 0.6, a: 1}
   isPurchased: 0
   isUnlocked: 0
+--- !u!1 &613824139 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 815454375105413527, guid: dfdf77287aa78b6d3a952d90110c51f1, type: 3}
+  m_PrefabInstance: {fileID: 1236540158}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &616680395 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: bbf7b8a212fa0384698c884b772507ba, type: 3}
@@ -3851,6 +3856,22 @@ MonoBehaviour:
   maxAllowedError: 100
   preparedSpell: {fileID: 0}
   spellText: {fileID: 1725359808}
+  spellJamMaterials:
+  - spell: {fileID: 11400000, guid: 17fb9490124f0f44bae19ba0fd51e9f6, type: 2}
+    jamMaterial: {fileID: 2100000, guid: 5ff7278843be1fc4b84056abe8232fe2, type: 2}
+  - spell: {fileID: 11400000, guid: 03b7125013cac644c95cface25e589aa, type: 2}
+    jamMaterial: {fileID: 2100000, guid: 186198d7b9ab818448b8d369324959b1, type: 2}
+  - spell: {fileID: 11400000, guid: 8e47f47162d2f574e828972cfe49216c, type: 2}
+    jamMaterial: {fileID: 2100000, guid: 017e51a35dcf3b94b87fef339a6c1c70, type: 2}
+  - spell: {fileID: 11400000, guid: 66a700c290ad29149aadf8baef04407f, type: 2}
+    jamMaterial: {fileID: 2100000, guid: d8d87347be8fb7745bf828daa13b47d0, type: 2}
+  - spell: {fileID: 11400000, guid: 6331b5dfa7fb3664bbb45331b659ce1d, type: 2}
+    jamMaterial: {fileID: 2100000, guid: 92e947739a3109749bc1d6ef0e4f6639, type: 2}
+  - spell: {fileID: 11400000, guid: 0d848884ed591c54bb51ba0ab69f89f3, type: 2}
+    jamMaterial: {fileID: 2100000, guid: 57f8894166396da4cb8a85c497d4f77e, type: 2}
+  - spell: {fileID: 11400000, guid: e250661bd639c074b935fffcc14ecf88, type: 2}
+    jamMaterial: {fileID: 2100000, guid: 26afb5041379bbd40a02a904f02e56a2, type: 2}
+  defaultJamMaterial: {fileID: 0}
 --- !u!4 &996634392
 Transform:
   m_ObjectHideFlags: 0
@@ -4917,6 +4938,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 3788485504342964226, guid: dfdf77287aa78b6d3a952d90110c51f1, type: 3}
+      propertyPath: jam1
+      value: 
+      objectReference: {fileID: 613824139}
+    - target: {fileID: 3788485504342964226, guid: dfdf77287aa78b6d3a952d90110c51f1, type: 3}
+      propertyPath: jam2
+      value: 
+      objectReference: {fileID: 2023145832}
     - target: {fileID: 3788485504342964226, guid: dfdf77287aa78b6d3a952d90110c51f1, type: 3}
       propertyPath: healthbar
       value: 
@@ -8282,6 +8311,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 996634392}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2023145832 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 568766604954226766, guid: dfdf77287aa78b6d3a952d90110c51f1, type: 3}
+  m_PrefabInstance: {fileID: 1236540158}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2031383461
 GameObject:
   m_ObjectHideFlags: 0
