@@ -47,7 +47,8 @@ public class EnemyBase : MonoBehaviour
     }
 
     protected virtual void Start()
-    {
+    { 
+        runeSymbol = (GameObject)Resources.Load("Enemy/Rune");
         currentHP = maxHP;
         currentspeed = moveSpeed;
 

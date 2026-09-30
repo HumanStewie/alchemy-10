@@ -7,7 +7,7 @@ public class BazookaLaunch : MonoBehaviour
     [SerializeField] private GameObject explosionVFX;
     [SerializeField] private float surfaceOffset = 0.02f;
 
-    private float blastDamage;
+    private float blastDamage = 15;
     private float blastRadius;
     private float freezeDuration;
     private Vector3 velocity;
@@ -19,8 +19,7 @@ public class BazookaLaunch : MonoBehaviour
         blastRadius = radius;
         freezeDuration = freezeTime;
 
-        Vector3 launchDir = (direction.normalized + Vector3.up * 0.35f).normalized;
-        velocity = launchDir * speed;
+        velocity = direction.normalized * speed;
 
         Destroy(gameObject, 6f);
     }
@@ -29,7 +28,6 @@ public class BazookaLaunch : MonoBehaviour
     {
         if (hasHit) return;
 
-        velocity += Physics.gravity * 2f * Time.deltaTime;
         float moveDistance = velocity.magnitude * Time.deltaTime;
 
         if (Physics.Raycast(transform.position, velocity.normalized, out RaycastHit hit, moveDistance))
@@ -61,13 +59,18 @@ public class BazookaLaunch : MonoBehaviour
         {
             Instantiate(explosionVFX, hit.point, Quaternion.identity);
         }
-        MusicManager.Instance.PlayJamHitSound(hit.point);
+
+        if (MusicManager.Instance != null)
+        {
+            MusicManager.Instance.PlayJamHitSound(hit.point);
+        }
+
         Collider[] hits = Physics.OverlapSphere(hit.point, blastRadius);
         foreach (Collider col in hits)
         {
             if (col.CompareTag("Player")) continue;
 
-            col.SendMessageUpwards("takeDamage", 10, SendMessageOptions.DontRequireReceiver);
+            col.SendMessageUpwards("takeDamage", blastDamage, SendMessageOptions.DontRequireReceiver);
 
             if (freezeDuration > 0f)
             {

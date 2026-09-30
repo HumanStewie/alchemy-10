@@ -7,7 +7,7 @@ public class ThrowJam : SpellTemplate
 {
     [Header("Base Projectile")]
     public GameObject bazookaBlobPrefab;
-    public float launchSpeed = 22f;
+    public float launchSpeed = 45f;
 
     [Header("Base Stats")]
     public float damage = 40f;
