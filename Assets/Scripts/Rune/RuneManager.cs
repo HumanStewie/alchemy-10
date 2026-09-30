@@ -1,3 +1,4 @@
+﻿using DG.Tweening;
 using System.Collections;
 using UnityEngine;
 
@@ -10,7 +11,7 @@ public class RuneManager : MonoBehaviour
 
     [Header("Health")]
     public float currentHealth;
-    public float maxHealth;
+    public float maxHealth = 100f;
 
     [Header("Detection Settings")]
     public LayerMask obstacleMask;
@@ -21,20 +22,37 @@ public class RuneManager : MonoBehaviour
     [Header("Visuals")]
     public Transform arrowVisual;
 
+    [Header("Position & Wave Transitions")]
+    [SerializeField] private Vector3 centerPosition = Vector3.zero;
+    [SerializeField] private float floatHeightOffset = 18f;
+    [SerializeField] private float transitionDuration = 1.5f;
+    [SerializeField] private Ease transitionEase = Ease.InOutSine;
+
     private Vector3 _currentMoveDirection;
     private bool _isMoving = false;
+    private Coroutine _routine;
 
     public Vector3 CurrentMoveDirection => _currentMoveDirection;
 
+    private void Awake()
+    {
+        if (maxHealth <= 0f) maxHealth = 100f;
+        currentHealth = maxHealth;
+    }
+
     private void Start()
     {
-        StartCoroutine(RuneRoutine());
+        _routine = StartCoroutine(RuneRoutine());
     }
+
     private void Update()
     {
-        if (currentHealth == 0)
+        if (currentHealth <= 0f)
         {
-            GameManager.Instance.Lose();
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.Lose();
+            }
         }
     }
 
@@ -145,5 +163,49 @@ public class RuneManager : MonoBehaviour
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position + Vector3.up * castRadius, castRadius);
+
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(new Vector3(centerPosition.x, transform.position.y, centerPosition.z), 0.5f);
+    }
+
+    public void goNextWave(float floorY = 0f)
+    {
+        if (_routine != null)
+        {
+            StopCoroutine(_routine);
+            _routine = null;
+        }
+
+        _isMoving = false;
+        if (arrowVisual != null) arrowVisual.gameObject.SetActive(false);
+
+        if (MusicManager.Instance != null)
+        {
+            MusicManager.Instance.SetRuneMovementSound(false);
+        }
+
+        Vector3 targetPos = new Vector3(centerPosition.x, floorY + floatHeightOffset, centerPosition.z);
+
+        transform.DOKill();
+        transform.DOMove(targetPos, transitionDuration).SetEase(transitionEase);
+    }
+
+    public void ResumeWave()
+    {
+        transform.DOKill();
+
+        float snapY = transform.position.y;
+        if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit groundHit, 50f, obstacleMask))
+        {
+            snapY = groundHit.point.y;
+        }
+
+        Vector3 groundPos = new Vector3(transform.position.x, snapY, transform.position.z);
+
+        transform.DOMove(groundPos, 0.5f).SetEase(Ease.InQuad).OnComplete(() =>
+        {
+            if (_routine != null) StopCoroutine(_routine);
+            _routine = StartCoroutine(RuneRoutine());
+        });
     }
 }

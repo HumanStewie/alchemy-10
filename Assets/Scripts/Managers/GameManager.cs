@@ -1,4 +1,4 @@
-using DG.Tweening;
+﻿using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,14 +20,18 @@ public class GameManager : MonoBehaviour
     [HideInInspector] public GameObject swarmEnemy;
     [HideInInspector] public GameObject Fatass;
 
+    public List<GameObject> InvisblesWall = new();
+
     [Header("Wave State")]
     public int currentWave = 1;
     public float addedDifficulty = 40f;
     public bool started = false;
     public bool checking = false;
 
-    [Header("Spawn Settings")]
+    [Header("Floor & Spawn Settings")]
+    [SerializeField] private float floorHeightStep = 20f;
     [SerializeField] private float spawnRadius = 15f;
+    [SerializeField] private LayerMask groundLayer;
     public Transform player;
     [SerializeField] private bool startChecking;
 
@@ -35,8 +39,6 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject GameCanvas;
     [SerializeField] private GameObject LoseCanvas;
     [SerializeField] private GameObject WinCanvas;
-
-
 
     [HideInInspector] public GameObject burningEffect;
     [HideInInspector] public GameObject poisonEffect;
@@ -64,8 +66,11 @@ public class GameManager : MonoBehaviour
         Fatass = Resources.Load<GameObject>("Enemy/Fatass");
 
         swarmEnemy = simpleFollower;
+    }
 
-
+    public float GetCurrentFloorY()
+    {
+        return (currentWave - 1) * floorHeightStep;
     }
 
     void StartWave(int wave)
@@ -94,6 +99,13 @@ public class GameManager : MonoBehaviour
             {
                 if (SkillCanvas != null) SkillCanvas.SetActive(true);
                 if (GameCanvas != null) GameCanvas.SetActive(false);
+
+                RuneManager rune = FindFirstObjectByType<RuneManager>();
+                if (rune != null)
+                {
+                    rune.goNextWave(GetCurrentFloorY());
+                }
+
                 startChecking = false;
             }
         }
@@ -103,21 +115,21 @@ public class GameManager : MonoBehaviour
             StartFirstWave();
         }
 
-        var player = FindFirstObjectByType<PlayerHealthAndStat>();
-        if (player != null && healthBar != null)
+        var playerComp = FindFirstObjectByType<PlayerHealthAndStat>();
+        if (playerComp != null && healthBar != null)
         {
             var img = healthBar.GetComponent<Image>();
-            if (img != null && player.maxHP > 0f)
-                img.DOFillAmount(player.currentHP / player.maxHP, 0.1f);
-        }
-        var rune = FindFirstObjectByType<RuneManager>();
-        if (rune != null && runeHealthbar != null)
-        {
-            var img = runeHealthbar.GetComponent<Image>();
-            if (img != null && rune.maxHealth > 0f)
-                img.DOFillAmount(rune.currentHealth / rune.maxHealth, 0.1f);
+            if (img != null && playerComp.maxHP > 0f)
+                img.DOFillAmount(playerComp.currentHP / playerComp.maxHP, 0.1f);
         }
 
+        var runeComp = FindFirstObjectByType<RuneManager>();
+        if (runeComp != null && runeHealthbar != null)
+        {
+            var img = runeHealthbar.GetComponent<Image>();
+            if (img != null && runeComp.maxHealth > 0f)
+                img.DOFillAmount(runeComp.currentHealth / runeComp.maxHealth, 0.1f);
+        }
     }
 
     public void GoNextWave()
@@ -130,7 +142,23 @@ public class GameManager : MonoBehaviour
         {
             currentWave++;
             if (GameCanvas != null) GameCanvas.SetActive(true);
+
+            if (currentWave - 2 >= 0 && currentWave - 2 < InvisblesWall.Count)
+            {
+                if (InvisblesWall[currentWave - 2] != null)
+                {
+                    InvisblesWall[currentWave - 2].SetActive(true);
+                }
+            }
+
             StartWave(currentWave);
+
+            RuneManager rune = FindFirstObjectByType<RuneManager>();
+            if (rune != null)
+            {
+                rune.ResumeWave();
+            }
+
             startChecking = true;
         }
     }
@@ -324,7 +352,7 @@ public class GameManager : MonoBehaviour
                 else if (roll < 75) { InstantiateEnemy(swarmEnemy); valueCost -= 3f; }
                 else { InstantiateEnemy(Fatass); valueCost -= 4f; }
             }
-            else 
+            else
             {
                 if (roll < 40) { InstantiateEnemy(Fatass); valueCost -= 4f; }
                 else if (roll < 70) { InstantiateEnemy(wallSpawner); valueCost -= 2f; }
@@ -358,8 +386,16 @@ public class GameManager : MonoBehaviour
     {
         if (enemyPrefab == null) return;
 
-        Vector2 randomPoint = Random.insideUnitCircle * spawnRadius;
-        Vector3 spawnPos = new Vector3(randomPoint.x, currentWave * 2, randomPoint.y);
+        Vector2 randomCircle = Random.insideUnitCircle.normalized * Random.Range(5f, spawnRadius);
+        float floorY = GetCurrentFloorY();
+
+        Vector3 spawnPos = new Vector3(randomCircle.x, floorY + 0.1f, randomCircle.y);
+
+        // Raycast dò đúng bề mặt sàn nếu có obstacleMask/groundLayer
+        if (Physics.Raycast(new Vector3(randomCircle.x, floorY + 10f, randomCircle.y), Vector3.down, out RaycastHit hit, 20f, groundLayer))
+        {
+            spawnPos = hit.point + Vector3.up * 0.1f;
+        }
 
         if (enemyPrefab == swarmEnemy)
         {
@@ -394,32 +430,37 @@ public class GameManager : MonoBehaviour
 
     public void Lose()
     {
-        LoseCanvas.SetActive(true);
-        GameCanvas.SetActive(false);
+        if (LoseCanvas != null)
+        {
+            LoseCanvas.SetActive(true);
+            EventTrigger trigger = LoseCanvas.GetComponent<EventTrigger>();
+            if (trigger == null) trigger = LoseCanvas.AddComponent<EventTrigger>();
 
-        LoseCanvas.AddComponent<EventTrigger>();
+            trigger.triggers.Clear();
+            EventTrigger.Entry entry = new EventTrigger.Entry();
+            entry.eventID = EventTriggerType.PointerClick;
+            entry.callback.AddListener((data) => SceneManager.LoadScene("MainMenu"));
+            trigger.triggers.Add(entry);
+        }
 
-        EventTrigger.Entry entry = new EventTrigger.Entry();
-        entry.eventID = EventTriggerType.PointerClick;
-
-        entry.callback.AddListener((data) => SceneManager.LoadScene("MainMenu"));
-
-        LoseCanvas.GetComponent<EventTrigger>().triggers.Add(entry);
-
+        if (GameCanvas != null) GameCanvas.SetActive(false);
     }
+
     public void Win()
     {
-        WinCanvas.SetActive(true);
-        GameCanvas.SetActive(false);    
+        if (WinCanvas != null)
+        {
+            WinCanvas.SetActive(true);
+            EventTrigger trigger = WinCanvas.GetComponent<EventTrigger>();
+            if (trigger == null) trigger = WinCanvas.AddComponent<EventTrigger>();
 
-        WinCanvas.AddComponent<EventTrigger>();
+            trigger.triggers.Clear();
+            EventTrigger.Entry entry = new EventTrigger.Entry();
+            entry.eventID = EventTriggerType.PointerClick;
+            entry.callback.AddListener((data) => SceneManager.LoadScene("MainMenu"));
+            trigger.triggers.Add(entry);
+        }
 
-        EventTrigger.Entry entry = new EventTrigger.Entry();
-        entry.eventID = EventTriggerType.PointerClick;
-
-        entry.callback.AddListener((data) => SceneManager.LoadScene("MainMenu"));
-
-        WinCanvas.GetComponent<EventTrigger>().triggers.Add(entry);
-
+        if (GameCanvas != null) GameCanvas.SetActive(false);
     }
 }
