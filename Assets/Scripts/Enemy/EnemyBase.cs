@@ -32,7 +32,11 @@ public class EnemyBase : MonoBehaviour
     private GameObject bloodEffect;
     private GameObject poofEffect;
 
-    // Hit Flash Internal Variables
+    private Coroutine _poisonRoutine;
+    private Coroutine _burnRoutine;
+    private GameObject _activePoisonVFX;
+    private GameObject _activeBurnVFX;
+
     private List<Renderer> _renderers = new List<Renderer>();
     private MaterialPropertyBlock _propBlock;
     private Coroutine _flashRoutine;
@@ -47,7 +51,7 @@ public class EnemyBase : MonoBehaviour
     }
 
     protected virtual void Start()
-    { 
+    {
         runeSymbol = (GameObject)Resources.Load("Enemy/Rune");
         currentHP = maxHP;
         currentspeed = moveSpeed;
@@ -83,7 +87,10 @@ public class EnemyBase : MonoBehaviour
         if (preferRune && runeTarget != null && Random.value < 0.5f)
         {
             currentTarget = runeTarget;
-            if (runeSymbol != null) runeSymbol.SetActive(true);
+            if (runeSymbol != null)
+            {
+                Instantiate(runeSymbol, new Vector3(0, 2, 0), Quaternion.identity, transform);
+            }
         }
         else
         {
@@ -103,6 +110,9 @@ public class EnemyBase : MonoBehaviour
         if (MusicManager.Instance != null)
             MusicManager.Instance.PlayEnemyHurtSound(transform.position);
 
+        if (bloodEffect != null)
+            Instantiate(bloodEffect, transform.position, Quaternion.identity);
+
         if (currentHP <= 0) Die();
     }
 
@@ -111,11 +121,31 @@ public class EnemyBase : MonoBehaviour
         if (MusicManager.Instance != null)
             MusicManager.Instance.PlayDieSound(transform.position);
 
+        if (poofEffect != null)
+            Instantiate(poofEffect, transform.position, Quaternion.identity);
+
         Destroy(gameObject);
     }
 
-    public virtual void Poisoned(float dps, float duration) => StartCoroutine(StatusDamage(dps, duration));
-    public virtual void Burnt(float dps, float duration) => StartCoroutine(StatusDamage(dps, duration));
+
+    public virtual void Poisoned(float dps, float duration)
+    {
+        if (_poisonRoutine != null)
+        {
+            StopCoroutine(_poisonRoutine);
+        }
+        _poisonRoutine = StartCoroutine(PoisonRoutine(dps, duration));
+    }
+
+    public virtual void Burnt(float dps, float duration)
+    {
+        if (_burnRoutine != null)
+        {
+            StopCoroutine(_burnRoutine);
+        }
+        _burnRoutine = StartCoroutine(BurnRoutine(dps, duration));
+    }
+
     public virtual void Freeze(float duration)
     {
         float original = currentspeed;
@@ -124,8 +154,13 @@ public class EnemyBase : MonoBehaviour
         void Unfreeze() => currentspeed = original;
     }
 
-    IEnumerator StatusDamage(float dps, float duration)
+    private IEnumerator PoisonRoutine(float dps, float duration)
     {
+        if (_activePoisonVFX == null && poisonEffect != null)
+        {
+            _activePoisonVFX = Instantiate(poisonEffect, transform.position, Quaternion.identity, transform);
+        }
+
         float t = 0f;
         while (t < duration)
         {
@@ -133,7 +168,38 @@ public class EnemyBase : MonoBehaviour
             t += Time.deltaTime;
             yield return null;
         }
+
+        if (_activePoisonVFX != null)
+        {
+            Destroy(_activePoisonVFX);
+            _activePoisonVFX = null;
+        }
+        _poisonRoutine = null;
     }
+
+    private IEnumerator BurnRoutine(float dps, float duration)
+    {
+        if (_activeBurnVFX == null && burningEffect != null)
+        {
+            _activeBurnVFX = Instantiate(burningEffect, transform.position, Quaternion.identity, transform);
+        }
+
+        float t = 0f;
+        while (t < duration)
+        {
+            takeDamage(dps * Time.deltaTime);
+            t += Time.deltaTime;
+            yield return null;
+        }
+
+        if (_activeBurnVFX != null)
+        {
+            Destroy(_activeBurnVFX);
+            _activeBurnVFX = null;
+        }
+        _burnRoutine = null;
+    }
+
 
     protected void MoveTowards(Vector3 targetPos, float speed)
     {
@@ -142,7 +208,8 @@ public class EnemyBase : MonoBehaviour
         if (dir.sqrMagnitude > 0.01f)
         {
             transform.position += dir.normalized * speed * Time.deltaTime;
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), 8f * Time.deltaTime);
+            Quaternion targetRot = Quaternion.LookRotation(dir) * Quaternion.Euler(0f, 90f, 0f);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, 8f * Time.deltaTime);
         }
     }
 
@@ -191,5 +258,8 @@ public class EnemyBase : MonoBehaviour
     protected virtual void OnDisable()
     {
         ResetRendererColors();
+
+        if (_activePoisonVFX != null) Destroy(_activePoisonVFX);
+        if (_activeBurnVFX != null) Destroy(_activeBurnVFX);
     }
 }

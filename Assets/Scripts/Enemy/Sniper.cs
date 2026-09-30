@@ -14,7 +14,7 @@ public class SniperEnemy : EnemyBase
         maxHP = 15f;
         damage = 10f;
         moveSpeed = 2.5f;
-        preferRune = false;    
+        preferRune = false;
         base.Start();
 
         if (aimLine != null) aimLine.enabled = false;
@@ -31,23 +31,43 @@ public class SniperEnemy : EnemyBase
         if (!isAiming && attackCooldownTimer <= 0f)
         {
             StartAiming();
-            MusicManager.Instance.PlayLazerChargeSound(transform.position);
+            if (MusicManager.Instance != null)
+                MusicManager.Instance.PlayLazerChargeSound(transform.position);
         }
 
         if (isAiming)
         {
+            Vector3 aimDir = (currentTarget.position - transform.position);
+            aimDir.y = 0f;
+            if (aimDir.sqrMagnitude > 0.01f)
+            {
+                Quaternion targetRot = Quaternion.LookRotation(aimDir) * Quaternion.Euler(0f, 0f, 0f);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, 10f * Time.deltaTime);
+            }
+
             aimTimer -= Time.deltaTime;
             UpdateAimLine();
 
             if (aimTimer <= 0f)
             {
                 Shoot();
-                MusicManager.Instance.PlaySniperSound(transform.position);
 
                 isAiming = false;
                 if (aimLine != null) aimLine.enabled = false;
                 attackCooldownTimer = 5f;
             }
+        }
+    }
+
+    protected new void MoveTowards(Vector3 targetPos, float speed)
+    {
+        Vector3 dir = (targetPos - transform.position);
+        dir.y = 0f;
+        if (dir.sqrMagnitude > 0.01f)
+        {
+            transform.position += dir.normalized * speed * Time.deltaTime;
+            Quaternion targetRot = Quaternion.LookRotation(dir) * Quaternion.Euler(0f, 180f, 0f);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, 8f * Time.deltaTime);
         }
     }
 
