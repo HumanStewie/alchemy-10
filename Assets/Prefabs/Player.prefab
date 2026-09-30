@@ -533,7 +533,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealthAndStat
   maxHP: 50
-  currentHP: 0
+  currentHP: 50
   damage: 5
   currentdamage: 0
   cooldownMultiplier: 1
@@ -1179,10 +1179,13 @@ MonoBehaviour:
   bobSpeed: 2.5
   bobHeight: 0.05
   spinSpeed: 40
+  healthbar: {fileID: 0}
+  Runehealthbar: {fileID: 0}
   WallSpellTime: 1
   WallSpawnLoc: {fileID: 7481458638589007281}
-  armsAnimator: {fileID: 0}
-  jarAnimator: {fileID: 0}
+  armsAnimator: {fileID: 1406649342847821001}
+  jarAnimator: {fileID: 5297359201346783028}
+  playerCharacter: {fileID: 0}
   isDisabled: 0
 --- !u!1 &5978117166810417901 stripped
 GameObject:

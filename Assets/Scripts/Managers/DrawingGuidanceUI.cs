@@ -11,26 +11,19 @@ public class DrawingGuidanceUI : MonoBehaviour
     [SerializeField] private RectTransform rightPanel;
 
     [Header("Panel Slide Positions (Anchored X)")]
-    [SerializeField] private float leftHiddenX = -1200f;
-    [SerializeField] private float rightHiddenX = 1200f;
-    [SerializeField] private float leftShownX = -550f;
-    [SerializeField] private float rightShownX = 550f;
+    [SerializeField] private float leftHiddenX = -1400f;
+    [SerializeField] private float rightHiddenX = 1400f;
+    [SerializeField] private float leftShownX = -600f;
+    [SerializeField] private float rightShownX = 600f;
 
     [Header("Transition Settings")]
     [SerializeField] private float transitionDuration = 0.25f;
     [SerializeField] private Ease showEase = Ease.OutBack;
     [SerializeField] private Ease hideEase = Ease.InQuad;
 
-    [Header("Video Players")]
-    [SerializeField] private VideoPlayer leftVideoPlayer;
-    [SerializeField] private VideoPlayer rightVideoPlayer;
-
-    [Header("Playlist Clips (7 Videos)")]
-    [SerializeField] private VideoClip[] leftClips;
-    [SerializeField] private VideoClip[] rightClips;
-
-    private int currentLeftIndex = 0;
-    private int currentRightIndex = 0;
+    [Header("Video Players (All Play Simultaneously)")]
+    [SerializeField] private VideoPlayer[] leftVideoPlayers;  
+    [SerializeField] private VideoPlayer[] rightVideoPlayers; 
 
     private void Awake()
     {
@@ -39,22 +32,27 @@ public class DrawingGuidanceUI : MonoBehaviour
 
     private void Start()
     {
+        // Position offscreen on boot
         if (leftPanel != null)
             leftPanel.anchoredPosition = new Vector2(leftHiddenX, leftPanel.anchoredPosition.y);
 
         if (rightPanel != null)
             rightPanel.anchoredPosition = new Vector2(rightHiddenX, rightPanel.anchoredPosition.y);
 
-        SetupPlayer(leftVideoPlayer, OnLeftVideoEnded);
-        SetupPlayer(rightVideoPlayer, OnRightVideoEnded);
+        ConfigurePlayers(leftVideoPlayers);
+        ConfigurePlayers(rightVideoPlayers);
     }
 
-    private void SetupPlayer(VideoPlayer vp, VideoPlayer.EventHandler onEnded)
+    private void ConfigurePlayers(VideoPlayer[] players)
     {
-        if (vp == null) return;
-        vp.isLooping = false; // Tắt lặp đơn lẻ để chuyển sang video tiếp theo trong playlist
-        vp.playOnAwake = false;
-        vp.loopPointReached += onEnded;
+        if (players == null) return;
+        for (int i = 0; i < players.Length; i++)
+        {
+            if (players[i] == null) continue;
+            players[i].isLooping = true;
+            players[i].playOnAwake = false;
+            players[i].Prepare();
+        }
     }
 
     public void ShowGuidance()
@@ -71,8 +69,8 @@ public class DrawingGuidanceUI : MonoBehaviour
             rightPanel.DOAnchorPosX(rightShownX, transitionDuration).SetEase(showEase);
         }
 
-        PlayClip(leftVideoPlayer, leftClips, currentLeftIndex);
-        PlayClip(rightVideoPlayer, rightClips, currentRightIndex);
+        PlayAll(leftVideoPlayers);
+        PlayAll(rightVideoPlayers);
     }
 
     public void HideGuidance()
@@ -89,36 +87,30 @@ public class DrawingGuidanceUI : MonoBehaviour
             rightPanel.DOAnchorPosX(rightHiddenX, transitionDuration).SetEase(hideEase);
         }
 
-        if (leftVideoPlayer != null && leftVideoPlayer.isPlaying) leftVideoPlayer.Pause();
-        if (rightVideoPlayer != null && rightVideoPlayer.isPlaying) rightVideoPlayer.Pause();
+        PauseAll(leftVideoPlayers);
+        PauseAll(rightVideoPlayers);
     }
 
-    private void PlayClip(VideoPlayer vp, VideoClip[] clips, int index)
+    private void PlayAll(VideoPlayer[] players)
     {
-        if (vp == null || clips == null || clips.Length == 0) return;
-
-        vp.clip = clips[index % clips.Length];
-        vp.time = 0;
-        vp.Play();
+        if (players == null) return;
+        for (int i = 0; i < players.Length; i++)
+        {
+            if (players[i] == null) continue;
+            players[i].time = 0;
+            players[i].Play();
+        }
     }
 
-    private void OnLeftVideoEnded(VideoPlayer source)
+    private void PauseAll(VideoPlayer[] players)
     {
-        if (leftClips == null || leftClips.Length == 0) return;
-        currentLeftIndex = (currentLeftIndex + 1) % leftClips.Length;
-        PlayClip(source, leftClips, currentLeftIndex);
-    }
-
-    private void OnRightVideoEnded(VideoPlayer source)
-    {
-        if (rightClips == null || rightClips.Length == 0) return;
-        currentRightIndex = (currentRightIndex + 1) % rightClips.Length;
-        PlayClip(source, rightClips, currentRightIndex);
-    }
-
-    private void OnDestroy()
-    {
-        if (leftVideoPlayer != null) leftVideoPlayer.loopPointReached -= OnLeftVideoEnded;
-        if (rightVideoPlayer != null) rightVideoPlayer.loopPointReached -= OnRightVideoEnded;
+        if (players == null) return;
+        for (int i = 0; i < players.Length; i++)
+        {
+            if (players[i] != null && players[i].isPlaying)
+            {
+                players[i].Pause();
+            }
+        }
     }
 }

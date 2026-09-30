@@ -64,6 +64,9 @@ public class GameManager : MonoBehaviour
         Fatass = Resources.Load<GameObject>("Enemy/Fatass");
 
         swarmEnemy = simpleFollower;
+
+
+        FindFirstObjectByType<PlayerHealthAndStat>().currentHP = FindFirstObjectByType<PlayerHealthAndStat>().maxHP;
     }
 
     void StartWave(int wave)

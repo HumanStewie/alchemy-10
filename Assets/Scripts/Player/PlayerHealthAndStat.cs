@@ -1,45 +1,68 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class PlayerHealthAndStat : MonoBehaviour
 {
-    public float maxHP;
+    [Header("Health Stats")]
+    public float maxHP = 100f; 
     public float currentHP;
 
-    public float damage;
+    [Header("Attack Stats")]
+    public float damage = 10f;
     public float currentdamage;
 
+    [Header("Modifiers")]
     public float cooldownMultiplier = 1f;
-
-    public float maxSpeed;
-
+    public float maxSpeed = 10f;
 
     [SerializeField] private GameObject bloodParticle;
     [SerializeField] private GameObject PoofParticle;
 
+    private PlayerCharacter playerCharacter;
+
+    protected virtual void Awake()
+    {
+        if (maxHP <= 0f) maxHP = 100f;
+        currentHP = maxHP;
+        currentdamage = damage;
+    }
+
     protected virtual void Start()
     {
-        currentHP = maxHP;
-        GameManager.Instance.healthBar.GetComponent<Image>().fillAmount = 1;
-        currentdamage = damage;
-
-        bloodParticle = GameManager.Instance.bloodEffect;
-        PoofParticle = GameManager.Instance.poofEffect;
-    }
-    private void LateUpdate()
-    {
-        if (currentHP == 0)
+        playerCharacter = GetComponent<PlayerCharacter>();
+        if (playerCharacter != null && maxSpeed <= 0f)
         {
-            GameManager.Instance.Lose();
+            maxSpeed = playerCharacter.walkSpeed;
+        }
+
+        if (GameManager.Instance != null)
+        {
+            bloodParticle = GameManager.Instance.bloodEffect;
+            PoofParticle = GameManager.Instance.poofEffect;
+            UpdateHealthBar();
         }
     }
+
+    private void LateUpdate()
+    {
+        if (currentHP <= 0f)
+        {
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.Lose();
+            }
+        }
+    }
+
     public void ChangeAttack(float multiplier = 1f)
     {
-        if (multiplier != 1)
+        if (multiplier != 1f)
         {
             currentdamage *= multiplier;
         }
     }
+
     public void AttackNormal()
     {
         currentdamage = damage;
@@ -47,42 +70,69 @@ public class PlayerHealthAndStat : MonoBehaviour
 
     public void ChangeSpeed(float multiplier = 1f)
     {
-        if (multiplier != 1)
+        if (playerCharacter != null && multiplier != 1f)
         {
-            GetComponent<PlayerCharacter>().walkSpeed *= multiplier;
+            playerCharacter.walkSpeed *= multiplier;
         }
     }
+
     public void SpeedNormal()
     {
-        GetComponent<PlayerCharacter>().walkSpeed = maxSpeed;
+        if (playerCharacter != null)
+        {
+            playerCharacter.walkSpeed = maxSpeed;
+        }
     }
 
-    public void takeDamage(float damage)
+    public void takeDamage(float dmg)
     {
-        currentHP -= damage;
-        Instantiate(bloodParticle, transform.position, Quaternion.identity);
-        MusicManager.Instance.PlayPlayerHurtSound(transform.position);
-        CameraShake.Instance.ShakeLight();
-        if (currentHP <= 0)
+        currentHP = Mathf.Max(currentHP - dmg, 0f);
+        UpdateHealthBar();
+
+        if (bloodParticle != null)
+            Instantiate(bloodParticle, transform.position, Quaternion.identity);
+
+        if (MusicManager.Instance != null)
+            MusicManager.Instance.PlayPlayerHurtSound(transform.position);
+
+        if (CameraShake.Instance != null)
+            CameraShake.Instance.ShakeLight();
+
+        if (currentHP <= 0f)
         {
             Die();
         }
     }
-    public void heal(float damage)
+
+    public void heal(float amount)
     {
-        currentHP += damage;
-        if (currentHP > maxHP) {
-            currentHP = maxHP;
+        currentHP = Mathf.Min(currentHP + amount, maxHP);
+        UpdateHealthBar();
+    }
+
+    private void UpdateHealthBar()
+    {
+        if (GameManager.Instance != null && GameManager.Instance.healthBar != null)
+        {
+            UnityEngine.UI.Image barImage = GameManager.Instance.healthBar.GetComponent<UnityEngine.UI.Image>();
+            if (barImage != null && maxHP > 0f)
+            {
+                barImage.fillAmount = Mathf.Clamp01(currentHP / maxHP);
+            }
         }
     }
 
     public void Die()
     {
-        MusicManager.Instance.PlayDieSound(transform.position);
-        Instantiate(PoofParticle, transform.position, Quaternion.identity);
-        CameraShake.Instance.ShakeHeavy();
+        if (MusicManager.Instance != null)
+            MusicManager.Instance.PlayDieSound(transform.position);
+
+        if (PoofParticle != null)
+            Instantiate(PoofParticle, transform.position, Quaternion.identity);
+
+        if (CameraShake.Instance != null)
+            CameraShake.Instance.ShakeHeavy();
 
         Destroy(gameObject);
     }
-
 }
