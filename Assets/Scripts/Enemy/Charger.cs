@@ -45,6 +45,8 @@ public class ChargerEnemy : EnemyBase
 
             if (MusicManager.Instance != null)
                 MusicManager.Instance.PlayChargerSound(transform.position);
+            TriggerAttackAnimation();
+
             CameraShake.Instance.ShakeHeavy();
         }
     }

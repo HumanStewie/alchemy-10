@@ -36,6 +36,8 @@ public class WallSpawnerEnemy : EnemyBase
         Vector3 pos1 = currentTarget.position + forward * spawnDistance;
         Vector3 pos2 = currentTarget.position - forward * spawnDistance;
 
+        TriggerAttackAnimation();
+
         Instantiate(smallWallPrefab, pos1, Quaternion.LookRotation(forward));
         Instantiate(smallWallPrefab, pos2, Quaternion.LookRotation(-forward));
 
