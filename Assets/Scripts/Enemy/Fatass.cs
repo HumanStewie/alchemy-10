@@ -22,6 +22,8 @@ public class JamEaterEnemy : EnemyBase
             {
                 if (h.GetComponent<JamSpread>() || h.GetComponent<TrapProperty>() || h.GetComponent<JamProperty>())
                 {
+                    TriggerAttackAnimation();
+
                     Destroy(h.gameObject);
                     attackCooldownTimer = 10f;
                     break;

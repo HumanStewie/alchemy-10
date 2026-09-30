@@ -303,7 +303,7 @@ public class BookMovement : MonoBehaviour
         if (isInanimation) return;
         OnStartSpellAnimation();
 
-        StartCoroutine(ArmsAndJarAnimation(SideWeepArms, SideWeepJar, 0.5f, 1.0f, onTrapApex, dropCurveDelay));
+        StartCoroutine(ArmsAndJarAnimation(SideWeepArms, SideWeepJar, 0.2f, 1.0f, onTrapApex, dropCurveDelay));
     }
 
     public void SpreadCardThrowAnimation(Action onFlick = null)

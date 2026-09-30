@@ -25,9 +25,9 @@ public class JamToucherEnemy : EnemyBase
         {
             BookMovement.Instance.TemporaryDisable(4);
             if (MusicManager.Instance != null)
-                MusicManager.Instance.PlayJamToucherSound(transform.position);
 
-            Die();
+                MusicManager.Instance.PlayJamToucherSound(transform.position);
+            TriggerAttackAnimation();
         }
     }
 }

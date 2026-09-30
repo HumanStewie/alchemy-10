@@ -44,6 +44,12 @@ public class EnemyBase : MonoBehaviour
     private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
     private static readonly int ColorId = Shader.PropertyToID("_Color");
 
+    [SerializeField] protected Animator enemyAnimator; 
+    [SerializeField] protected Rigidbody rb;
+
+    protected static readonly int IsMovingHash = Animator.StringToHash("isMoving");
+    protected static readonly int AttackHash = Animator.StringToHash("Attack");
+
     protected virtual void Awake()
     {
         _propBlock = new MaterialPropertyBlock();
@@ -52,6 +58,18 @@ public class EnemyBase : MonoBehaviour
 
     protected virtual void Start()
     {
+        enemyAnimator = GetComponent<Animator>();
+
+        if (enemyAnimator == null)
+        {
+            enemyAnimator = GetComponentInChildren<Animator>();
+        }
+        rb = GetComponent<Rigidbody>();
+
+        if (enemyAnimator == null)
+        {
+            rb = GetComponentInChildren<Rigidbody>();
+        }
         runeSymbol = (GameObject)Resources.Load("Enemy/Rune");
         currentHP = maxHP;
         currentspeed = moveSpeed;
@@ -205,11 +223,34 @@ public class EnemyBase : MonoBehaviour
     {
         Vector3 dir = (targetPos - transform.position);
         dir.y = 0f;
-        if (dir.sqrMagnitude > 0.01f)
+
+        if (dir.sqrMagnitude > 0.01f && speed > 0f)
         {
-            transform.position += dir.normalized * speed * Time.deltaTime;
+            if (rb != null)
+            {
+                Vector3 moveVelocity = dir.normalized * speed;
+                moveVelocity.y = rb.linearVelocity.y; 
+                rb.linearVelocity = moveVelocity;
+            }
+
             Quaternion targetRot = Quaternion.LookRotation(dir) * Quaternion.Euler(0f, 90f, 0f);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, 8f * Time.deltaTime);
+
+            if (enemyAnimator != null) enemyAnimator.SetBool(IsMovingHash, true);
+        }
+        else
+        {
+            if (rb != null) rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+            if (enemyAnimator != null) enemyAnimator.SetBool(IsMovingHash, false);
+        }
+    }
+
+    public void TriggerAttackAnimation()
+    {
+        if (enemyAnimator != null)
+        {
+            enemyAnimator.SetBool(IsMovingHash, false);
+            enemyAnimator.SetTrigger(AttackHash);
         }
     }
 

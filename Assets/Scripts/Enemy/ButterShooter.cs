@@ -52,6 +52,8 @@ public class ShootingEnemy : EnemyBase
         Vector3 spawnPos = transform.position + transform.forward * 1.2f + Vector3.up * 0.5f;
         GameObject proj = Instantiate(butterProjectile, spawnPos, Quaternion.identity);
 
+        TriggerAttackAnimation();
+
         Vector3 dir = (currentTarget.position - spawnPos).normalized;
         if (proj.TryGetComponent<Rigidbody>(out var rb))
             rb.linearVelocity = dir * 18f;

@@ -96,6 +96,9 @@ public class SniperEnemy : EnemyBase
         if (bullet.TryGetComponent<Rigidbody>(out var rb))
             rb.linearVelocity = dir * 40f;
 
+        TriggerAttackAnimation();
+
+
         if (MusicManager.Instance != null)
             MusicManager.Instance.PlaySniperSound(transform.position);
     }
