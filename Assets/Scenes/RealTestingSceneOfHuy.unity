@@ -326,9 +326,21 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 691759552}
     - target: {fileID: 3788485504342964226, guid: dfdf77287aa78b6d3a952d90110c51f1, type: 3}
+      propertyPath: splatDelay
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3788485504342964226, guid: dfdf77287aa78b6d3a952d90110c51f1, type: 3}
       propertyPath: Runehealthbar
       value: 
       objectReference: {fileID: 1902807845}
+    - target: {fileID: 3788485504342964226, guid: dfdf77287aa78b6d3a952d90110c51f1, type: 3}
+      propertyPath: swordAnimator
+      value: 
+      objectReference: {fileID: 1422725283}
+    - target: {fileID: 6215098478801804140, guid: dfdf77287aa78b6d3a952d90110c51f1, type: 3}
+      propertyPath: swordAnimator
+      value: 
+      objectReference: {fileID: 1422725283}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -337,6 +349,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1747059363}
   m_SourcePrefab: {fileID: 100100000, guid: dfdf77287aa78b6d3a952d90110c51f1, type: 3}
+--- !u!95 &1422725283 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 7944549472739691898, guid: dfdf77287aa78b6d3a952d90110c51f1, type: 3}
+  m_PrefabInstance: {fileID: 1236540158}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1747059358 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8404932299835668151, guid: dfdf77287aa78b6d3a952d90110c51f1, type: 3}
