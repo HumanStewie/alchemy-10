@@ -176,7 +176,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Spready Slippery
+  m_text: Slope
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 22f690083f145ff4a8aed166b1eb7892, type: 2}
   m_sharedMaterial: {fileID: 2173938029167797538, guid: 22f690083f145ff4a8aed166b1eb7892, type: 2}
@@ -2904,7 +2904,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 611, y: 70}
+  m_AnchoredPosition: {x: 1191, y: 70}
   m_SizeDelta: {x: 700, y: 1300}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &669545557
@@ -5863,7 +5863,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -676, y: 70}
+  m_AnchoredPosition: {x: -1241, y: 70}
   m_SizeDelta: {x: 700, y: 1300}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1469991657

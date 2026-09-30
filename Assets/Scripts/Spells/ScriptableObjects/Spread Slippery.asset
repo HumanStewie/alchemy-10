@@ -80,5 +80,10 @@ MonoBehaviour:
   - {x: 237.72266, y: 237.67178}
   - {x: 245.78406, y: 245.75415}
   - {x: 253.84631, y: 253.83197}
-  jamBlobPrefab: {fileID: 1205236737125480316, guid: b18b84e8542d457449677f38d0a8a819, type: 3}
-  projectileSpeed: 28
+  slopePrefab: {fileID: 7596654761230660592, guid: 0abdd58aed0f28144a8904a478b461f2, type: 3}
+  yFinal: 0.1
+  lifetime: 12
+  spawnForwardOffset: 2.5
+  maxSlopes: 1
+  sizeMultiplier: 1
+  allowWallWalk: 0

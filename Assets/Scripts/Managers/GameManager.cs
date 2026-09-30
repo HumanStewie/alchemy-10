@@ -66,7 +66,6 @@ public class GameManager : MonoBehaviour
         swarmEnemy = simpleFollower;
 
 
-        FindFirstObjectByType<PlayerHealthAndStat>().currentHP = FindFirstObjectByType<PlayerHealthAndStat>().maxHP;
     }
 
     void StartWave(int wave)
@@ -104,8 +103,20 @@ public class GameManager : MonoBehaviour
             StartFirstWave();
         }
 
-        healthBar.GetComponent<Image>().DOFillAmount(FindFirstObjectByType<PlayerHealthAndStat>().currentHP / FindFirstObjectByType<PlayerHealthAndStat>().maxHP, 0.1f);
-        healthBar.GetComponent<Image>().DOFillAmount(FindFirstObjectByType<RuneManager>().currentHealth / FindFirstObjectByType<RuneManager>().maxHealth, 0.1f);
+        var player = FindFirstObjectByType<PlayerHealthAndStat>();
+        if (player != null && healthBar != null)
+        {
+            var img = healthBar.GetComponent<Image>();
+            if (img != null && player.maxHP > 0f)
+                img.DOFillAmount(player.currentHP / player.maxHP, 0.1f);
+        }
+        var rune = FindFirstObjectByType<RuneManager>();
+        if (rune != null && runeHealthbar != null)
+        {
+            var img = runeHealthbar.GetComponent<Image>();
+            if (img != null && rune.maxHealth > 0f)
+                img.DOFillAmount(rune.currentHealth / rune.maxHealth, 0.1f);
+        }
 
     }
 

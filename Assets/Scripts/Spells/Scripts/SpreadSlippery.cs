@@ -1,38 +1,74 @@
+using DG.Tweening;
+using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "SpreadSlippery", menuName = "Spells/SpreadSlippery")]
-public class SpreadSlippery : SpellTemplate
+[CreateAssetMenu(fileName = "WallSlope", menuName = "Spells/WallSlope")]
+public class WallSlope : SpellTemplate
 {
-    [Header("Projectile Settings")]
-    [SerializeField] private GameObject jamBlobPrefab;
-    [SerializeField] private float projectileSpeed = 28f;
+    [Header("Prefab & Position")]
+    public GameObject slopePrefab;         
+    public float yFinal = 0.1f;            
+    public float lifetime = 12f;
+    public float spawnForwardOffset = 2.5f; 
+
+    [Header("Base & Upgrade Stats")]
+    public int maxSlopes = 1;
+    public float sizeMultiplier = 1f;
+    public bool allowWallWalk = true;  
+
+    private Queue<WallProp> activeSlopes = new();
 
     public override void Cast(GameObject caster, Vector3 targetPoint, float scale)
     {
-        if (BookMovement.Instance != null)
+        BookMovement book = Object.FindAnyObjectByType<BookMovement>();
+        PlayerCharacter player = Object.FindAnyObjectByType<PlayerCharacter>();
+
+        if (book == null || player == null || slopePrefab == null) return;
+
+        // Same animation timing as WallSpell
+        book.WallSpellAnimation(() =>
         {
-            BookMovement.Instance.SpreadCardThrowAnimation(() =>
-            {
-                ShootSingleJam(targetPoint);
-            });
-        }
-        else
-        {
-            ShootSingleJam(targetPoint);
-        }
+            SpawnSlopeInstance(book, player);
+        });
     }
 
-    private void ShootSingleJam(Vector3 targetPoint)
+    private void SpawnSlopeInstance(BookMovement book, PlayerCharacter player)
     {
-        if (Camera.main == null || jamBlobPrefab == null) return;
+        PruneDestroyedSlopes();
 
-        Vector3 spawnOrigin = Camera.main.transform.position + (Camera.main.transform.forward * 0.4f);
-        Vector3 shootDir = (targetPoint - spawnOrigin).normalized;
-        MusicManager.Instance.PlayJamThrowSound(spawnOrigin);
-        GameObject blob = Instantiate(jamBlobPrefab, spawnOrigin, Quaternion.identity);
-        if (blob.TryGetComponent<JamAmmo>(out var jamScript))
+        // Remove oldest if we are at the limit
+        while (activeSlopes.Count >= maxSlopes)
         {
-            jamScript.Launch(shootDir, projectileSpeed);
+            WallProp oldest = activeSlopes.Dequeue();
+            if (oldest != null)
+                oldest.DespawnWall();
         }
+
+        Vector3 spawnLoc;
+        if (book.WallSpawnLoc != null)
+            spawnLoc = book.WallSpawnLoc.position;
+        else
+            spawnLoc = player.transform.position + player.transform.forward * spawnForwardOffset;
+
+        Quaternion spawnRot = Quaternion.Euler(0, player.transform.eulerAngles.y - 180f, 0f);
+
+        GameObject newSlopeObj = Instantiate(slopePrefab, spawnLoc, spawnRot);
+
+        newSlopeObj.transform.DOMoveY(spawnLoc.y + yFinal, 0.45f).SetEase(Ease.OutSine);
+
+        if (newSlopeObj.TryGetComponent<WallProp>(out var slopeScript))
+        {
+            slopeScript.Initialize(lifetime, 0f, sizeMultiplier, allowWallWalk, false);
+            activeSlopes.Enqueue(slopeScript);
+        }
+
+        if (MusicManager.Instance != null)
+            MusicManager.Instance.PlayCreateWallSound(spawnLoc);
+    }
+
+    private void PruneDestroyedSlopes()
+    {
+        while (activeSlopes.Count > 0 && activeSlopes.Peek() == null)
+            activeSlopes.Dequeue();
     }
 }
