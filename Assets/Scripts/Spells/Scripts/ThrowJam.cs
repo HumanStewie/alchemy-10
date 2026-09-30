@@ -20,7 +20,7 @@ public class ThrowJam : SpellTemplate
     {
         if (BookMovement.Instance != null)
         {
-            BookMovement.Instance.SwingJamAttack(() =>
+            BookMovement.Instance.JamBazooka(() =>
             {
                 // Uses caster's MonoBehaviour to safely run the burst coroutine
                 caster.GetComponent<MonoBehaviour>().StartCoroutine(FireBurst(targetPoint));
