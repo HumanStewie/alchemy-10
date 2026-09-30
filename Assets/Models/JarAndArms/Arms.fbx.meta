@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: d167db7b46accb868838ae279c55ecf2
+guid: b89228a256990e0068dede6832a523b9
 ModelImporter:
   serializedVersion: 24300
   internalIDToNameTable: []
@@ -23,7 +23,7 @@ ModelImporter:
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
     importConstraints: 0
-    animationCompression: 1
+    animationCompression: 0
     animationRotationError: 0.5
     animationPositionError: 0.5
     animationScaleError: 0.5
@@ -32,11 +32,11 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: rig.001|01_Arms Jar Idle
-      takeName: rig.001|01_Arms Jar Idle
+      name: rig.001|15_Arms Sword Moving (1)
+      takeName: rig.001|15_Arms Sword Moving
       internalID: -7906105519440353646
       firstFrame: 0
-      lastFrame: 64
+      lastFrame: 24
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -297,7 +297,7 @@ ModelImporter:
       takeName: rig.001|10_Arms Sword AttackRight
       internalID: 5854366953796602089
       firstFrame: 0
-      lastFrame: 20.9
+      lastFrame: 48
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -325,7 +325,7 @@ ModelImporter:
       name: rig.001|11_Arms Sword AttackLeft
       takeName: rig.001|11_Arms Sword AttackLeft
       internalID: 663645440618909502
-      firstFrame: 1
+      firstFrame: 0
       lastFrame: 48
       wrapMode: 0
       orientationOffsetY: 0
@@ -392,6 +392,64 @@ ModelImporter:
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: rig.001|14_Arms Sword Idle
+      takeName: rig.001|14_Arms Sword Idle
+      internalID: 4921823999390534244
+      firstFrame: 0
+      lastFrame: 96
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: rig.001|15_Arms Sword Moving
+      takeName: rig.001|15_Arms Sword Moving
+      internalID: -9035440878949481651
+      firstFrame: 1
+      lastFrame: 24
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 0
       loopBlendPositionY: 0

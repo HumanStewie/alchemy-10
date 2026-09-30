@@ -37,6 +37,20 @@ public class BookMovement : MonoBehaviour
     public Transform WallSpawnLoc;
     [SerializeField] private Animator armsAnimator;
     [SerializeField] private Animator jarAnimator;
+    [SerializeField] private Animator swordAnimator;
+
+    [Header("Animation Delay")]
+    [SerializeField] private float bazookaDelay = 1.5f;
+    [SerializeField] private float dropWallDelay = 0.3f;
+    [SerializeField] private float eatDelay = 0.4f;
+    [SerializeField] private float dropCurveDelay = 0.2f;
+    [SerializeField] private float splatDelay = 0.2f;
+
+    [SerializeField] private float swordPullDelay = 0.4f;
+    [SerializeField] private float swordLeftDelay = 0.4f;
+    [SerializeField] private float swordRightDelay = 0.4f;
+    [SerializeField] private float swordEndDelay = 0.4f;
+
 
     private static readonly int DropWallArms = Animator.StringToHash("rig_001|08_Arms Jar DropGround");
     private static readonly int DropWallJar = Animator.StringToHash("Armature|08_Jar Arms DropGround");
@@ -46,15 +60,18 @@ public class BookMovement : MonoBehaviour
     private static readonly int BazookaJar = Animator.StringToHash("Armature|05_Jar Arms StartBazooka");
     private static readonly int SideWeepArms = Animator.StringToHash("rig_001|13_Arms Jar Splat");
     private static readonly int SideWeepJar = Animator.StringToHash("Armature|13_Jar Arms Splat");
-    private static readonly int PullSwordArms = Animator.StringToHash("rig_001|13_Arms Jar Splat");
-    private static readonly int PullSwordJar = Animator.StringToHash("Armature|13_Jar Arms Splat");
-    private static readonly int PullSwordSword = Animator.StringToHash("rig_001|13_Arms Jar Splat");
-    private static readonly int SwingLeftArms = Animator.StringToHash("Armature|13_Jar Arms Splat");
-    private static readonly int SwingLeftSword = Animator.StringToHash("rig_001|13_Arms Jar Splat");
-    private static readonly int SwingRightArms = Animator.StringToHash("Armature|13_Jar Arms Splat");
-    private static readonly int SwingRightSword = Animator.StringToHash("rig_001|13_Arms Jar Splat");
+    private static readonly int PullSwordArms = Animator.StringToHash("rig_001|09_Arms Jar PullSword");
+    private static readonly int PullSwordJar = Animator.StringToHash("Armature|09_Jar Arms PullSword");
+    private static readonly int PullSwordSword = Animator.StringToHash("Armature_001|09_Sword Arms PullSword");
+    private static readonly int SwingLeftArms = Animator.StringToHash("rig_001|11_Arms Sword AttackLeft");
+    private static readonly int SwingLeftSword = Animator.StringToHash("Armature_001|11_Sword Arms AttackLeft");
+    private static readonly int SwingLeftJar = Animator.StringToHash("Armature|11_Jar Arms AttackLeft");
+
+    private static readonly int SwingRightArms = Animator.StringToHash("rig_001|10_Arms Sword AttackRight");
+    private static readonly int SwingRightSword = Animator.StringToHash("Armature_001|10_Sword Arms AttackRight");
+    private static readonly int SwingRightJar = Animator.StringToHash("Armature|10_Jar Arms AttackRight");
     private static readonly int StopSwordArms = Animator.StringToHash("rig_001|12_Arms Sword EndSword");
-    private static readonly int StopSwordSword = Animator.StringToHash("rig_001|13_Arms Jar Splat");
+    private static readonly int StopSwordSword = Animator.StringToHash("Armature_001|12_Sword Arms EndSword");
     private static readonly int StopSwordJar = Animator.StringToHash("Armature|12_Jar Arms EndSword");
 
 
@@ -63,6 +80,9 @@ public class BookMovement : MonoBehaviour
 
     private float currentY;
     public bool isDisabled = false;
+
+    // Checks if player is currently in sword stance based on the arms animator parameter
+    public bool IsHoldingSword => armsAnimator != null && armsAnimator.GetBool("IsHoldingSword");
 
     private void Awake()
     {
@@ -105,6 +125,8 @@ public class BookMovement : MonoBehaviour
         isInanimation = true;
         isIdle = false;
         transform.DOKill();
+        swordAnimator.gameObject.SetActive(false);
+        jarAnimator.gameObject.SetActive(true);
 
         if (playerCharacter != null)
         {
@@ -120,6 +142,7 @@ public class BookMovement : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
+        
         if (playerCharacter != null)
         {
             playerCharacter.SetHandVisibility(true);
@@ -160,20 +183,100 @@ public class BookMovement : MonoBehaviour
         ResetToIdleState();
     }
 
+    private IEnumerator ArmsAndJarAndSwordAnimation(int armHash, int jarHash, int swordHash, float transitionDuration, float earlyCutOff, Action onTriggerAction, float triggerDelay = 0.4f, Action onAnimationComplete = null)
+    {
+        if (armsAnimator != null) armsAnimator.CrossFadeInFixedTime(armHash, transitionDuration);
+        if (jarAnimator != null) jarAnimator.CrossFadeInFixedTime(jarHash, transitionDuration);
+        if (swordAnimator != null) swordAnimator.CrossFadeInFixedTime(swordHash, transitionDuration);
+
+        yield return new WaitForSeconds(triggerDelay);
+
+        try
+        {
+            onTriggerAction?.Invoke();
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error in spell callback: {e}");
+        }
+
+        float animLength = 1f;
+        if (armsAnimator != null)
+        {
+            AnimatorStateInfo stateInfo = armsAnimator.GetCurrentAnimatorStateInfo(0);
+            if (stateInfo.length > 0f) animLength = stateInfo.length;
+        }
+
+        float totalDuration = animLength * Mathf.Clamp01(earlyCutOff);
+        float remainingTime = Mathf.Max(0f, totalDuration - triggerDelay);
+
+        if (remainingTime > 0f)
+        {
+            yield return new WaitForSeconds(remainingTime);
+        }
+
+        // Invoke completion callback if provided (e.g., to clean up sword state after sheathing)
+        onAnimationComplete?.Invoke();
+
+        ResetToIdleState();
+    }
+
+
     public void JamBazooka(Action onSwingApex)
     {
         if (isInanimation) return;
         OnStartSpellAnimation();
 
-        StartCoroutine(ArmsAndJarAnimation(BazookaArms, BazookaJar, 0.2f, 0.9f, onSwingApex, 0.4f));
+        StartCoroutine(ArmsAndJarAnimation(BazookaArms, BazookaJar, 0.2f, 1.0f, onSwingApex, bazookaDelay));
     }
 
-    public void JamSwordSwing(Action onSwingApex)
+    public void JamSwordSwing(SwordState state, Action onSwingApex)
     {
         if (isInanimation) return;
-        OnStartSpellAnimation();
+        swordAnimator.gameObject.SetActive(true);
+        isInanimation = true;
+        isIdle = false;
+        transform.DOKill();
+        transform.localPosition = startLoc;
+        transform.localRotation = Quaternion.Euler(startRot);
 
-        StartCoroutine(ArmsAndJarAnimation(BazookaArms, BazookaJar, 0.2f, 0.9f, onSwingApex, 0.4f));
+        if (state is SwordState.Pull)
+        {   
+            armsAnimator.SetBool("IsHoldingSword", true);
+            jarAnimator.SetBool("IsHoldingSword", true);
+            StartCoroutine(ArmsAndJarAndSwordAnimation(PullSwordArms, PullSwordJar, PullSwordSword, 0.2f, 1f, onSwingApex, swordPullDelay));
+        }
+        else if (state is SwordState.SwingRight)
+        {
+            jarAnimator.gameObject.SetActive(false);
+            StartCoroutine(ArmsAndJarAndSwordAnimation(SwingRightArms, SwingRightJar, SwingRightSword, 0.2f, 1f, onSwingApex, swordRightDelay));
+        }
+        else if (state is SwordState.SwingLeft)
+        {
+            jarAnimator.gameObject.SetActive(false);
+            StartCoroutine(ArmsAndJarAndSwordAnimation(SwingLeftArms, SwingLeftJar, SwingLeftSword, 0.2f, 1f, onSwingApex, swordLeftDelay));
+        }
+        else if (state is SwordState.Stop)
+        {
+            // Putting away the sword:
+            // Ensure both jar and sword are visible so they can animate stowing into the jar together
+            jarAnimator.gameObject.SetActive(true);
+            swordAnimator.gameObject.SetActive(true);
+
+            StartCoroutine(ArmsAndJarAndSwordAnimation(
+                StopSwordArms, StopSwordJar, StopSwordSword, 0.2f, 1f, () => {
+                    // Clean up once the putting-away animation has fully finished:
+                    // 1. Reset sword holding animation parameters so arms/jar return to regular idle
+                    if (armsAnimator != null) armsAnimator.SetBool("IsHoldingSword", false);
+                    if (jarAnimator != null) {
+                        jarAnimator.SetBool("IsHoldingSword", false);
+                        jarAnimator.SetBool("IsDrawing", false);
+                    }
+                    
+                    // 2. Hide the sword mesh now that it's back inside the jar
+                    if (swordAnimator != null) swordAnimator.gameObject.SetActive(false);
+                }, swordEndDelay));
+        }
     }
 
     public void WallSpellAnimation(Action onSlamDown = null)
@@ -181,7 +284,7 @@ public class BookMovement : MonoBehaviour
         if (isInanimation) return;
         OnStartSpellAnimation();
 
-        StartCoroutine(ArmsAndJarAnimation(DropWallArms, DropWallJar, 0.2f, 0.8f, onSlamDown, 0.4f));
+        StartCoroutine(ArmsAndJarAnimation(DropWallArms, DropWallJar, 0.2f, 0.8f, onSlamDown, dropWallDelay));
     }
 
     public void EatAnimation(Action onEatComplete = null)
@@ -192,7 +295,7 @@ public class BookMovement : MonoBehaviour
         if (MusicManager.Instance != null) MusicManager.Instance.PlayEatingSound(transform.position);
         StartCoroutine(ArmsAndJarAnimation(EatArms, EatJar, 0.2f, 1.0f, () => {
             onEatComplete?.Invoke();
-        }, 0.4f));
+        }, eatDelay));
     }
 
     public void ThrowTrapAnimation(Action onTrapApex = null)
@@ -200,7 +303,7 @@ public class BookMovement : MonoBehaviour
         if (isInanimation) return;
         OnStartSpellAnimation();
 
-        StartCoroutine(ArmsAndJarAnimation(SideWeepArms, SideWeepJar, 0.2f, 1.0f, onTrapApex, 0.4f));
+        StartCoroutine(ArmsAndJarAnimation(SideWeepArms, SideWeepJar, 0.2f, 1.0f, onTrapApex, dropCurveDelay));
     }
 
     public void SpreadCardThrowAnimation(Action onFlick = null)
@@ -208,7 +311,7 @@ public class BookMovement : MonoBehaviour
         if (isInanimation) return;
         OnStartSpellAnimation();
 
-        StartCoroutine(ArmsAndJarAnimation(SideWeepArms, SideWeepJar, 0.2f, 1.0f, onFlick, 0.4f));
+        StartCoroutine(ArmsAndJarAnimation(SideWeepArms, SideWeepJar, 0.2f, 1.0f, onFlick, splatDelay));
     }
 
     public void ToggleBookState()

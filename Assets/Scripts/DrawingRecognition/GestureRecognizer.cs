@@ -298,6 +298,36 @@ public class GestureRecognizer : MonoBehaviour
 
         if (lowestDistance <= maxAllowedError && bestTemp != null)
         {
+            // =========================================================================
+            // CONDITION: Putting away the sword when drawing a new non-sword spell
+            // =========================================================================
+            // 1. Check if the player is currently holding the sword in their hands
+            //    (queried directly from BookMovement.IsHoldingSword).
+            // 2. Check if the newly drawn and recognized spell is NOT a sword spell.
+            // 3. If both conditions are met, trigger JamSwordSwing(SwordState.Stop) to
+            //    play the putting-away animation, and reset the sword spell state.
+            // =========================================================================
+            bool wasHoldingSword = BookMovement.Instance != null && BookMovement.Instance.IsHoldingSword;
+            bool isNewSpellNonSword = !(bestTemp is SwordSpell);
+
+            if (wasHoldingSword && isNewSpellNonSword)
+            {
+                // Play putting-away (EndSword) animation across arms, jar, and sword
+                BookMovement.Instance.JamSwordSwing(SwordState.Stop, null);
+
+                // Reset internal holding flags so the sword is drawn fresh if switched back
+                if (preparedSpell is SwordSpell prevSword)
+                {
+                    prevSword.ResetSwordState();
+                }
+
+                // Also ensure the instantiated template copy is reset
+                if (templates.Find(s => s is SwordSpell) is SwordSpell templateSword)
+                {
+                    templateSword.ResetSwordState();
+                }
+            }
+
             preparedSpell = bestTemp;
             ApplyJamMaterialForSpell(preparedSpell);
 

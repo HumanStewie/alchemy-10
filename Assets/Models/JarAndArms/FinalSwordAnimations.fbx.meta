@@ -35,7 +35,7 @@ ModelImporter:
       name: Armature.001|09_Sword Arms PullSword
       takeName: Armature.001|09_Sword Arms PullSword
       internalID: -3939108155470406921
-      firstFrame: 0
+      firstFrame: 1
       lastFrame: 48
       wrapMode: 0
       orientationOffsetY: 0
@@ -93,7 +93,7 @@ ModelImporter:
       name: Armature.001|11_Sword Arms AttackLeft
       takeName: Armature.001|11_Sword Arms AttackLeft
       internalID: -8182018047277633497
-      firstFrame: 0
+      firstFrame: 1
       lastFrame: 24
       wrapMode: 0
       orientationOffsetY: 0

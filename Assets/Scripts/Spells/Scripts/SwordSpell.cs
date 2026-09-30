@@ -1,5 +1,12 @@
 using UnityEngine;
 
+public enum SwordState
+{
+    Pull,
+    SwingLeft,
+    SwingRight,
+    Stop
+} 
 [CreateAssetMenu(fileName = "SwordSpell", menuName = "Spells/SwordSpell")]
 public class SwordSpell : SpellTemplate
 {
@@ -12,14 +19,45 @@ public class SwordSpell : SpellTemplate
     public float collisionDamage = 20f;     
     public float rangeMultiplier = 1f;     
     public bool attackTwice = false;       
+
+    private bool isHoldingSword;
+    private bool swingLeft = false;
+
+    // Resets internal sword state when sword is stowed away into the jar
+    public void ResetSwordState()
+    {
+        isHoldingSword = false;
+        swingLeft = false;
+    }
+
     public override void Cast(GameObject caster, Vector3 targetPoint, float scale)
     {
         if (BookMovement.Instance != null)
         {
-            BookMovement.Instance.JamSwordSwing(() =>
+            // If BookMovement is no longer in sword stance (e.g. stowed when drawing a new spell), keep in sync
+            if (!BookMovement.Instance.IsHoldingSword)
             {
-                ExecuteSlash(caster, targetPoint);
-            });
+                isHoldingSword = false;
+            }
+
+            // Swinging
+            if (isHoldingSword)
+            {
+                if(attackTwice) swingLeft = !swingLeft;
+                BookMovement.Instance.JamSwordSwing(swingLeft ? SwordState.SwingLeft : SwordState.SwingRight, () =>
+                {
+                    ExecuteSlash(caster, targetPoint);
+                });
+            }
+            // Pulling out
+            else
+            {
+                BookMovement.Instance.JamSwordSwing(SwordState.Pull, () =>
+                {
+                    isHoldingSword = true;
+                });
+            }
+                
         }
         else
         {

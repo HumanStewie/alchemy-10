@@ -46,6 +46,8 @@ public class PlayerCharacter : MonoBehaviour, ICharacterController
     public Animator ArmsAnimator => armsAnimator;
     [SerializeField] private Animator jarAnimator;
     public Animator JarAnimator => jarAnimator;
+    [SerializeField] private Animator swordAnimator;
+    public Animator SwordAnimator => swordAnimator;
 
     [Header("Move")]
     [SerializeField] public float walkSpeed = 10.0f;
@@ -163,6 +165,7 @@ public class PlayerCharacter : MonoBehaviour, ICharacterController
     {
         armsAnimator.SetBool("IsGroundedMoving", false);
         jarAnimator.SetBool("IsGroundedMoving", false);
+        swordAnimator.SetBool("IsGroundedMoving", false);
 
         character.acceleration = Vector3.zero;
 
@@ -228,6 +231,7 @@ public class PlayerCharacter : MonoBehaviour, ICharacterController
         {
             armsAnimator.SetBool("IsGroundedMoving", true);
             jarAnimator.SetBool("IsGroundedMoving", true);
+            swordAnimator.SetBool("IsGroundedMoving", true);
         }
         if (character.stance is Stance.Stand) {
             // Walking & Sprinting
