@@ -16,7 +16,7 @@ public class SwordSpell : SpellTemplate
     {
         if (BookMovement.Instance != null)
         {
-            BookMovement.Instance.SwingJamAttack(() =>
+            BookMovement.Instance.JamSwordSwing(() =>
             {
                 ExecuteSlash(caster, targetPoint);
             });

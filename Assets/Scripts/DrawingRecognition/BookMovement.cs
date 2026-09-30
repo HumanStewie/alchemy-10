@@ -46,6 +46,17 @@ public class BookMovement : MonoBehaviour
     private static readonly int BazookaJar = Animator.StringToHash("Armature|05_Jar Arms StartBazooka");
     private static readonly int SideWeepArms = Animator.StringToHash("rig_001|13_Arms Jar Splat");
     private static readonly int SideWeepJar = Animator.StringToHash("Armature|13_Jar Arms Splat");
+    private static readonly int PullSwordArms = Animator.StringToHash("rig_001|13_Arms Jar Splat");
+    private static readonly int PullSwordJar = Animator.StringToHash("Armature|13_Jar Arms Splat");
+    private static readonly int PullSwordSword = Animator.StringToHash("rig_001|13_Arms Jar Splat");
+    private static readonly int SwingLeftArms = Animator.StringToHash("Armature|13_Jar Arms Splat");
+    private static readonly int SwingLeftSword = Animator.StringToHash("rig_001|13_Arms Jar Splat");
+    private static readonly int SwingRightArms = Animator.StringToHash("Armature|13_Jar Arms Splat");
+    private static readonly int SwingRightSword = Animator.StringToHash("rig_001|13_Arms Jar Splat");
+    private static readonly int StopSwordArms = Animator.StringToHash("rig_001|12_Arms Sword EndSword");
+    private static readonly int StopSwordSword = Animator.StringToHash("rig_001|13_Arms Jar Splat");
+    private static readonly int StopSwordJar = Animator.StringToHash("Armature|12_Jar Arms EndSword");
+
 
     [Header("Player Character Reference")]
     [SerializeField] private PlayerCharacter playerCharacter;
@@ -149,12 +160,20 @@ public class BookMovement : MonoBehaviour
         ResetToIdleState();
     }
 
-    public void SwingJamAttack(Action onSwingApex)
+    public void JamBazooka(Action onSwingApex)
     {
         if (isInanimation) return;
         OnStartSpellAnimation();
 
-        StartCoroutine(ArmsAndJarAnimation(SideWeepArms, SideWeepJar, 0.2f, 1.0f, onSwingApex, 0.4f));
+        StartCoroutine(ArmsAndJarAnimation(BazookaArms, BazookaJar, 0.2f, 0.9f, onSwingApex, 0.4f));
+    }
+
+    public void JamSwordSwing(Action onSwingApex)
+    {
+        if (isInanimation) return;
+        OnStartSpellAnimation();
+
+        StartCoroutine(ArmsAndJarAnimation(BazookaArms, BazookaJar, 0.2f, 0.9f, onSwingApex, 0.4f));
     }
 
     public void WallSpellAnimation(Action onSlamDown = null)
