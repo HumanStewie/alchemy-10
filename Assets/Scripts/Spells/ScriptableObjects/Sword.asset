@@ -81,8 +81,10 @@ MonoBehaviour:
   - {x: 223.50989, y: 223.96732}
   - {x: 245.4635, y: 245.84036}
   slashPrefab: {fileID: 2912465776236066321, guid: a79cd0516b0432942b0a4501c8c6f601, type: 3}
-  baseDamage: 35
+  baseDamage: 5
   knockbackForce: 22
   collisionDamage: 20
   rangeMultiplier: 1
   attackTwice: 0
+  travelDistance: 0.8
+  travelDuration: 0.35

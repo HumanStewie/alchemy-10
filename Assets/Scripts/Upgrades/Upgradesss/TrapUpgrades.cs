@@ -25,10 +25,10 @@ public class TrapUpgrade : UpgradeBase
                 trap.isTier11 = true;
                 break;
             case TrapBranch.EvolvedTrap:
-                trap.isTier21 = true;
+                trap.isTier12 = true;
                 break;
             case TrapBranch.BurningTrap:
-                trap.isTier12 = true;
+                trap.isTier21 = true;
                 break;
             case TrapBranch.RagebaitedTrap:
                 trap.isTier22 = true;

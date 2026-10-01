@@ -3,22 +3,22 @@ using UnityEngine;
 
 public class TrapProperty : MonoBehaviour
 {
-    // Global tracker to limit total active traps to 2
     public static List<TrapProperty> ActiveTraps = new List<TrapProperty>();
     private const int MaxTrapCount = 2;
 
     [Header("Trap Settings")]
     public float lifetime = 10f;
     public float damage = 4f;
-    public float damageInterval = 1f;
+    [Tooltip("Tick damage delay")]
+    public float damageInterval = 2f;
     public GameObject explosionVFX;
 
     [Header("Explosion Upgrade Settings")]
-    public float deathExplosionRadius = 3f;
+    public float deathExplosionRadius = 3.5f;
     public float deathExplosionDamage = 10f;
 
-    private Dictionary<Collider, float> activeEnemies = new Dictionary<Collider, float>();
-    private List<Collider> toRemove = new List<Collider>();
+    private Dictionary<EnemyBase, float> activeEnemies = new Dictionary<EnemyBase, float>();
+    private List<EnemyBase> toRemove = new List<EnemyBase>();
     private bool isQuitting = false;
 
     private void Awake()
@@ -64,11 +64,11 @@ public class TrapProperty : MonoBehaviour
     private void Update()
     {
         toRemove.Clear();
-        List<Collider> keys = new List<Collider>(activeEnemies.Keys);
+        List<EnemyBase> keys = new List<EnemyBase>(activeEnemies.Keys);
 
-        foreach (Collider enemy in keys)
+        foreach (EnemyBase enemy in keys)
         {
-            if (enemy == null)
+            if (enemy == null || !enemy.gameObject.activeInHierarchy)
             {
                 toRemove.Add(enemy);
                 continue;
@@ -81,43 +81,66 @@ public class TrapProperty : MonoBehaviour
             }
         }
 
-        foreach (Collider col in toRemove)
-            activeEnemies.Remove(col);
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Enemy") && !activeEnemies.ContainsKey(other))
+        foreach (EnemyBase deadEnemy in toRemove)
         {
-            ApplyEffects(other);
-            activeEnemies.Add(other, Time.time);
+            activeEnemies.Remove(deadEnemy);
         }
     }
 
-    private void OnTriggerExit(Collider other)
+    private void OnCollisionEnter(Collision other)
     {
-        if (other.CompareTag("Enemy") && activeEnemies.ContainsKey(other))
-            activeEnemies.Remove(other);
+        if (other.gameObject.CompareTag("Player")) return;
+
+        EnemyBase enemy = other.gameObject.GetComponentInParent<EnemyBase>();
+        if (enemy == null)
+        {
+            enemy = other.gameObject.GetComponentInChildren<EnemyBase>();
+        }
+
+        if (enemy != null && !activeEnemies.ContainsKey(enemy))
+        {
+            ApplyEffects(enemy);
+            activeEnemies.Add(enemy, Time.time);
+        }
     }
 
-    private void ApplyEffects(Collider enemy)
+    private void OnCollisionExit(Collision other)
     {
-        EnemyBase enemyScript = enemy.GetComponentInParent<EnemyBase>();
+        EnemyBase enemy = other.gameObject.GetComponentInParent<EnemyBase>();
+        if (enemy == null)
+        {
+            enemy = other.gameObject.GetComponentInChildren<EnemyBase>();
+        }
+
+        if (enemy != null && activeEnemies.ContainsKey(enemy))
+        {
+            activeEnemies.Remove(enemy);
+        }
+    }
+
+    private void ApplyEffects(EnemyBase enemyScript)
+    {
         if (enemyScript == null) return;
 
-        enemyScript.SendMessageUpwards("takeDamage", damage, SendMessageOptions.DontRequireReceiver);
+        enemyScript.takeDamage(damage);
 
         if (explosionVFX != null)
-            Instantiate(explosionVFX, enemy.transform.position, Quaternion.identity);
+        {
+            Instantiate(explosionVFX, enemyScript.transform.position, Quaternion.identity);
+        }
 
         BreadTrap trap = GetLiveTrap();
         if (trap == null) return;
 
         if (trap.isTier11)
+        {
             enemyScript.Poisoned(1f, 5f);
+        }
 
         if (trap.isTier21)
+        {
             enemyScript.Burnt(0.5f, 6f);
+        }
     }
 
     private void OnDestroy()
@@ -130,20 +153,32 @@ public class TrapProperty : MonoBehaviour
         if (trap != null && trap.isTier22)
         {
             if (explosionVFX != null)
+            {
                 Instantiate(explosionVFX, transform.position, Quaternion.identity);
+            }
 
             if (CameraShake.Instance != null)
+            {
                 CameraShake.Instance.ShakeLight();
+            }
 
             if (MusicManager.Instance != null)
+            {
                 MusicManager.Instance.PlayExplosionSound(transform.position);
+            }
 
             Collider[] hits = Physics.OverlapSphere(transform.position, deathExplosionRadius);
+            HashSet<EnemyBase> hitEnemies = new HashSet<EnemyBase>();
+
             foreach (Collider col in hits)
             {
-                if (col.CompareTag("Enemy"))
+                if (col.CompareTag("Player")) continue;
+
+                EnemyBase enemy = col.GetComponentInParent<EnemyBase>();
+                if (enemy != null && !hitEnemies.Contains(enemy))
                 {
-                    col.SendMessageUpwards("takeDamage", deathExplosionDamage, SendMessageOptions.DontRequireReceiver);
+                    hitEnemies.Add(enemy);
+                    enemy.takeDamage(deathExplosionDamage);
                 }
             }
         }

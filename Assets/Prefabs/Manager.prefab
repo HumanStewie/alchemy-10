@@ -4474,9 +4474,12 @@ MonoBehaviour:
   started: 0
   checking: 0
   floorHeightStep: 20
+  yOffsetForBachMapForNoReason: 144
   groundLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 4294967295
+  player: {fileID: 0}
+  startChecking: 0
   spawnPointsParent: {fileID: 0}
   spawnPoints:
   - {fileID: 0}
@@ -4509,18 +4512,19 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  player: {fileID: 0}
-  startChecking: 0
+  enemySpawnHeightOffset: 1
+  runePrefab: {fileID: 0}
+  runeEntrancePosition: {x: 10, y: 143, z: -247}
   SkillCanvas: {fileID: 4083446938836747336}
   GameCanvas: {fileID: 1139487016444573472}
   LoseCanvas: {fileID: 5828404241576598432}
   WinCanvas: {fileID: 4890257500030054435}
+  healthBar: {fileID: 719743302275072666}
+  runeHealthbar: {fileID: 4090187848420082170}
   burningEffect: {fileID: 0}
   poisonEffect: {fileID: 0}
   bloodEffect: {fileID: 0}
   poofEffect: {fileID: 0}
-  healthBar: {fileID: 719743302275072666}
-  runeHealthbar: {fileID: 4090187848420082170}
 --- !u!114 &2597959853237172983
 MonoBehaviour:
   m_ObjectHideFlags: 0

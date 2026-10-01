@@ -112,19 +112,21 @@ MonoBehaviour:
   damage: 5
   moveSpeed: 4
   currentspeed: 0
-  attackRange: 2
-  detectionRange: 30
+  attackRange: 3
+  detectionRange: 20
   preferRune: 0
   runeSymbol: {fileID: 0}
   flashColor: {r: 1, g: 1, b: 1, a: 1}
   flashDuration: 0.08
   enemyAnimator: {fileID: 0}
   rb: {fileID: 0}
-  hitboxRadius: 0.8
+  hitboxRadius: 1
   hitboxForwardOffset: 1.2
   targetMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 128
+  windupDuration: 0.45
+  slapDuration: 0.2
 --- !u!54 &4826014210968307094
 Rigidbody:
   m_ObjectHideFlags: 0

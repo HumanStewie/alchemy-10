@@ -81,7 +81,7 @@ PrefabInstance:
       addedObject: {fileID: 3640644506678488545}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: b16da6aacae1b9a45942430a990b5c48, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 902587746193714062}
+      addedObject: {fileID: 8805357443367956626}
   m_SourcePrefab: {fileID: 100100000, guid: b16da6aacae1b9a45942430a990b5c48, type: 3}
 --- !u!1 &7596654761230660592 stripped
 GameObject:
@@ -106,7 +106,7 @@ MonoBehaviour:
   isStickyWallWalk: 1
   healOnRuneTouch: 0
   runeHealAmount: 0
---- !u!64 &902587746193714062
+--- !u!64 &8805357443367956626
 MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

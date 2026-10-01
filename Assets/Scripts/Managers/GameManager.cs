@@ -1,6 +1,7 @@
 ﻿using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -24,7 +25,6 @@ public class GameManager : MonoBehaviour
     public GameObject Fatass;
 
     public List<GameObject> InvisblesWall = new();
-
 
     public int currentWave = 1;
     public float addedDifficulty = 40f;
@@ -50,6 +50,12 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject WinCanvas;
     [SerializeField] public GameObject healthBar;
     [SerializeField] private GameObject runeHealthbar;
+
+    [Header("Enemy Tracking & UI")]
+    [SerializeField] private TextMeshProUGUI enemyCountText;
+    public int activeEnemyCount = 0;
+    private Dictionary<EnemyBase, Vector3> spawnedEnemyOrigins = new Dictionary<EnemyBase, Vector3>();
+    private List<EnemyBase> deadEnemiesBuffer = new List<EnemyBase>();
 
     [HideInInspector] public GameObject burningEffect;
     [HideInInspector] public GameObject poisonEffect;
@@ -108,6 +114,8 @@ public class GameManager : MonoBehaviour
 
     void StartWave(int wave)
     {
+        spawnedEnemyOrigins.Clear();
+
         switch (wave)
         {
             case 1: Wave1(); break;
@@ -126,9 +134,11 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
+        UpdateEnemyTrackingAndBounds();
+
         if (startChecking)
         {
-            if (!FindFirstObjectByType<EnemyBase>())
+            if (activeEnemyCount == 0)
             {
                 if (SkillCanvas != null) SkillCanvas.SetActive(true);
                 if (GameCanvas != null) GameCanvas.SetActive(false);
@@ -179,6 +189,55 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void UpdateEnemyTrackingAndBounds()
+    {
+        deadEnemiesBuffer.Clear();
+
+        foreach (var kvp in spawnedEnemyOrigins)
+        {
+            EnemyBase enemy = kvp.Key;
+            Vector3 originSpawnPos = kvp.Value;
+
+            if (enemy == null || !enemy.gameObject.activeInHierarchy)
+            {
+                deadEnemiesBuffer.Add(enemy);
+                continue;
+            }
+
+            if (enemy.transform.position.y < originSpawnPos.y - 5f)
+            {
+                if (enemy.TryGetComponent<CharacterController>(out var cc))
+                {
+                    cc.enabled = false;
+                    enemy.transform.position = originSpawnPos;
+                    cc.enabled = true;
+                }
+                else
+                {
+                    enemy.transform.position = originSpawnPos;
+                }
+
+                if (enemy.TryGetComponent<Rigidbody>(out var rb))
+                {
+                    rb.linearVelocity = Vector3.zero;
+                    rb.angularVelocity = Vector3.zero;
+                }
+            }
+        }
+
+        for (int i = 0; i < deadEnemiesBuffer.Count; i++)
+        {
+            spawnedEnemyOrigins.Remove(deadEnemiesBuffer[i]);
+        }
+
+        activeEnemyCount = spawnedEnemyOrigins.Count;
+
+        if (enemyCountText != null)
+        {
+            enemyCountText.text = $"Enemies Left: {activeEnemyCount}";
+        }
+    }
+
     private void OnWaveCleared()
     {
         if (currentWave == 10)
@@ -198,6 +257,8 @@ public class GameManager : MonoBehaviour
 
             targetBarrierIndex = nextWallIndex;
             waitingForPlayerToReachNextFloor = true;
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
         }
     }
 
@@ -317,10 +378,10 @@ public class GameManager : MonoBehaviour
             basePos = new Vector3(circle.x, floorY, circle.y);
         }
 
-        Vector3 rayOrigin = new Vector3(basePos.x, floorY + 25f, basePos.z);
+        Vector3 rayOrigin = new Vector3(basePos.x, floorY + 5f, basePos.z);
         if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, 60f, groundLayer))
         {
-            return hit.point + Vector3.up * enemySpawnHeightOffset;
+            return hit.point + Vector3.up * (enemySpawnHeightOffset + 3);
         }
 
         return basePos + Vector3.up * enemySpawnHeightOffset;
@@ -338,7 +399,11 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
+            GameObject obj = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
+            if (obj.TryGetComponent<EnemyBase>(out var enemy))
+            {
+                spawnedEnemyOrigins[enemy] = spawnPos;
+            }
         }
     }
 
@@ -351,9 +416,9 @@ public class GameManager : MonoBehaviour
             Vector2 offset = Random.insideUnitCircle * 1.5f;
             Vector3 swarmPos = centerPosition + new Vector3(offset.x, 0f, offset.y);
 
-            if (Physics.Raycast(swarmPos + Vector3.up * 10f, Vector3.down, out RaycastHit hit, 20f, groundLayer))
+            if (Physics.Raycast(swarmPos + Vector3.up * 5f, Vector3.down, out RaycastHit hit, 20f, groundLayer))
             {
-                swarmPos = hit.point + Vector3.up * (enemySpawnHeightOffset * 0.4f);
+                swarmPos = hit.point + Vector3.up * (enemySpawnHeightOffset + 3);
             }
 
             GameObject mini = Instantiate(simpleFollower, swarmPos, Quaternion.identity);
@@ -364,6 +429,7 @@ public class GameManager : MonoBehaviour
                 enemy.maxHP = 1f;
                 enemy.currentHP = 1f;
                 enemy.damage = 3f;
+                spawnedEnemyOrigins[enemy] = swarmPos;
             }
         }
     }

@@ -19,36 +19,48 @@ public class SwordSlash : MonoBehaviour
 
         transform.localScale = new Vector3(transform.localScale.x * rangeMultiplier, transform.localScale.y, transform.localScale.z * rangeMultiplier);
 
+        CheckInstantOverlap();
+
         Destroy(gameObject, 0.4f);
+    }
+
+    private void CheckInstantOverlap()
+    {
+        Collider[] hits = Physics.OverlapSphere(transform.position, 1.2f * transform.localScale.x);
+        for (int i = 0; i < hits.Length; i++)
+        {
+            TryDamageTarget(hits[i]);
+        }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        EnemyBase enemy = other.GetComponent<EnemyBase>();
-        if (enemy == null)
-        {
-            enemy = other.GetComponentInChildren<EnemyBase>();
-        }
+        TryDamageTarget(other);
+    }
 
-        if (enemy != null && !hitEnemies.Contains(other))
+    private void TryDamageTarget(Collider other)
+    {
+        if (other == null || other.CompareTag("Player") || hitEnemies.Contains(other)) return;
+
+        if (other.CompareTag("Enemy") || other.GetComponentInParent<EnemyBase>() != null)
         {
             hitEnemies.Add(other);
 
             int hitCount = hitsTwice ? 2 : 1;
             for (int i = 0; i < hitCount; i++)
             {
-                enemy.takeDamage(damage);
+                other.SendMessageUpwards("takeDamage", damage, SendMessageOptions.DontRequireReceiver);
             }
 
             if (knockbackForce > 0f)
             {
-                Vector3 knockDir = (enemy.transform.position - transform.position).normalized;
+                Vector3 knockDir = (other.transform.position - transform.position).normalized;
                 knockDir.y = 0f;
 
-                KnockedEnemy knockedComp = enemy.gameObject.GetComponent<KnockedEnemy>();
+                KnockedEnemy knockedComp = other.GetComponentInParent<KnockedEnemy>();
                 if (knockedComp == null)
                 {
-                    knockedComp = enemy.gameObject.AddComponent<KnockedEnemy>();
+                    knockedComp = other.gameObject.AddComponent<KnockedEnemy>();
                 }
 
                 knockedComp.Launch(knockDir * knockbackForce, collisionDamage);

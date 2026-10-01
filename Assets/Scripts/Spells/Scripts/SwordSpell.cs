@@ -16,7 +16,7 @@ public class SwordSpell : SpellTemplate
     public GameObject slashPrefab;
 
     [Header("Base Stats")]
-    public float baseDamage = 35f;
+    public float baseDamage = 5f;
     public float knockbackForce = 22f;
     public float collisionDamage = 20f;
     public float rangeMultiplier = 1f;

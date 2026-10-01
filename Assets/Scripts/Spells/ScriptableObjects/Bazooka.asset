@@ -81,8 +81,8 @@ MonoBehaviour:
   - {x: -126.91589, y: -125.02615}
   - {x: -154.76404, y: -152.5444}
   bazookaBlobPrefab: {fileID: 3390788335232189030, guid: dc57be36f58aad644bada349b573d41d, type: 3}
-  launchSpeed: 22
-  damage: 40
+  launchSpeed: 40
+  damage: 15
   blastRadius: 3.5
   freezeDuration: 0
   shotsPerCast: 1
