@@ -233,7 +233,7 @@ public class EnemyBase : MonoBehaviour
                 rb.linearVelocity = moveVelocity;
             }
 
-            Quaternion targetRot = Quaternion.LookRotation(dir) * Quaternion.Euler(0f, 90f, 0f);
+            Quaternion targetRot = Quaternion.LookRotation(dir);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, 8f * Time.deltaTime);
 
             if (enemyAnimator != null) enemyAnimator.SetBool(IsMovingHash, true);

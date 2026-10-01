@@ -2,35 +2,91 @@ using UnityEngine;
 
 public class SniperBullet : MonoBehaviour
 {
-    public float speed = 10f;
+    public float speed = 35f;
     public float lifetime = 5f;
-    public float damage = 20f;
+    public float damage = 15f;
 
-    void Start()
+    private Vector3 moveDir;
+    private GameObject shooter;
+    private bool hasHit = false;
+
+    public void Initialize(Vector3 direction, float dmg, GameObject sniperOwner)
     {
-        var pc = FindFirstObjectByType<PlayerCharacter>();
-        if (pc != null)
+        moveDir = direction.normalized;
+        damage = dmg;
+        shooter = sniperOwner;
+        transform.rotation = Quaternion.LookRotation(moveDir) * Quaternion.Euler(0,-90,0);
+
+        if (shooter != null)
         {
-            transform.LookAt(pc.transform);
+            Collider bulletCol = GetComponent<Collider>();
+            Collider[] shooterCols = shooter.GetComponentsInChildren<Collider>();
+            if (bulletCol != null)
+            {
+                foreach (Collider col in shooterCols)
+                {
+                    Physics.IgnoreCollision(bulletCol, col, true);
+                }
+            }
         }
+
         Destroy(gameObject, lifetime);
     }
 
     void Update()
     {
-        transform.position += transform.forward * speed * Time.deltaTime;
+        if (hasHit) return;
+
+        float step = speed * Time.deltaTime;
+        Vector3 nextPos = transform.position + moveDir * step;
+
+        if (Physics.Raycast(transform.position, moveDir, out RaycastHit hit, step))
+        {
+            CheckHit(hit.collider);
+            transform.position = hit.point;
+            Destroy(gameObject);
+            hasHit = true;
+            return;
+        }
+
+        transform.position = nextPos;
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<PlayerHealthAndStat>(out PlayerHealthAndStat player))
+        CheckHit(other);
+    }
+
+    private void OnCollisionEnter(Collision other)
+    {
+        CheckHit(other.collider);
+        Destroy(gameObject);
+    }
+
+    private void CheckHit(Collider col)
+    {
+        if (col == null || hasHit) return;
+
+        if (shooter != null && (col.gameObject == shooter || col.transform.IsChildOf(shooter.transform))) return;
+
+        if (col.CompareTag("Player") || col.TryGetComponent<PlayerHealthAndStat>(out var _))
         {
-            player.takeDamage(damage);
-            Destroy(gameObject);
+            var health = col.GetComponentInParent<PlayerHealthAndStat>();
+            if (health != null)
+            {
+                health.takeDamage(damage);
+                hasHit = true;
+                Destroy(gameObject);
+                return;
+            }
         }
-        else if (!other.isTrigger)
+
+        if (col.TryGetComponent<RuneManager>(out var rune))
         {
+            rune.currentHealth = Mathf.Max(0f, rune.currentHealth - damage);
+            hasHit = true;
             Destroy(gameObject);
+            return;
         }
     }
 }

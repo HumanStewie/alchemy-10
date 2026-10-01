@@ -1,6 +1,7 @@
+using System.Collections;
 using UnityEngine;
 
-public class SniperEnemy : EnemyBase
+public class Sniper : EnemyBase
 {
     public LineRenderer aimLine;
     public GameObject sniperBulletPrefab;
@@ -41,7 +42,7 @@ public class SniperEnemy : EnemyBase
             aimDir.y = 0f;
             if (aimDir.sqrMagnitude > 0.01f)
             {
-                Quaternion targetRot = Quaternion.LookRotation(aimDir) * Quaternion.Euler(0f, 0f, 0f);
+                Quaternion targetRot = Quaternion.LookRotation(aimDir) * Quaternion.Euler(0f, 90f, 0f);
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, 10f * Time.deltaTime);
             }
 
@@ -50,11 +51,11 @@ public class SniperEnemy : EnemyBase
 
             if (aimTimer <= 0f)
             {
-                Shoot();
-
                 isAiming = false;
                 if (aimLine != null) aimLine.enabled = false;
                 attackCooldownTimer = 5f;
+
+                StartCoroutine(ShootRoutine());
             }
         }
     }
@@ -66,7 +67,7 @@ public class SniperEnemy : EnemyBase
         if (dir.sqrMagnitude > 0.01f)
         {
             transform.position += dir.normalized * speed * Time.deltaTime;
-            Quaternion targetRot = Quaternion.LookRotation(dir) * Quaternion.Euler(0f, 180f, 0f);
+            Quaternion targetRot = Quaternion.LookRotation(dir) * Quaternion.Euler(0f, 90f, 0f);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, 8f * Time.deltaTime);
         }
     }
@@ -85,21 +86,32 @@ public class SniperEnemy : EnemyBase
         aimLine.SetPosition(1, currentTarget.position + Vector3.up * 1f);
     }
 
-    void Shoot()
+    private IEnumerator ShootRoutine()
     {
-        if (sniperBulletPrefab == null || currentTarget == null) return;
-
-        Vector3 spawn = transform.position + Vector3.up * 1.5f;
-        GameObject bullet = Instantiate(sniperBulletPrefab, spawn, Quaternion.identity);
-        Vector3 dir = (currentTarget.position - spawn).normalized;
-
-        if (bullet.TryGetComponent<Rigidbody>(out var rb))
-            rb.linearVelocity = dir * 40f;
-
         TriggerAttackAnimation();
 
+        yield return new WaitForSeconds(0.2f);
+
+        if (sniperBulletPrefab == null || currentTarget == null) yield break;
+
+        Vector3 spawn = transform.position + Vector3.up * 1.5f + (currentTarget.position - transform.position).normalized * 0.8f;
+        Vector3 dir = (currentTarget.position + Vector3.up * 1f - spawn).normalized;
+
+        GameObject bullet = Instantiate(sniperBulletPrefab, spawn, Quaternion.LookRotation(dir));
+
+        if (bullet.TryGetComponent<SniperBullet>(out var bulletScript))
+        {
+            bulletScript.Initialize(dir, damage, gameObject);
+        }
 
         if (MusicManager.Instance != null)
             MusicManager.Instance.PlaySniperSound(transform.position);
+    }
+
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        if (aimLine != null) aimLine.enabled = false;
+        isAiming = false;
     }
 }
