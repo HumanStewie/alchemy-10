@@ -141,7 +141,7 @@ public class EnemyBase : MonoBehaviour
 
         if (poofEffect != null)
             Instantiate(poofEffect, transform.position, Quaternion.identity);
-
+        Destroy(transform.parent);
         Destroy(gameObject);
     }
 
