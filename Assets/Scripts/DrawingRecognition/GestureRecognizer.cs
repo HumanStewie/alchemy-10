@@ -86,11 +86,7 @@ public class GestureRecognizer : MonoBehaviour
         }
         if (BookMovement.Instance.isDisabled)
         {
-            spellText.text = "Jam is stuck, get away from the PanCake!";
-        }
-        else
-        {
-            spellText.text = "Spell is available";
+            spellText.text = "Jam is stuck for 4 seconds, get away from the PanCake!";
         }
     }
 

@@ -215,7 +215,6 @@ public class BookMovement : MonoBehaviour
             yield return new WaitForSeconds(remainingTime);
         }
 
-        // Invoke completion callback if provided (e.g., to clean up sword state after sheathing)
         onAnimationComplete?.Invoke();
 
         ResetToIdleState();
