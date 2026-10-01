@@ -10,6 +10,11 @@ public class SniperBullet : MonoBehaviour
     private GameObject shooter;
     private bool hasHit = false;
 
+    private void Start()
+    {
+
+        Destroy(transform, 5);
+    }
     public void Initialize(Vector3 direction, float dmg, GameObject sniperOwner)
     {
         moveDir = direction.normalized;

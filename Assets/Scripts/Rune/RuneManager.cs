@@ -22,8 +22,9 @@ public class RuneManager : MonoBehaviour
 
     public void InitializeRune()
     {
-        // Randomize location for Wave 1
-        TeleportToRandomSpawnPoint();
+        // Get the mathematical floor Y from GameManager to make sure it syncs properly
+        float floorY = GameManager.Instance != null ? GameManager.Instance.GetCurrentFloorY() : 0f;
+        TeleportToRandomSpawnPoint(floorY);
     }
 
     private void Update()
@@ -41,10 +42,10 @@ public class RuneManager : MonoBehaviour
     // Called by the GameManager when a wave is cleared and the player moves up
     public void goNextWave(float floorY = 0f)
     {
-        TeleportToRandomSpawnPoint();
+        TeleportToRandomSpawnPoint(floorY);
     }
 
-    private void TeleportToRandomSpawnPoint()
+    private void TeleportToRandomSpawnPoint(float floorY)
     {
         if (GameManager.Instance == null || GameManager.Instance.floorSpawnParents == null || GameManager.Instance.floorSpawnParents.Count == 0)
         {
@@ -66,7 +67,17 @@ public class RuneManager : MonoBehaviour
         int randomIndex = Random.Range(0, currentFloorParent.childCount);
         Transform randomPoint = currentFloorParent.GetChild(randomIndex);
 
+        Vector3 targetPosition = randomPoint.position;
+
+        // Force the Rune's Y position to match or exceed the floor's Y.
+        // This ensures the Rune goes up and is perfectly synced with the GameManager's floor height
+        // even if the spawn points are flat or slightly misaligned.
+        if (targetPosition.y < floorY)
+        {
+            targetPosition.y = floorY;
+        }
+
         // Instantly teleport the Rune to the spawn point
-        transform.position = randomPoint.position;
+        transform.position = targetPosition;
     }
 }
