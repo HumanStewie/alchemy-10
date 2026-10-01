@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class SpellBranchManager : MonoBehaviour
@@ -7,12 +8,24 @@ public class SpellBranchManager : MonoBehaviour
     [SerializeField] private SmallSpell node1_2;
     [SerializeField] private SmallSpell node2_1;
     [SerializeField] private SmallSpell node2_2;
+    [SerializeField] private Animator UpgradeAnim;
+    [SerializeField] private GameObject background;
 
     private void Start()
     {
         RefreshStates();
     }
-
+    
+    private IEnumerator FadeOut()
+    {
+        float elapsed = 0f;
+        while (elapsed < 1)
+        {
+            elapsed += Time.unscaledDeltaTime; // unscaledDeltaTime allows fading while paused
+            background.GetComponent<CanvasGroup>().alpha = Mathf.Lerp(1f, 0f, elapsed / 0.4f);
+            yield return null;
+        }
+    }
     public void OnNodePurchased(SmallSpell.SpellNodeID purchasedID)
     {
         switch (purchasedID)
@@ -65,12 +78,19 @@ public class SpellBranchManager : MonoBehaviour
         Canvas canvas = GetComponentInParent<Canvas>();
         if (canvas != null)
         {
-            canvas.gameObject.SetActive(false);
+            StartCoroutine(CloseUpgrade(canvas));
+            StartCoroutine(FadeOut());
         }
 
         if (GameManager.Instance != null)
         {
             GameManager.Instance.GoNextWave();
         }
+    }
+    private IEnumerator CloseUpgrade(Canvas canvas)
+    {
+        UpgradeAnim.SetTrigger("Close");
+        yield return new WaitForSecondsRealtime(4.5f);
+        canvas.gameObject.SetActive(false);
     }
 }

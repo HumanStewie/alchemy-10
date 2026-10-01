@@ -27,26 +27,26 @@ public class GameManager : MonoBehaviour
     public List<GameObject> InvisblesWall = new();
 
     public int currentWave = 1;
+    // Added 10 to the base endless difficulty cost as well
     public float addedDifficulty = 50f;
     public bool started = false;
     public bool checking = false;
 
-    [SerializeField] private float floorHeightStep = 17f;
-    public float yOffsetForBachMapForNoReason = 141.8f;
+    [SerializeField] private float floorHeightStep = 20f;
+    public float yOffsetForBachMapForNoReason = 144f;
     [SerializeField] private LayerMask groundLayer;
     public Transform player;
     [SerializeField] private bool startChecking;
 
-    [Header("Spawn Points")]
-    [Tooltip("Assign the parent object for each floor's spawn points. Element 0 = Wave 1, Element 1 = Wave 2, etc.")]
-    public List<Transform> floorSpawnParents = new();
-
-    // Kept for Rune, but completely removed from Enemy spawning logic as requested
+    [SerializeField] private Transform spawnPointsParent;
+    public List<Transform> spawnPoints = new();
     [SerializeField] private float enemySpawnHeightOffset = 1.0f;
 
     [SerializeField] private GameObject runePrefab;
     [SerializeField] private Vector3 runeEntrancePosition = new Vector3(10f, 143f, -247f);
 
+    [SerializeField] private Animator UpgradeAnim;
+    [SerializeField] private GameObject background;
     [SerializeField] private GameObject SkillCanvas;
     [SerializeField] private GameObject GameCanvas;
     [SerializeField] private GameObject LoseCanvas;
@@ -60,9 +60,6 @@ public class GameManager : MonoBehaviour
     private Dictionary<EnemyBase, Vector3> spawnedEnemyOrigins = new Dictionary<EnemyBase, Vector3>();
     private List<EnemyBase> deadEnemiesBuffer = new List<EnemyBase>();
 
-    private float lowEnemyTimer = 0f;
-    private float waveClearGraceTimer = 0f;
-
     [HideInInspector] public GameObject burningEffect;
     [HideInInspector] public GameObject poisonEffect;
     [HideInInspector] public GameObject bloodEffect;
@@ -70,7 +67,7 @@ public class GameManager : MonoBehaviour
 
     private bool waitingForPlayerToReachNextFloor = false;
     private int targetBarrierIndex = -1;
-
+    private static readonly int CloseMenuHash = Animator.StringToHash("Close");
     private void Awake()
     {
         Instance = this;
@@ -88,9 +85,19 @@ public class GameManager : MonoBehaviour
         jamToucher = Resources.Load<GameObject>("Enemy/Jam Toucher");
         Fatass = Resources.Load<GameObject>("Enemy/Fatass");
 
+        // FIX: Instead of pointing swarmEnemy to simpleFollower (which breaks the Instantiate logic and spawns swarms for EVERY simpleFollower), 
+        // we create a dedicated dummy marker object so InstantiateEnemy can distinguish between them properly.
         swarmEnemy = new GameObject("Swarm_Marker_Dummy");
         swarmEnemy.transform.SetParent(this.transform);
         swarmEnemy.SetActive(false);
+
+        if (spawnPoints.Count == 0 && spawnPointsParent != null)
+        {
+            foreach (Transform child in spawnPointsParent)
+            {
+                spawnPoints.Add(child);
+            }
+        }
     }
 
     private void Start()
@@ -112,27 +119,9 @@ public class GameManager : MonoBehaviour
         return (currentWave - 1) * floorHeightStep + yOffsetForBachMapForNoReason;
     }
 
-    private float GetCurrentKillPlaneY()
-    {
-        if (floorSpawnParents != null && floorSpawnParents.Count > 0)
-        {
-            int floorIndex = Mathf.Clamp(currentWave - 1, 0, floorSpawnParents.Count - 1);
-            Transform currentFloorParent = floorSpawnParents[floorIndex];
-
-            if (currentFloorParent != null && currentFloorParent.childCount > 0)
-            {
-                // Made the kill plane extremely deep (-50f) so nothing accidentally touches it on spawn
-                return currentFloorParent.GetChild(0).position.y - 50f;
-            }
-        }
-        return GetCurrentFloorY() - 50f;
-    }
-
     void StartWave(int wave)
     {
         spawnedEnemyOrigins.Clear();
-        lowEnemyTimer = 0f;
-        waveClearGraceTimer = 0f;
 
         switch (wave)
         {
@@ -149,6 +138,26 @@ public class GameManager : MonoBehaviour
             default: WaveEndless(); break;
         }
     }
+    private IEnumerator FadeIn()
+    {
+        float elapsed = 0f;
+        while (elapsed < 1)
+        {
+            elapsed += Time.unscaledDeltaTime; // unscaledDeltaTime allows fading while paused
+            background.GetComponent<CanvasGroup>().alpha = Mathf.Lerp(0f, 1f, elapsed / 0.4f);
+            yield return null;
+        }
+    }
+    private IEnumerator FadeOut()
+    {
+        float elapsed = 0f;
+        while (elapsed < 1)
+        {
+            elapsed += Time.unscaledDeltaTime; // unscaledDeltaTime allows fading while paused
+            background.GetComponent<CanvasGroup>().alpha = Mathf.Lerp(1f, 0f, elapsed / 0.4f);
+            yield return null;
+        }
+    }
 
     private void Update()
     {
@@ -158,20 +167,20 @@ public class GameManager : MonoBehaviour
         {
             if (activeEnemyCount == 0)
             {
-                waveClearGraceTimer += Time.deltaTime;
-                if (waveClearGraceTimer >= 0.5f)
-                {
-                    if (SkillCanvas != null) SkillCanvas.SetActive(true);
-                    if (GameCanvas != null) GameCanvas.SetActive(false);
-
-                    startChecking = false;
-                    waveClearGraceTimer = 0f;
-                    OnWaveCleared();
+                if (SkillCanvas != null) {
+                    SkillCanvas.SetActive(true);
+                    StartCoroutine(FadeIn());
                 }
-            }
-            else
-            {
-                waveClearGraceTimer = 0f;
+                if (GameCanvas != null) GameCanvas.SetActive(false);
+
+                RuneManager rune = FindFirstObjectByType<RuneManager>();
+                if (rune != null)
+                {
+                    rune.goNextWave(GetCurrentFloorY());
+                }
+
+                startChecking = false;
+                OnWaveCleared();
             }
         }
 
@@ -183,6 +192,7 @@ public class GameManager : MonoBehaviour
                 if (player.position.y >= wall.transform.position.y)
                 {
                     waitingForPlayerToReachNextFloor = false;
+                    GoNextWave();
                 }
             }
         }
@@ -212,11 +222,11 @@ public class GameManager : MonoBehaviour
     private void UpdateEnemyTrackingAndBounds()
     {
         deadEnemiesBuffer.Clear();
-        float killPlaneY = GetCurrentKillPlaneY();
 
         foreach (var kvp in spawnedEnemyOrigins)
         {
             EnemyBase enemy = kvp.Key;
+            Vector3 originSpawnPos = kvp.Value;
 
             if (enemy == null || !enemy.gameObject.activeInHierarchy)
             {
@@ -224,10 +234,24 @@ public class GameManager : MonoBehaviour
                 continue;
             }
 
-            if (enemy.transform.position.y < killPlaneY)
+            if (enemy.transform.position.y < originSpawnPos.y - 5f)
             {
-                Destroy(enemy.gameObject);
-                deadEnemiesBuffer.Add(enemy);
+                if (enemy.TryGetComponent<CharacterController>(out var cc))
+                {
+                    cc.enabled = false;
+                    enemy.transform.position = originSpawnPos;
+                    cc.enabled = true;
+                }
+                else
+                {
+                    enemy.transform.position = originSpawnPos;
+                }
+
+                if (enemy.TryGetComponent<Rigidbody>(out var rb))
+                {
+                    rb.linearVelocity = Vector3.zero;
+                    rb.angularVelocity = Vector3.zero;
+                }
             }
         }
 
@@ -236,42 +260,11 @@ public class GameManager : MonoBehaviour
             spawnedEnemyOrigins.Remove(deadEnemiesBuffer[i]);
         }
 
-        EnemyBase[] allActiveEnemies = FindObjectsByType<EnemyBase>(FindObjectsSortMode.None);
-
-        activeEnemyCount = 0;
-        foreach (var enemy in allActiveEnemies)
-        {
-            if (enemy != null && !deadEnemiesBuffer.Contains(enemy))
-            {
-                activeEnemyCount++;
-            }
-        }
+        activeEnemyCount = spawnedEnemyOrigins.Count;
 
         if (enemyCountText != null)
         {
             enemyCountText.text = $"Enemies Left: {activeEnemyCount}";
-        }
-
-        if (startChecking && activeEnemyCount > 0 && activeEnemyCount < 5)
-        {
-            lowEnemyTimer += Time.deltaTime;
-
-            if (lowEnemyTimer >= 30f)
-            {
-                foreach (EnemyBase enemy in allActiveEnemies)
-                {
-                    if (enemy != null && !deadEnemiesBuffer.Contains(enemy))
-                    {
-                        Destroy(enemy.gameObject);
-                    }
-                }
-                lowEnemyTimer = 0f;
-                activeEnemyCount = 0;
-            }
-        }
-        else
-        {
-            lowEnemyTimer = 0f;
         }
     }
 
@@ -310,7 +303,11 @@ public class GameManager : MonoBehaviour
         currentWave++;
 
         if (GameCanvas != null) GameCanvas.SetActive(true);
-        if (SkillCanvas != null) SkillCanvas.SetActive(false);
+        if (SkillCanvas != null)
+        {
+            StartCoroutine(CloseUpgrade());
+            StartCoroutine(FadeOut());
+        }
 
         UpdateFloorAccess();
 
@@ -319,10 +316,18 @@ public class GameManager : MonoBehaviour
         RuneManager rune = FindFirstObjectByType<RuneManager>();
         if (rune != null)
         {
-            rune.goNextWave(GetCurrentFloorY());
+            rune.ResumeWave();
         }
 
         startChecking = true;
+    }
+
+    private IEnumerator CloseUpgrade()
+    {
+        UpgradeAnim.SetTrigger("Close");
+        yield return new WaitForSecondsRealtime(4.5f);
+        SkillCanvas.SetActive(false);
+        
     }
 
     private void UpdateFloorAccess()
@@ -399,29 +404,29 @@ public class GameManager : MonoBehaviour
         return activeRune;
     }
 
-    // COMPLETELY REMOVED RAYCASTS & OFFSETS. Just grabs the exact world position.
     private Vector3 GetRandomSpawnPosition()
     {
-        if (floorSpawnParents == null || floorSpawnParents.Count == 0)
+        float floorY = GetCurrentFloorY();
+        Vector3 basePos;
+
+        if (spawnPoints != null && spawnPoints.Count > 0)
         {
-            Debug.LogError("No floor spawn parents assigned in GameManager! Returning Vector3.zero.");
-            return Vector3.zero;
+            Transform randomPoint = spawnPoints[Random.Range(0, spawnPoints.Count)];
+            basePos = new Vector3(randomPoint.position.x, floorY, randomPoint.position.z);
+        }
+        else
+        {
+            Vector2 circle = Random.insideUnitCircle.normalized * Random.Range(5f, 15f);
+            basePos = new Vector3(circle.x, floorY, circle.y);
         }
 
-        int floorIndex = Mathf.Clamp(currentWave - 1, 0, floorSpawnParents.Count - 1);
-        Transform currentFloorParent = floorSpawnParents[floorIndex];
-
-        if (currentFloorParent == null || currentFloorParent.childCount == 0)
+        Vector3 rayOrigin = new Vector3(basePos.x, floorY + 5f, basePos.z);
+        if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, 60f, groundLayer))
         {
-            Debug.LogWarning($"Floor spawn parent at index {floorIndex} is empty! Returning parent position.");
-            return currentFloorParent != null ? currentFloorParent.position : Vector3.zero;
+            return hit.point + Vector3.up * (enemySpawnHeightOffset + 3);
         }
 
-        int randomIndex = Random.Range(0, currentFloorParent.childCount);
-        Transform randomPoint = currentFloorParent.GetChild(randomIndex);
-
-        // Return EXACT position of the chosen transform point
-        return randomPoint.position;
+        return basePos + Vector3.up * enemySpawnHeightOffset;
     }
 
     void InstantiateEnemy(GameObject enemyPrefab)
@@ -437,10 +442,6 @@ public class GameManager : MonoBehaviour
         else
         {
             GameObject obj = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
-
-            // FAILSAFE: Force the object to be active in case the prefab was saved as inactive
-            obj.SetActive(true);
-
             if (obj.TryGetComponent<EnemyBase>(out var enemy))
             {
                 spawnedEnemyOrigins[enemy] = spawnPos;
@@ -455,14 +456,14 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < 5; i++)
         {
             Vector2 offset = Random.insideUnitCircle * 1.5f;
-
-            // EXACT center position + flat horizontal spread. No raycasts down.
             Vector3 swarmPos = centerPosition + new Vector3(offset.x, 0f, offset.y);
 
-            GameObject mini = Instantiate(simpleFollower, swarmPos, Quaternion.identity);
+            if (Physics.Raycast(swarmPos + Vector3.up * 5f, Vector3.down, out RaycastHit hit, 20f, groundLayer))
+            {
+                swarmPos = hit.point + Vector3.up * (enemySpawnHeightOffset + 3);
+            }
 
-            // FAILSAFE
-            mini.SetActive(true);
+            GameObject mini = Instantiate(simpleFollower, swarmPos, Quaternion.identity);
             mini.transform.localScale = Vector3.one * 0.3f;
 
             if (mini.TryGetComponent<EnemyBase>(out var enemy))
@@ -526,6 +527,7 @@ public class GameManager : MonoBehaviour
     #region Wave Setups
     void Wave1()
     {
+        // Added 10 to cost (was 5f)
         float valueCost = 15f;
         while (valueCost > 0)
         {
@@ -536,6 +538,7 @@ public class GameManager : MonoBehaviour
 
     void Wave2()
     {
+        // Added 10 to cost (was 8f)
         float valueCost = 18f;
         while (valueCost > 0)
         {
@@ -547,6 +550,7 @@ public class GameManager : MonoBehaviour
 
     void Wave3()
     {
+        // Added 10 to cost (was 11f)
         float valueCost = 21f;
         while (valueCost > 0)
         {
@@ -559,6 +563,7 @@ public class GameManager : MonoBehaviour
 
     void Wave4()
     {
+        // Added 10 to cost (was 14f)
         float valueCost = 24f;
         while (valueCost > 0)
         {
@@ -572,6 +577,7 @@ public class GameManager : MonoBehaviour
 
     void Wave5()
     {
+        // Added 10 to cost (was 17f)
         float valueCost = 27f;
         InstantiateEnemy(Fatass);
         valueCost -= 4f;
@@ -589,6 +595,7 @@ public class GameManager : MonoBehaviour
 
     void Wave6()
     {
+        // Added 10 to cost (was 21f)
         float valueCost = 31f;
         while (valueCost > 0)
         {
@@ -605,6 +612,7 @@ public class GameManager : MonoBehaviour
 
     void Wave7()
     {
+        // Added 10 to cost (was 26f)
         float valueCost = 36f;
         while (valueCost > 0)
         {
@@ -622,6 +630,7 @@ public class GameManager : MonoBehaviour
 
     void Wave8()
     {
+        // Added 10 to cost (was 32f)
         float valueCost = 42f;
         while (valueCost > 0)
         {
@@ -639,6 +648,7 @@ public class GameManager : MonoBehaviour
 
     void Wave9()
     {
+        // Added 10 to cost (was 38f)
         float valueCost = 48f;
         while (valueCost > 0)
         {
@@ -656,6 +666,7 @@ public class GameManager : MonoBehaviour
 
     void Wave10()
     {
+        // Added 10 to cost (was 45f)
         float valueCost = 55f;
 
         InstantiateEnemy(Fatass);
