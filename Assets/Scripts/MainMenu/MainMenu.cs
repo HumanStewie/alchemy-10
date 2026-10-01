@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class MainMenu : MonoBehaviour
 {
     [Header("Buttons")]
+    [SerializeField] private GameObject ExitGame;
     [SerializeField] private Button PlayButton;
     [SerializeField] private Button SettingButton;
     [SerializeField] private Button CreditButton;
@@ -39,6 +40,11 @@ public class MainMenu : MonoBehaviour
         if (BackButton != null) BackButton.onClick.AddListener(ChangePanel);
         if (BackButton2 != null) BackButton2.onClick.AddListener(ChangePanel);
         if (SettingButton != null) SettingButton.onClick.AddListener(SettinPanel);
+
+        if (Application.platform == RuntimePlatform.WebGLPlayer)
+        {
+            ExitGame.SetActive(false);
+        }
 
         SetupButtonHover(PlayButton);
         SetupButtonHover(SettingButton);
@@ -85,7 +91,7 @@ public class MainMenu : MonoBehaviour
         enterEntry.callback.AddListener((_) =>
         {
             btn.transform.DOKill();
-            btn.transform.DOScale(1.15f, 0.15f).SetEase(Ease.OutQuad);
+            btn.transform.DOScale(0.23f, 0.15f).SetEase(Ease.OutQuad);
         });
         trigger.triggers.Add(enterEntry);
 
@@ -94,7 +100,7 @@ public class MainMenu : MonoBehaviour
         exitEntry.callback.AddListener((_) =>
         {
             btn.transform.DOKill();
-            btn.transform.DOScale(1f, 0.15f).SetEase(Ease.OutQuad);
+            btn.transform.DOScale(0.1802289f, 0.15f).SetEase(Ease.OutQuad);
         });
         trigger.triggers.Add(exitEntry);
     }
