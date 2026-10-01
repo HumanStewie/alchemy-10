@@ -80,8 +80,8 @@ MonoBehaviour:
   - {x: 237.72266, y: 237.67178}
   - {x: 245.78406, y: 245.75415}
   - {x: 253.84631, y: 253.83197}
-  slopePrefab: {fileID: 7596654761230660592, guid: 0abdd58aed0f28144a8904a478b461f2, type: 3}
-  yFinal: 0.1
+  slopePrefab: {fileID: 2608128198931782044, guid: 5054369dad44cb7a1a5ac08de235e7cc, type: 3}
+  yFinal: 1
   lifetime: 12
   spawnForwardOffset: 2.5
   maxSlopes: 1
