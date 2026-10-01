@@ -377,6 +377,7 @@ GameObject:
   - component: {fileID: 1047089201860181650}
   - component: {fileID: 303226606579053608}
   - component: {fileID: 7223621926140489897}
+  - component: {fileID: 3438862868842565620}
   m_Layer: 7
   m_Name: Character
   m_TagString: Untagged
@@ -541,6 +542,33 @@ MonoBehaviour:
   maxSpeed: 0
   bloodParticle: {fileID: 7243542710608240285, guid: cc5d2afec6d931041aa955703c1de161, type: 3}
   PoofParticle: {fileID: 7820940365141394766, guid: 0b557c8d370d6ce40a7bc792d7c9164c, type: 3}
+--- !u!54 &3438862868842565620
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6034749142269318283}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &6307683960000511169
 GameObject:
   m_ObjectHideFlags: 0
