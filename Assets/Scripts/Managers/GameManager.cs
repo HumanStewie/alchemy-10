@@ -45,6 +45,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject runePrefab;
     [SerializeField] private Vector3 runeEntrancePosition = new Vector3(10f, 143f, -247f);
 
+    [SerializeField] private Animator UpgradeAnim;
+    [SerializeField] private GameObject background;
     [SerializeField] private GameObject SkillCanvas;
     [SerializeField] private GameObject GameCanvas;
     [SerializeField] private GameObject LoseCanvas;
@@ -65,7 +67,7 @@ public class GameManager : MonoBehaviour
 
     private bool waitingForPlayerToReachNextFloor = false;
     private int targetBarrierIndex = -1;
-
+    private static readonly int CloseMenuHash = Animator.StringToHash("Close");
     private void Awake()
     {
         Instance = this;
@@ -136,6 +138,26 @@ public class GameManager : MonoBehaviour
             default: WaveEndless(); break;
         }
     }
+    private IEnumerator FadeIn()
+    {
+        float elapsed = 0f;
+        while (elapsed < 1)
+        {
+            elapsed += Time.unscaledDeltaTime; // unscaledDeltaTime allows fading while paused
+            background.GetComponent<CanvasGroup>().alpha = Mathf.Lerp(0f, 1f, elapsed / 0.4f);
+            yield return null;
+        }
+    }
+    private IEnumerator FadeOut()
+    {
+        float elapsed = 0f;
+        while (elapsed < 1)
+        {
+            elapsed += Time.unscaledDeltaTime; // unscaledDeltaTime allows fading while paused
+            background.GetComponent<CanvasGroup>().alpha = Mathf.Lerp(1f, 0f, elapsed / 0.4f);
+            yield return null;
+        }
+    }
 
     private void Update()
     {
@@ -145,7 +167,10 @@ public class GameManager : MonoBehaviour
         {
             if (activeEnemyCount == 0)
             {
-                if (SkillCanvas != null) SkillCanvas.SetActive(true);
+                if (SkillCanvas != null) {
+                    SkillCanvas.SetActive(true);
+                    StartCoroutine(FadeIn());
+                }
                 if (GameCanvas != null) GameCanvas.SetActive(false);
 
                 RuneManager rune = FindFirstObjectByType<RuneManager>();
@@ -278,7 +303,11 @@ public class GameManager : MonoBehaviour
         currentWave++;
 
         if (GameCanvas != null) GameCanvas.SetActive(true);
-        if (SkillCanvas != null) SkillCanvas.SetActive(false);
+        if (SkillCanvas != null)
+        {
+            StartCoroutine(CloseUpgrade());
+            StartCoroutine(FadeOut());
+        }
 
         UpdateFloorAccess();
 
@@ -291,6 +320,14 @@ public class GameManager : MonoBehaviour
         }
 
         startChecking = true;
+    }
+
+    private IEnumerator CloseUpgrade()
+    {
+        UpgradeAnim.SetTrigger("Close");
+        yield return new WaitForSecondsRealtime(4.5f);
+        SkillCanvas.SetActive(false);
+        
     }
 
     private void UpdateFloorAccess()
