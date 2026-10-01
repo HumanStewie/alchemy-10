@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class JamEaterEnemy : EnemyBase
+public class Fatass : EnemyBase
 {
     protected override void Start()
     {
@@ -15,12 +15,14 @@ public class JamEaterEnemy : EnemyBase
     {
         MoveTowards(currentTarget != null ? currentTarget.position : transform.position, currentspeed * 0.7f);
 
+        transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(currentTarget.position - transform.position) * Quaternion.Euler(0f, 110f, 0f), 14f * Time.deltaTime);
+
         if (attackCooldownTimer <= 0f)
         {
             Collider[] hits = Physics.OverlapSphere(transform.position, 2.5f);
             foreach (var h in hits)
             {
-                if (h.GetComponent<JamSpread>() || h.GetComponent<TrapProperty>() || h.GetComponent<JamProperty>())
+                if (h.GetComponent<JamSpread>() || h.GetComponent<TrapProperty>() || h.GetComponent<JamProperty>() || h.GetComponent<WallProp>())
                 {
                     TriggerAttackAnimation();
 

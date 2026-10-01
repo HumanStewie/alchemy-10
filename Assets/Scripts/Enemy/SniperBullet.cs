@@ -15,7 +15,7 @@ public class SniperBullet : MonoBehaviour
         moveDir = direction.normalized;
         damage = dmg;
         shooter = sniperOwner;
-        transform.rotation = Quaternion.LookRotation(moveDir) * Quaternion.Euler(0,-90,0);
+        transform.rotation = Quaternion.LookRotation(moveDir);
 
         if (shooter != null)
         {

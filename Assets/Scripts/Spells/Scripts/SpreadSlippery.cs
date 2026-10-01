@@ -44,13 +44,9 @@ public class WallSlope : SpellTemplate
                 oldest.DespawnWall();
         }
 
-        Vector3 spawnLoc;
-        if (book.WallSpawnLoc != null)
-            spawnLoc = book.WallSpawnLoc.position;
-        else
-            spawnLoc = player.transform.position + player.transform.forward * spawnForwardOffset;
+        Vector3 spawnLoc = book.WallSpawnLoc.position;
 
-        Quaternion spawnRot = Quaternion.Euler(0, player.transform.eulerAngles.y - 180f, 0f);
+            Quaternion spawnRot = Quaternion.Euler(0, player.transform.eulerAngles.y - 180f, 0f);
 
         GameObject newSlopeObj = Instantiate(slopePrefab, spawnLoc, spawnRot);
 

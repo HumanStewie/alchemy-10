@@ -42,7 +42,7 @@ public class Sniper : EnemyBase
             aimDir.y = 0f;
             if (aimDir.sqrMagnitude > 0.01f)
             {
-                Quaternion targetRot = Quaternion.LookRotation(aimDir) * Quaternion.Euler(0f, 90f, 0f);
+                Quaternion targetRot = Quaternion.LookRotation(aimDir);
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, 10f * Time.deltaTime);
             }
 

@@ -44,9 +44,9 @@ public class WallSpell : SpellTemplate
             }
         }
 
-        Vector3 spawnLoc = book.WallSpawnLoc != null
-            ? book.WallSpawnLoc.position
-            : player.transform.position + player.transform.forward * 2f;
+
+        Vector3 spawnLoc = book.WallSpawnLoc.position;
+
 
         float groundY = spawnLoc.y;
         if (Physics.Raycast(spawnLoc + Vector3.up * 1.5f, Vector3.down, out RaycastHit hit, 10f, groundLayer))

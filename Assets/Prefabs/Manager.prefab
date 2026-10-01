@@ -4513,7 +4513,7 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   enemySpawnHeightOffset: 1
-  runePrefab: {fileID: 0}
+  runePrefab: {fileID: 2207925048264276087, guid: ce6b3d8b34d4c9e45aab7c23bf8c6e01, type: 3}
   runeEntrancePosition: {x: 10, y: 143, z: -247}
   SkillCanvas: {fileID: 4083446938836747336}
   GameCanvas: {fileID: 1139487016444573472}
@@ -4591,8 +4591,8 @@ MonoBehaviour:
   wallSpawnerSoundVolume: 1
   butterShooter: {fileID: 8300000, guid: f5372d53d01bec040a24852c184de265, type: 3}
   butterShooterVolume: 1
-  sniper: {fileID: 8300000, guid: f9efa3b262cb035439be5b0fe3a5bf67, type: 3}
-  sniperVolume: 1
+  sniper: {fileID: 8300000, guid: 03106fb5efd078d4f9ffb9934bd84bab, type: 3}
+  sniperVolume: 2
   jamToucher: {fileID: 8300000, guid: bfee6cb52cc253b4680b7fc3ebbe10ac, type: 3}
   jamToucherVolume: 1
   charger: {fileID: 8300000, guid: 7739f0d091a60eb4c9bf6eeb8e015f42, type: 3}
@@ -4604,7 +4604,7 @@ MonoBehaviour:
   WaveWinSound: {fileID: 8300000, guid: b670ce723edc635449a4ab73bb96a814, type: 3}
   WaveWinSoundVolume: 1
   LazerCharge: {fileID: 8300000, guid: 28e551609de59614683b28daacf54608, type: 3}
-  LazerChargeVolume: 1
+  LazerChargeVolume: 2
   Explosion: {fileID: 8300000, guid: dc6b714b1e78e644f97482778446fe11, type: 3}
   ExplosionVolume: 1
 --- !u!1 &4653525616131242365

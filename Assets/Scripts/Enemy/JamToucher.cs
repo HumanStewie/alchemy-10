@@ -16,17 +16,32 @@ public class JamToucherEnemy : EnemyBase
     protected override void BehaviorUpdate()
     {
         if (currentTarget == null) return;
+
         MoveTowards(currentTarget.position, currentspeed);
+
+        Vector3 lookDir = currentTarget.position - transform.position;
+        lookDir.y = 0f;
+
+        if (lookDir.sqrMagnitude > 0.001f)
+        {
+            transform.rotation = Quaternion.LookRotation(lookDir) * Quaternion.Euler(0f, 180f, 0f);
+        }
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void OnCollisionEnter(Collision other)
     {
-        if (other.CompareTag("Player"))
+        if (other.gameObject.CompareTag("Player"))
         {
-            BookMovement.Instance.TemporaryDisable(4);
-            if (MusicManager.Instance != null)
+            if (BookMovement.Instance != null)
+            {
+                BookMovement.Instance.Disabler(4);
+            }
 
+            if (MusicManager.Instance != null)
+            {
                 MusicManager.Instance.PlayJamToucherSound(transform.position);
+            }
+
             TriggerAttackAnimation();
         }
     }

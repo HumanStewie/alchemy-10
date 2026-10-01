@@ -135,9 +135,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6956291819092862187}
+  - component: {fileID: 2325786544786661327}
+  - component: {fileID: 7046001492181417323}
+  - component: {fileID: 746602342981159491}
   m_Layer: 8
   m_Name: Charger
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -159,6 +162,91 @@ Transform:
   - {fileID: 5687498692305254018}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2325786544786661327
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1133974599178278631}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3168785167995184383663e14180c29d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ChargerEnemy
+  maxHP: 10
+  currentHP: 0
+  damage: 5
+  moveSpeed: 4
+  currentspeed: 0
+  attackRange: 2
+  detectionRange: 30
+  preferRune: 0
+  runeSymbol: {fileID: 0}
+  flashColor: {r: 1, g: 1, b: 1, a: 1}
+  flashDuration: 0.08
+  enemyAnimator: {fileID: 0}
+  rb: {fileID: 0}
+  chargeSpeed: 18
+  chargeDistance: 12
+  maxChargeTime: 2.5
+  hitRadius: 1
+  forwardOffset: 0.8
+  heightOffset: 0.5
+  hitMask:
+    serializedVersion: 2
+    m_Bits: 0
+  hitDamageCooldown: 0.5
+--- !u!136 &7046001492181417323
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1133974599178278631}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 1.1286196
+  m_Height: 5.70968
+  m_Direction: 2
+  m_Center: {x: 0, y: 1.7, z: 0}
+--- !u!54 &746602342981159491
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1133974599178278631}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 112
+  m_CollisionDetection: 0
 --- !u!1 &1171460842642566595
 GameObject:
   m_ObjectHideFlags: 0
@@ -190,7 +278,7 @@ Transform:
   m_Children:
   - {fileID: 3917753681395377617}
   m_Father: {fileID: 940769236041682636}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 62.559834, y: -0.000029398223, z: -0.000025125042}
 --- !u!1 &1562803898850407860
 GameObject:
   m_ObjectHideFlags: 0
@@ -222,7 +310,7 @@ Transform:
   m_Children:
   - {fileID: 5983298320351268916}
   m_Father: {fileID: 940769236041682636}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -61.274048, y: 0, z: 0}
 --- !u!1 &4405794928031201562
 GameObject:
   m_ObjectHideFlags: 0
@@ -360,9 +448,6 @@ GameObject:
   m_Component:
   - component: {fileID: 848477638829839173}
   - component: {fileID: 3045120451477318347}
-  - component: {fileID: 55416512433656032}
-  - component: {fileID: 8912761528506303404}
-  - component: {fileID: 4030230974859275454}
   m_Layer: 8
   m_Name: Croissant
   m_TagString: Enemy
@@ -378,15 +463,15 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4959876475136672371}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 1.111111, z: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.81, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1425304194193325291}
   - {fileID: 3998945005236077080}
   m_Father: {fileID: 6956291819092862187}
-  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &3045120451477318347
 Animator:
   serializedVersion: 7
@@ -400,7 +485,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: 0229f4f23ab20036dbb26125503e7022, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
-  m_ApplyRootMotion: 0
+  m_ApplyRootMotion: 1
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0
@@ -409,81 +494,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!65 &55416512433656032
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4959876475136672371}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!54 &8912761528506303404
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4959876475136672371}
-  serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 1
-  m_Constraints: 112
-  m_CollisionDetection: 1
---- !u!114 &4030230974859275454
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4959876475136672371}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3168785167995184383663e14180c29d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ChargerEnemy
-  maxHP: 10
-  currentHP: 0
-  damage: 5
-  moveSpeed: 4
-  currentspeed: 0
-  attackRange: 2
-  detectionRange: 30
-  preferRune: 0
-  runeSymbol: {fileID: 0}
-  flashColor: {r: 1, g: 1, b: 1, a: 1}
-  flashDuration: 0.08
-  enemyAnimator: {fileID: 0}
-  rb: {fileID: 0}
-  chargeSpeed: 18
-  chargeDistance: 12
 --- !u!1 &5058644711406441696
 GameObject:
   m_ObjectHideFlags: 0
@@ -546,7 +556,7 @@ Transform:
   m_Children:
   - {fileID: 940769236041682636}
   m_Father: {fileID: 848477638829839173}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -89.98021, y: 0, z: 0}
 --- !u!1 &7842766205444381970
 GameObject:
   m_ObjectHideFlags: 0
@@ -579,4 +589,4 @@ Transform:
   - {fileID: 6027773277919400010}
   - {fileID: 1581326321853130323}
   m_Father: {fileID: 1425304194193325291}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 90, y: -8.094796, z: 0}

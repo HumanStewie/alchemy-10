@@ -84,6 +84,14 @@ public class GestureRecognizer : MonoBehaviour
                 TryCastSpell();
             }
         }
+        if (BookMovement.Instance.isDisabled)
+        {
+            spellText.text = "Jam is stuck, get away from the PanCake!";
+        }
+        else
+        {
+            spellText.text = "Spell is available";
+        }
     }
 
     private void UpdateSpellHUDText()
