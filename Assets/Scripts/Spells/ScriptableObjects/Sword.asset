@@ -80,7 +80,7 @@ MonoBehaviour:
   - {x: 201.55603, y: 202.09537}
   - {x: 223.50989, y: 223.96732}
   - {x: 245.4635, y: 245.84036}
-  slashPrefab: {fileID: 0}
+  slashPrefab: {fileID: 2912465776236066321, guid: a79cd0516b0432942b0a4501c8c6f601, type: 3}
   baseDamage: 35
   knockbackForce: 22
   collisionDamage: 20

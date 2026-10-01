@@ -420,6 +420,7 @@ MonoBehaviour:
   cameraTarget: {fileID: 2811574230585240769}
   armsAnimator: {fileID: 1406649342847821001}
   jarAnimator: {fileID: 5297359201346783028}
+  swordAnimator: {fileID: 7944549472739691898}
   walkSpeed: 10
   sprintResponse: 15
   walkResponse: 25
@@ -957,6 +958,7 @@ GameObject:
   - component: {fileID: 5732961938659608842}
   - component: {fileID: 1073404102685352547}
   - component: {fileID: 1308717092649683029}
+  - component: {fileID: 5895216669424438988}
   m_Layer: 7
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -1084,6 +1086,18 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!114 &5895216669424438988
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8404932299835668151}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06b85bfd903c99f41bcf868080f46282, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraShake
 --- !u!1001 &5099617408534190856
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1192,6 +1206,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 9084261120980136660}
   m_SourcePrefab: {fileID: 100100000, guid: 29bf69e366dd1bf42aeb91b676bcb79c, type: 3}
+--- !u!1 &815454375105413527 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -3633164183754351969, guid: 29bf69e366dd1bf42aeb91b676bcb79c, type: 3}
+  m_PrefabInstance: {fileID: 5099617408534190856}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &4706193985816329443 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 29bf69e366dd1bf42aeb91b676bcb79c, type: 3}
@@ -1221,8 +1240,8 @@ MonoBehaviour:
   isInanimation: 0
   isIdle: 1
   timeChange: 0.2
-  jam1: {fileID: 0}
-  jam2: {fileID: 0}
+  jam1: {fileID: 815454375105413527}
+  jam2: {fileID: 568766604954226766}
   bobSpeed: 2.5
   bobHeight: 0.05
   spinSpeed: 40
@@ -1232,11 +1251,16 @@ MonoBehaviour:
   WallSpawnLoc: {fileID: 7481458638589007281}
   armsAnimator: {fileID: 1406649342847821001}
   jarAnimator: {fileID: 5297359201346783028}
+  swordAnimator: {fileID: 7944549472739691898}
   bazookaDelay: 1.5
   dropWallDelay: 0.3
   eatDelay: 0.4
   dropCurveDelay: 0.2
-  splatDelay: 0.2
+  splatDelay: 0.5
+  swordPullDelay: 0.4
+  swordLeftDelay: 0.4
+  swordRightDelay: 0.4
+  swordEndDelay: 0.4
   playerCharacter: {fileID: 0}
   isDisabled: 0
 --- !u!1 &5978117166810417901 stripped
@@ -1494,6 +1518,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 5297359201346783028}
   m_SourcePrefab: {fileID: 100100000, guid: 42e5ff601a5ef1f4794ffe3a23ddf649, type: 3}
+--- !u!1 &568766604954226766 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -3633164183754351969, guid: 42e5ff601a5ef1f4794ffe3a23ddf649, type: 3}
+  m_PrefabInstance: {fileID: 5364000848550595281}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &5094041270323361664 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 42e5ff601a5ef1f4794ffe3a23ddf649, type: 3}

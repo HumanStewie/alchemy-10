@@ -1,3 +1,5 @@
+using DG.Tweening;
+using System.Collections;
 using UnityEngine;
 
 public class SimpleFollower : EnemyBase
@@ -6,6 +8,14 @@ public class SimpleFollower : EnemyBase
     [SerializeField] private float hitboxRadius = 0.8f;
     [SerializeField] private float hitboxForwardOffset = 1.2f;
     [SerializeField] private LayerMask targetMask;
+
+    [Header("Windup & Jump Attack")]
+    [SerializeField] private float windupDuration = 0.5f;
+    [SerializeField] private float jumpPower = 0.6f;
+    [SerializeField] private float jumpDuration = 0.28f;
+    [SerializeField] private float leapForwardDistance = 0.8f;
+
+    private bool isAttacking = false;
 
     protected override void Start()
     {
@@ -19,7 +29,7 @@ public class SimpleFollower : EnemyBase
 
     protected override void BehaviorUpdate()
     {
-        if (currentTarget == null) return;
+        if (currentTarget == null || isAttacking) return;
 
         float dist = Vector3.Distance(transform.position, currentTarget.position);
 
@@ -29,15 +39,61 @@ public class SimpleFollower : EnemyBase
         }
         else if (attackCooldownTimer <= 0f)
         {
-            PerformAttack();
+            StartCoroutine(AttackRoutine());
             attackCooldownTimer = 2f;
         }
     }
 
-    private void PerformAttack()
+    private IEnumerator AttackRoutine()
     {
+        isAttacking = true;
+
+        if (enemyAnimator != null)
+        {
+            enemyAnimator.SetBool(IsMovingHash, false);
+        }
+
+        float elapsed = 0f;
+        while (elapsed < windupDuration)
+        {
+            elapsed += Time.deltaTime;
+
+            if (currentTarget != null)
+            {
+                Vector3 lookDir = (currentTarget.position - transform.position);
+                lookDir.y = 0f;
+                if (lookDir.sqrMagnitude > 0.01f)
+                {
+                    Quaternion targetRot = Quaternion.LookRotation(lookDir) * Quaternion.Euler(0f, 90f, 0f);
+                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, 12f * Time.deltaTime);
+                }
+            }
+
+            yield return null;
+        }
+
         TriggerAttackAnimation();
 
+        Vector3 forwardDir = transform.right;
+        Vector3 jumpTarget = transform.position + forwardDir * leapForwardDistance;
+
+        if (Physics.Raycast(jumpTarget + Vector3.up * 1f, Vector3.down, out RaycastHit groundHit, 3f))
+        {
+            jumpTarget.y = groundHit.point.y;
+        }
+
+        Tween jumpTween = transform.DOJump(jumpTarget, jumpPower, 1, jumpDuration).SetEase(Ease.OutQuad);
+
+        yield return new WaitForSeconds(jumpDuration * 0.5f);
+        CheckHitbox();
+
+        yield return jumpTween.WaitForCompletion();
+
+        isAttacking = false;
+    }
+
+    private void CheckHitbox()
+    {
         Vector3 forwardDir = transform.right;
         Vector3 hitboxCenter = transform.position + Vector3.up * 0.5f + (forwardDir * hitboxForwardOffset);
 
@@ -64,6 +120,13 @@ public class SimpleFollower : EnemyBase
                 break;
             }
         }
+    }
+
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        transform.DOKill();
+        isAttacking = false;
     }
 
     private void OnDrawGizmosSelected()

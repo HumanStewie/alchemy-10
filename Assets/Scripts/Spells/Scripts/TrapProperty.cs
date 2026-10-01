@@ -105,7 +105,7 @@ public class TrapProperty : MonoBehaviour
         EnemyBase enemyScript = enemy.GetComponentInParent<EnemyBase>();
         if (enemyScript == null) return;
 
-        enemyScript.takeDamage(damage);
+        enemyScript.SendMessageUpwards("takeDamage", damage, SendMessageOptions.DontRequireReceiver);
 
         if (explosionVFX != null)
             Instantiate(explosionVFX, enemy.transform.position, Quaternion.identity);
@@ -143,9 +143,7 @@ public class TrapProperty : MonoBehaviour
             {
                 if (col.CompareTag("Enemy"))
                 {
-                    EnemyBase enemy = col.GetComponentInParent<EnemyBase>();
-                    if (enemy != null)
-                        enemy.takeDamage(deathExplosionDamage);
+                    col.SendMessageUpwards("takeDamage", deathExplosionDamage, SendMessageOptions.DontRequireReceiver);
                 }
             }
         }

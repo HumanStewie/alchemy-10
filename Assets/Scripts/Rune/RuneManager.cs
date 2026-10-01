@@ -23,7 +23,7 @@ public class RuneManager : MonoBehaviour
     public Transform arrowVisual;
 
     [Header("Position & Wave Transitions")]
-    [SerializeField] private Vector3 centerPosition = Vector3.zero;
+    private Vector3 centerPosition = new Vector3(9.75f, 143.179993f, -247.979996f);
     [SerializeField] private float floatHeightOffset = 18f;
     [SerializeField] private float transitionDuration = 1.5f;
     [SerializeField] private Ease transitionEase = Ease.InOutSine;
@@ -40,8 +40,9 @@ public class RuneManager : MonoBehaviour
         currentHealth = maxHealth;
     }
 
-    private void Start()
+    public void InitializeRune()
     {
+        if (_routine != null) StopCoroutine(_routine);
         _routine = StartCoroutine(RuneRoutine());
     }
 

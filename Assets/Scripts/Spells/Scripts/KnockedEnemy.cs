@@ -54,13 +54,14 @@ public class KnockedEnemy : MonoBehaviour
         // 1. Damage self on impact
         if (enemyScript != null)
         {
-            enemyScript.takeDamage(collisionBonusDamage);
+            enemyScript.SendMessageUpwards("takeDamage", collisionBonusDamage, SendMessageOptions.DontRequireReceiver);
+
         }
 
         EnemyBase otherEnemy = hit.collider.GetComponentInParent<EnemyBase>();
         if (otherEnemy != null && otherEnemy != enemyScript)
         {
-            otherEnemy.takeDamage(collisionBonusDamage);
+            otherEnemy.SendMessageUpwards("takeDamage", collisionBonusDamage, SendMessageOptions.DontRequireReceiver);
         }
 
         EndKnockback();

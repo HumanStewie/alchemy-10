@@ -6,47 +6,58 @@ using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
-    [Header("Enemies")]
-    [HideInInspector] public GameObject simpleFollower;
-    [HideInInspector] public GameObject shootingEnemy;
+    public GameObject simpleFollower;
+    public GameObject shootingEnemy;
     [HideInInspector] public GameObject wallSpawner;
-    [HideInInspector] public GameObject charger;
+    public GameObject charger;
     [HideInInspector] public GameObject sniper;
     [HideInInspector] public GameObject jamToucher;
     [HideInInspector] public GameObject swarmEnemy;
-    [HideInInspector] public GameObject Fatass;
+    public GameObject Fatass;
 
     public List<GameObject> InvisblesWall = new();
 
-    [Header("Wave State")]
+
     public int currentWave = 1;
     public float addedDifficulty = 40f;
     public bool started = false;
     public bool checking = false;
 
-    [Header("Floor & Spawn Settings")]
     [SerializeField] private float floorHeightStep = 20f;
-    [SerializeField] private float spawnRadius = 15f;
+    public float yOffsetForBachMapForNoReason = 144f;
     [SerializeField] private LayerMask groundLayer;
     public Transform player;
     [SerializeField] private bool startChecking;
+
+    [SerializeField] private Transform spawnPointsParent;
+    public List<Transform> spawnPoints = new();
+    [SerializeField] private float enemySpawnHeightOffset = 1.0f;
+
+    [SerializeField] private GameObject runePrefab;
+    [SerializeField] private Vector3 runeEntrancePosition = new Vector3(10f, 143f, -247f);
 
     [SerializeField] private GameObject SkillCanvas;
     [SerializeField] private GameObject GameCanvas;
     [SerializeField] private GameObject LoseCanvas;
     [SerializeField] private GameObject WinCanvas;
+    [SerializeField] public GameObject healthBar;
+    [SerializeField] private GameObject runeHealthbar;
 
     [HideInInspector] public GameObject burningEffect;
     [HideInInspector] public GameObject poisonEffect;
     [HideInInspector] public GameObject bloodEffect;
     [HideInInspector] public GameObject poofEffect;
 
-    [SerializeField] public GameObject healthBar;
-    [SerializeField] private GameObject runeHealthbar;
+    private bool waitingForPlayerToReachNextFloor = false;
+    private int targetBarrierIndex = -1;
 
     private void Awake()
     {
@@ -66,11 +77,33 @@ public class GameManager : MonoBehaviour
         Fatass = Resources.Load<GameObject>("Enemy/Fatass");
 
         swarmEnemy = simpleFollower;
+
+        if (spawnPoints.Count == 0 && spawnPointsParent != null)
+        {
+            foreach (Transform child in spawnPointsParent)
+            {
+                spawnPoints.Add(child);
+            }
+        }
+    }
+
+    private void Start()
+    {
+        if (player == null)
+        {
+            var p = FindFirstObjectByType<PlayerCharacter>();
+            if (p != null) player = p.transform;
+        }
+
+        for (int i = 0; i < InvisblesWall.Count; i++)
+        {
+            if (InvisblesWall[i] != null) InvisblesWall[i].SetActive(true);
+        }
     }
 
     public float GetCurrentFloorY()
     {
-        return (currentWave - 1) * floorHeightStep;
+        return (currentWave - 1) * floorHeightStep + yOffsetForBachMapForNoReason;
     }
 
     void StartWave(int wave)
@@ -107,6 +140,20 @@ public class GameManager : MonoBehaviour
                 }
 
                 startChecking = false;
+                OnWaveCleared();
+            }
+        }
+
+        if (waitingForPlayerToReachNextFloor && player != null && targetBarrierIndex >= 0 && targetBarrierIndex < InvisblesWall.Count)
+        {
+            GameObject wall = InvisblesWall[targetBarrierIndex];
+            if (wall != null)
+            {
+                if (player.position.y >= wall.transform.position.y)
+                {
+                    waitingForPlayerToReachNextFloor = false;
+                    GoNextWave();
+                }
             }
         }
 
@@ -132,37 +179,244 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void OnWaveCleared()
+    {
+        if (currentWave == 10)
+        {
+            Win();
+            return;
+        }
+
+        int nextWallIndex = currentWave - 1;
+
+        if (nextWallIndex >= 0 && nextWallIndex < InvisblesWall.Count)
+        {
+            if (InvisblesWall[nextWallIndex] != null)
+            {
+                InvisblesWall[nextWallIndex].SetActive(false);
+            }
+
+            targetBarrierIndex = nextWallIndex;
+            waitingForPlayerToReachNextFloor = true;
+        }
+    }
+
     public void GoNextWave()
     {
         if (currentWave == 10)
         {
             Win();
+            return;
         }
-        else
+
+        currentWave++;
+
+        if (GameCanvas != null) GameCanvas.SetActive(true);
+        if (SkillCanvas != null) SkillCanvas.SetActive(false);
+
+        UpdateFloorAccess();
+
+        StartWave(currentWave);
+
+        RuneManager rune = FindFirstObjectByType<RuneManager>();
+        if (rune != null)
         {
-            currentWave++;
-            if (GameCanvas != null) GameCanvas.SetActive(true);
+            rune.ResumeWave();
+        }
 
-            if (currentWave - 2 >= 0 && currentWave - 2 < InvisblesWall.Count)
+        startChecking = true;
+    }
+
+    private void UpdateFloorAccess()
+    {
+        for (int i = 0; i < InvisblesWall.Count; i++)
+        {
+            if (InvisblesWall[i] == null) continue;
+
+            if (i == currentWave - 2)
             {
-                if (InvisblesWall[currentWave - 2] != null)
-                {
-                    InvisblesWall[currentWave - 2].SetActive(true);
-                }
+                InvisblesWall[i].SetActive(false);
             }
-
-            StartWave(currentWave);
-
-            RuneManager rune = FindFirstObjectByType<RuneManager>();
-            if (rune != null)
+            else
             {
-                rune.ResumeWave();
+                InvisblesWall[i].SetActive(true);
             }
-
-            startChecking = true;
         }
     }
 
+    public void StartFirstWave()
+    {
+        if (started) return;
+        started = true;
+        currentWave = 1;
+        StartWave(currentWave);
+        startChecking = true;
+    }
+
+    public RuneManager SpawnRuneAtEntrance(bool autoStartWave = true)
+    {
+        RuneManager activeRune = FindFirstObjectByType<RuneManager>();
+
+        if (activeRune == null)
+        {
+            if (runePrefab == null)
+            {
+                runePrefab = Resources.Load<GameObject>("Rune");
+            }
+
+            if (runePrefab != null)
+            {
+                GameObject runeObj = Instantiate(runePrefab, runeEntrancePosition, Quaternion.identity);
+                activeRune = runeObj.GetComponent<RuneManager>();
+            }
+            else
+            {
+                return null;
+            }
+        }
+        else
+        {
+            activeRune.transform.position = runeEntrancePosition;
+        }
+
+        if (Physics.Raycast(runeEntrancePosition + Vector3.up * 2f, Vector3.down, out RaycastHit hit, 10f, groundLayer))
+        {
+            activeRune.transform.position = hit.point;
+        }
+
+        activeRune.currentHealth = activeRune.maxHealth;
+        activeRune.InitializeRune();
+
+        if (runeHealthbar != null)
+        {
+            var img = runeHealthbar.GetComponent<Image>();
+            if (img != null) img.fillAmount = 1f;
+        }
+
+        if (autoStartWave && !started)
+        {
+            StartFirstWave();
+        }
+
+        return activeRune;
+    }
+
+    private Vector3 GetRandomSpawnPosition()
+    {
+        float floorY = GetCurrentFloorY();
+        Vector3 basePos;
+
+        if (spawnPoints != null && spawnPoints.Count > 0)
+        {
+            Transform randomPoint = spawnPoints[Random.Range(0, spawnPoints.Count)];
+            basePos = new Vector3(randomPoint.position.x, floorY, randomPoint.position.z);
+        }
+        else
+        {
+            Vector2 circle = Random.insideUnitCircle.normalized * Random.Range(5f, 15f);
+            basePos = new Vector3(circle.x, floorY, circle.y);
+        }
+
+        Vector3 rayOrigin = new Vector3(basePos.x, floorY + 25f, basePos.z);
+        if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, 60f, groundLayer))
+        {
+            return hit.point + Vector3.up * enemySpawnHeightOffset;
+        }
+
+        return basePos + Vector3.up * enemySpawnHeightOffset;
+    }
+
+    void InstantiateEnemy(GameObject enemyPrefab)
+    {
+        if (enemyPrefab == null) return;
+
+        Vector3 spawnPos = GetRandomSpawnPosition();
+
+        if (enemyPrefab == swarmEnemy)
+        {
+            SpawnSwarmAt(spawnPos);
+        }
+        else
+        {
+            Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
+        }
+    }
+
+    public void SpawnSwarmAt(Vector3 centerPosition)
+    {
+        if (simpleFollower == null) return;
+
+        for (int i = 0; i < 5; i++)
+        {
+            Vector2 offset = Random.insideUnitCircle * 1.5f;
+            Vector3 swarmPos = centerPosition + new Vector3(offset.x, 0f, offset.y);
+
+            if (Physics.Raycast(swarmPos + Vector3.up * 10f, Vector3.down, out RaycastHit hit, 20f, groundLayer))
+            {
+                swarmPos = hit.point + Vector3.up * (enemySpawnHeightOffset * 0.4f);
+            }
+
+            GameObject mini = Instantiate(simpleFollower, swarmPos, Quaternion.identity);
+            mini.transform.localScale = Vector3.one * 0.3f;
+
+            if (mini.TryGetComponent<EnemyBase>(out var enemy))
+            {
+                enemy.maxHP = 1f;
+                enemy.currentHP = 1f;
+                enemy.damage = 3f;
+            }
+        }
+    }
+
+    public void SlowEVERYTHING(int time, int percentage)
+    {
+        StartCoroutine(slowStuff(time, percentage));
+    }
+
+    IEnumerator slowStuff(int time, int percentage)
+    {
+        Time.timeScale *= (100 - percentage) / 100f;
+        yield return new WaitForSeconds(time);
+        Time.timeScale = 1f;
+    }
+
+    public void Lose()
+    {
+        if (LoseCanvas != null)
+        {
+            LoseCanvas.SetActive(true);
+            EventTrigger trigger = LoseCanvas.GetComponent<EventTrigger>();
+            if (trigger == null) trigger = LoseCanvas.AddComponent<EventTrigger>();
+
+            trigger.triggers.Clear();
+            EventTrigger.Entry entry = new EventTrigger.Entry();
+            entry.eventID = EventTriggerType.PointerClick;
+            entry.callback.AddListener((data) => SceneManager.LoadScene("MainMenu"));
+            trigger.triggers.Add(entry);
+        }
+
+        if (GameCanvas != null) GameCanvas.SetActive(false);
+    }
+
+    public void Win()
+    {
+        if (WinCanvas != null)
+        {
+            WinCanvas.SetActive(true);
+            EventTrigger trigger = WinCanvas.GetComponent<EventTrigger>();
+            if (trigger == null) trigger = WinCanvas.AddComponent<EventTrigger>();
+
+            trigger.triggers.Clear();
+            EventTrigger.Entry entry = new EventTrigger.Entry();
+            entry.eventID = EventTriggerType.PointerClick;
+            entry.callback.AddListener((data) => SceneManager.LoadScene("MainMenu"));
+            trigger.triggers.Add(entry);
+        }
+
+        if (GameCanvas != null) GameCanvas.SetActive(false);
+    }
+
+    #region Wave Setups
     void Wave1()
     {
         float valueCost = 5f;
@@ -360,107 +614,5 @@ public class GameManager : MonoBehaviour
             }
         }
     }
-
-    public void StartFirstWave()
-    {
-        if (started) return;
-        started = true;
-        currentWave = 1;
-        StartWave(currentWave);
-        startChecking = true;
-    }
-
-    public void SlowEVERYTHING(int time, int percentage)
-    {
-        StartCoroutine(slowStuff(time, percentage));
-    }
-
-    IEnumerator slowStuff(int time, int percentage)
-    {
-        Time.timeScale *= (100 - percentage) / 100f;
-        yield return new WaitForSeconds(time);
-        Time.timeScale = 1f;
-    }
-
-    void InstantiateEnemy(GameObject enemyPrefab)
-    {
-        if (enemyPrefab == null) return;
-
-        Vector2 randomCircle = Random.insideUnitCircle.normalized * Random.Range(5f, spawnRadius);
-        float floorY = GetCurrentFloorY();
-
-        Vector3 spawnPos = new Vector3(randomCircle.x, floorY + 0.1f, randomCircle.y);
-
-        // Raycast dò đúng bề mặt sàn nếu có obstacleMask/groundLayer
-        if (Physics.Raycast(new Vector3(randomCircle.x, floorY + 10f, randomCircle.y), Vector3.down, out RaycastHit hit, 20f, groundLayer))
-        {
-            spawnPos = hit.point + Vector3.up * 0.1f;
-        }
-
-        if (enemyPrefab == swarmEnemy)
-        {
-            SpawnSwarmAt(spawnPos);
-        }
-        else
-        {
-            Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
-        }
-    }
-
-    public void SpawnSwarmAt(Vector3 centerPosition)
-    {
-        if (simpleFollower == null) return;
-
-        for (int i = 0; i < 5; i++)
-        {
-            Vector2 offset = Random.insideUnitCircle * 1.5f;
-            Vector3 spawnPos = centerPosition + new Vector3(offset.x, 0f, offset.y);
-
-            GameObject mini = Instantiate(simpleFollower, spawnPos, Quaternion.identity);
-            mini.transform.localScale = Vector3.one * 0.3f;
-
-            if (mini.TryGetComponent<EnemyBase>(out var enemy))
-            {
-                enemy.maxHP = 1f;
-                enemy.currentHP = 1f;
-                enemy.damage = 3f;
-            }
-        }
-    }
-
-    public void Lose()
-    {
-        if (LoseCanvas != null)
-        {
-            LoseCanvas.SetActive(true);
-            EventTrigger trigger = LoseCanvas.GetComponent<EventTrigger>();
-            if (trigger == null) trigger = LoseCanvas.AddComponent<EventTrigger>();
-
-            trigger.triggers.Clear();
-            EventTrigger.Entry entry = new EventTrigger.Entry();
-            entry.eventID = EventTriggerType.PointerClick;
-            entry.callback.AddListener((data) => SceneManager.LoadScene("MainMenu"));
-            trigger.triggers.Add(entry);
-        }
-
-        if (GameCanvas != null) GameCanvas.SetActive(false);
-    }
-
-    public void Win()
-    {
-        if (WinCanvas != null)
-        {
-            WinCanvas.SetActive(true);
-            EventTrigger trigger = WinCanvas.GetComponent<EventTrigger>();
-            if (trigger == null) trigger = WinCanvas.AddComponent<EventTrigger>();
-
-            trigger.triggers.Clear();
-            EventTrigger.Entry entry = new EventTrigger.Entry();
-            entry.eventID = EventTriggerType.PointerClick;
-            entry.callback.AddListener((data) => SceneManager.LoadScene("MainMenu"));
-            trigger.triggers.Add(entry);
-        }
-
-        if (GameCanvas != null) GameCanvas.SetActive(false);
-    }
+    #endregion
 }
