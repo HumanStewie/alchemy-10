@@ -27,7 +27,8 @@ public class GameManager : MonoBehaviour
     public List<GameObject> InvisblesWall = new();
 
     public int currentWave = 1;
-    public float addedDifficulty = 40f;
+    // Added 10 to the base endless difficulty cost as well
+    public float addedDifficulty = 50f;
     public bool started = false;
     public bool checking = false;
 
@@ -82,7 +83,11 @@ public class GameManager : MonoBehaviour
         jamToucher = Resources.Load<GameObject>("Enemy/Jam Toucher");
         Fatass = Resources.Load<GameObject>("Enemy/Fatass");
 
-        swarmEnemy = simpleFollower;
+        // FIX: Instead of pointing swarmEnemy to simpleFollower (which breaks the Instantiate logic and spawns swarms for EVERY simpleFollower), 
+        // we create a dedicated dummy marker object so InstantiateEnemy can distinguish between them properly.
+        swarmEnemy = new GameObject("Swarm_Marker_Dummy");
+        swarmEnemy.transform.SetParent(this.transform);
+        swarmEnemy.SetActive(false);
 
         if (spawnPoints.Count == 0 && spawnPointsParent != null)
         {
@@ -485,7 +490,8 @@ public class GameManager : MonoBehaviour
     #region Wave Setups
     void Wave1()
     {
-        float valueCost = 5f;
+        // Added 10 to cost (was 5f)
+        float valueCost = 15f;
         while (valueCost > 0)
         {
             InstantiateEnemy(simpleFollower);
@@ -495,7 +501,8 @@ public class GameManager : MonoBehaviour
 
     void Wave2()
     {
-        float valueCost = 8f;
+        // Added 10 to cost (was 8f)
+        float valueCost = 18f;
         while (valueCost > 0)
         {
             int roll = Random.Range(0, 100);
@@ -506,7 +513,8 @@ public class GameManager : MonoBehaviour
 
     void Wave3()
     {
-        float valueCost = 11f;
+        // Added 10 to cost (was 11f)
+        float valueCost = 21f;
         while (valueCost > 0)
         {
             int roll = Random.Range(0, 100);
@@ -518,7 +526,8 @@ public class GameManager : MonoBehaviour
 
     void Wave4()
     {
-        float valueCost = 14f;
+        // Added 10 to cost (was 14f)
+        float valueCost = 24f;
         while (valueCost > 0)
         {
             int roll = Random.Range(0, 100);
@@ -531,7 +540,8 @@ public class GameManager : MonoBehaviour
 
     void Wave5()
     {
-        float valueCost = 17f;
+        // Added 10 to cost (was 17f)
+        float valueCost = 27f;
         InstantiateEnemy(Fatass);
         valueCost -= 4f;
 
@@ -548,7 +558,8 @@ public class GameManager : MonoBehaviour
 
     void Wave6()
     {
-        float valueCost = 21f;
+        // Added 10 to cost (was 21f)
+        float valueCost = 31f;
         while (valueCost > 0)
         {
             int roll = Random.Range(0, 100);
@@ -564,7 +575,8 @@ public class GameManager : MonoBehaviour
 
     void Wave7()
     {
-        float valueCost = 26f;
+        // Added 10 to cost (was 26f)
+        float valueCost = 36f;
         while (valueCost > 0)
         {
             int roll = Random.Range(0, 100);
@@ -581,7 +593,8 @@ public class GameManager : MonoBehaviour
 
     void Wave8()
     {
-        float valueCost = 32f;
+        // Added 10 to cost (was 32f)
+        float valueCost = 42f;
         while (valueCost > 0)
         {
             int roll = Random.Range(0, 100);
@@ -598,7 +611,8 @@ public class GameManager : MonoBehaviour
 
     void Wave9()
     {
-        float valueCost = 38f;
+        // Added 10 to cost (was 38f)
+        float valueCost = 48f;
         while (valueCost > 0)
         {
             int roll = Random.Range(0, 100);
@@ -615,7 +629,8 @@ public class GameManager : MonoBehaviour
 
     void Wave10()
     {
-        float valueCost = 45f;
+        // Added 10 to cost (was 45f)
+        float valueCost = 55f;
 
         InstantiateEnemy(Fatass);
         InstantiateEnemy(Fatass);
